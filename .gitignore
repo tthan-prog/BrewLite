@@ -1,0 +1,22 @@
+# Hệ điều hành / trình soạn thảo
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Biến môi trường: chỉ đưa các file .env.example lên Git
+.env
+.env.*
+!.env.example
+
+# Thư viện và sản phẩm build
+node_modules/
+dist/
+.next/
+coverage/
+*.tsbuildinfo
+
+# Nhật ký
+*.log
+npm-debug.log*
