@@ -7,6 +7,86 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  price       Int
+  stock       Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+}
+
+model Topping {
+  id                Int                @id @default(autoincrement())
+  name              String
+  price             Int
+  orderItemToppings OrderItemTopping[]
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  userId    Int
+  status    OrderStatus @default(PENDING)
+  subtotal  Int
+  discount  Int         @default(0)
+  promoCode String?
+  total     Int
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  user      User        @relation(fields: [userId], references: [id])
+  items     OrderItem[]
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id        Int                @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  unitPrice Int
+  size      String
+  order     Order              @relation(fields: [orderId], references: [id])
+  product   Product            @relation(fields: [productId], references: [id])
+  toppings  OrderItemTopping[]
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model OrderItemTopping {
+  orderItemId Int
+  toppingId   Int
+  quantity    Int
+  price       Int
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+  topping     Topping   @relation(fields: [toppingId], references: [id])
+
+  @@id([orderItemId, toppingId])
+}
+
+model Promotion {
+  id         Int           @id @default(autoincrement())
+  code       String        @unique
+  type       PromotionType
+  value      Int
+  minOrder   Int           @default(0)
+  expiresAt  DateTime?
+  usageCount Int           @default(0)
+}
+
 enum Role {
   CUSTOMER
   STAFF
@@ -25,91 +105,4 @@ enum OrderStatus {
 enum PromotionType {
   PERCENT
   FIXED
-}
-
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  role      Role     @default(CUSTOMER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  orders Order[]
-}
-
-model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  price       Int
-  stock       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  orderItems OrderItem[]
-}
-
-model Topping {
-  id    Int    @id @default(autoincrement())
-  name  String
-  price Int
-
-  orderItemToppings OrderItemTopping[]
-}
-
-model Order {
-  id         Int         @id @default(autoincrement())
-  userId     Int
-  status     OrderStatus @default(PENDING)
-  subtotal   Int
-  discount   Int         @default(0)
-  promoCode  String?
-  total      Int
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-
-  user  User        @relation(fields: [userId], references: [id])
-  items OrderItem[]
-
-  @@index([userId])
-}
-
-model OrderItem {
-  id        Int    @id @default(autoincrement())
-  orderId   Int
-  productId Int
-  quantity  Int
-  unitPrice Int
-  size      String
-
-  order   Order   @relation(fields: [orderId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
-
-  toppings OrderItemTopping[]
-
-  @@index([orderId])
-  @@index([productId])
-}
-
-model OrderItemTopping {
-  orderItemId Int
-  toppingId   Int
-  quantity    Int
-  price       Int
-
-  orderItem OrderItem @relation(fields: [orderItemId], references: [id])
-  topping   Topping   @relation(fields: [toppingId], references: [id])
-
-  @@id([orderItemId, toppingId])
-}
-
-model Promotion {
-  id         Int            @id @default(autoincrement())
-  code       String         @unique
-  type       PromotionType
-  value      Int
-  minOrder   Int            @default(0)
-  expiresAt  DateTime?
-  usageCount Int            @default(0)
 }
