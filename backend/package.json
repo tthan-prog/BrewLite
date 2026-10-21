@@ -25,9 +25,12 @@
     "@nestjs/common": "^12.0.1",
     "@nestjs/core": "^12.0.1",
     "@nestjs/platform-express": "^12.0.1",
+<<<<<<< HEAD
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "pg": "^8.23.1",
+=======
+>>>>>>> origin/Thành-viên-B
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
@@ -42,10 +45,15 @@
     "@vitest/coverage-v8": "^4.1.2",
     "oxlint": "^1.58.0",
     "prettier": "^3.4.2",
+<<<<<<< HEAD
     "prisma": "^7.10.1",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "tsx": "^4.23.15",
+=======
+    "source-map-support": "^0.5.21",
+    "supertest": "^7.0.0",
+>>>>>>> origin/Thành-viên-B
     "typescript": "^6.0.2",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.1.2"
