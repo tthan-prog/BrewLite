@@ -15,6 +15,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   orders    Order[]
+  idempotencyRecords IdempotencyRecord[]
 }
 
 model Product {
@@ -47,6 +48,7 @@ model Order {
   updatedAt DateTime    @updatedAt
   user      User        @relation(fields: [userId], references: [id])
   items     OrderItem[]
+  idempotencyRecord IdempotencyRecord?
 
   @@index([userId])
 }
@@ -105,4 +107,18 @@ enum OrderStatus {
 enum PromotionType {
   PERCENT
   FIXED
+}
+model IdempotencyRecord {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  key         String
+  requestHash String
+  orderId     Int      @unique
+  createdAt   DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@unique([userId, key])
+  @@index([createdAt])
 }
