@@ -296,15 +296,15 @@ Mọi route (trừ `/`, `/health`, `/products*`, `/toppings`, `/auth/register`, 
 | # | Task | Trạng thái | Nghiệm thu chéo |
 |---|---|---|---|
 | 1 | Khởi tạo dự án và cấu trúc | Xong | Rôi |
-| 2 | API danh sách sản phẩm | Xong (`/products`, seed 12 sản phẩm + 4 topping) | Rôi |
+| 2 | API danh sách sản phẩm | Xong (`/products`, seed 12 sản phẩm + 4 topping) | Rồi |
 | 3 | Trang Menu | Xong (gọi API; có loading, lỗi, rỗng) | Rôi |
-| 4 | Chi tiết và tùy chọn sản phẩm | Xong (size, topping; giá do server tính lại) | Rôi |
-| 5 | Giỏ hàng | Xong (thêm, sửa số lượng, xóa, tổng tiền, badge) | Rôi |
-| 6 | API tạo đơn hàng | Xong (JWT, class-validator, lưu PENDING) | Rôi |
-| 7 | Đăng ký / đăng nhập (JWT) | Xong (bcrypt, JWT, guard, trang `/login`, `/register`) | Rôi |
-| 8 | Thanh toán không tiền mặt | Xong (Ví/Thẻ mô phỏng, PAID/PAYMENT_FAILED, giữ giỏ khi lỗi) | Rôi |
-| 9 | Xác nhận, lịch sử đơn và bàn giao | Xong (`/orders/me`, trang xác nhận, Docker, README) | Rôi |
-| 10 | Nghiệp vụ backend nâng cao | Xong (state machine, idempotent, tồn kho đồng thời, khuyến mãi, điểm thưởng; test a, b, c) | Rôi |
+| 4 | Chi tiết và tùy chọn sản phẩm | Xong (size, topping; giá do server tính lại) | Rồi |
+| 5 | Giỏ hàng | Xong (thêm, sửa số lượng, xóa, tổng tiền, badge) | Rồi |
+| 6 | API tạo đơn hàng | Xong (JWT, class-validator, lưu PENDING) | Rồi |
+| 7 | Đăng ký / đăng nhập (JWT) | Xong (bcrypt, JWT, guard, trang `/login`, `/register`) | Rồi |
+| 8 | Thanh toán không tiền mặt | Xong (Ví/Thẻ mô phỏng, PAID/PAYMENT_FAILED, giữ giỏ khi lỗi) | Rồi |
+| 9 | Xác nhận, lịch sử đơn và bàn giao | Xong (`/orders/me`, trang xác nhận, Docker, README) | Rồi |
+| 10 | Nghiệp vụ backend nâng cao | Xong (state machine, idempotent, tồn kho đồng thời, khuyến mãi, điểm thưởng; test a, b, c) | Rồi |
 
 Giới hạn đã biết: thanh toán chỉ mô phỏng; không có giao diện barista (STAFF thao tác qua API); các trường đường/đá trong giỏ chỉ hiển thị, chưa lưu vào đơn.
 
