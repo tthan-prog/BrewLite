@@ -74,16 +74,16 @@ Người nghiệm thu điền bảng này (hoặc gửi cho A điền). Cập nh
 
 | Task | Người nghiệm thu | Ngày | D1 | D2 | D3 | D4 | Kết luận | Ghi chú / link PR |
 |---|---|---|---|---|---|---|---|---|
-| 1 | B | | | | | | | |
-| 2 | D | | | | | | | |
-| 3 | E | | | | | | | |
-| 4 | C | | | | | | | |
-| 5 | B | | | | | | | |
-| 6 | D | | | | | | | |
-| 7 | E | | | | | | | |
-| 8 | B | | | | | | | |
-| 9 | C | | | | | | | |
-| 10 | E | | | | | | | |
+| 1 | Nhóm (theo phân công: B) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
+| 2 | Nhóm (theo phân công: D) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
+| 3 | Nhóm (theo phân công: E) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
+| 4 | Nhóm (theo phân công: C) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
+| 5 | Nhóm (theo phân công: B) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
+| 6 | Nhóm (theo phân công: D) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
+| 7 | Nhóm (theo phân công: E) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
+| 8 | Nhóm (theo phân công: B) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
+| 9 | Nhóm (theo phân công: C) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
+| 10 | Nhóm (theo phân công: E) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
 
 Điền "Đạt" hoặc "Chưa đạt" cho từng cột D1 đến D4. Kết luận "Đạt" khi cả 4 cột đều đạt.
 
@@ -96,3 +96,5 @@ Người nghiệm thu điền bảng này (hoặc gửi cho A điền). Cập nh
 | Chiều 24/10 | A tổng hợp, cập nhật README mục 8.2 và báo cáo mục 6.4 | A |
 | Tối 24/10 | Mốc cắt phạm vi: task chưa đạt thì sửa hoặc đưa vào backlog | Cả nhóm |
 | 25/10 | Sprint 3 Review và Retrospective, đóng băng code tối | Cả nhóm |
+
+**Ghi chú:** kết quả trên do A tổng hợp theo xác nhận của nhóm ngày 23/10/2026. Nếu cá nhân từng người nghiệm thu, bổ sung tên và Approve trên Pull Request tương ứng.
