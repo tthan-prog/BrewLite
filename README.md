@@ -404,14 +404,14 @@ Bằng chứng Scrum lưu trong `docs/scrum/`: Product Backlog, Sprint Backlog, 
 
 | Ký hiệu | Họ tên | MSSV | Vai trò |
 |---|---|---|---|
-| A | | | Scrum Master + Dev nền tảng |
-| B | | | Dev backend (dữ liệu, nghiệp vụ lõi) |
-| C | | | Dev backend (xác thực, thanh toán, state machine) |
-| D | | | Dev frontend, slide |
-| E | | | Dev frontend, kiểm thử, PO tạm |
+| A | Nguyễn Lê Nhựt Thắng | | Scrum Master + Dev nền tảng |
+| B | Hồ Thiên Ngân | | Dev backend (dữ liệu, nghiệp vụ lõi) |
+| C | Hà Thiên Long | | Dev backend (xác thực, thanh toán, state machine) |
+| D | Giản Thiên Lực | | Dev frontend, slide |
+| E | Lê Thuận | | Dev frontend, kiểm thử, PO tạm |
 
 **Giảng viên hướng dẫn:** …………………………………………
 
 ---
 
-*README phiên bản 1.1 (sau Task 1). Cập nhật sau mỗi Sprint khi có thay đổi về cài đặt hoặc cách chạy.*
+*README phiên bản 1.2 (cập nhật 23/10/2026, Assignment 1 hoàn thành code; chờ nghiệm thu chéo). Cập nhật sau mỗi Sprint khi có thay đổi về cài đặt hoặc cách chạy.*

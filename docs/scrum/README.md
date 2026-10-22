@@ -39,3 +39,11 @@ Thư mục này lưu **bằng chứng làm theo Scrum** (đề yêu cầu quy tr
 ## Definition of Done
 
 Một task được tính xong khi: code chạy được và không lỗi build; có commit rõ ràng và được review; API có validate đầu vào, giao diện xử lý loading/lỗi cơ bản; README có hướng dẫn chạy; **được một thành viên khác nghiệm thu**. Chi tiết ở README gốc, Mục 11.
+
+## Bằng chứng đã có (cập nhật 23/10/2026)
+
+| File | Nội dung |
+|---|---|
+| `sprint-1-backlog.md`, `sprint-2-backlog.md`, `sprint-3-backlog.md` | Backlog từng Sprint, điểm, người làm, rủi ro |
+| `burndown-sprint-1.csv`, `-2.csv`, `-3.csv`, `burndown-ghi-chu.md` | Dữ liệu Burndown và cách tính |
+| `minutes/01…06-*.md` | Biên bản Planning, Review, Retrospective (bản nháp để nhóm rà soát) |
