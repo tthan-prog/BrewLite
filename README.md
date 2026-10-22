@@ -177,9 +177,7 @@ docker compose exec backend npx prisma db seed --config prisma7.config.ts
 
 > Cảnh báo: `prisma/seed.ts` bắt đầu bằng `deleteMany()` trên mọi bảng. Chạy lại seed sẽ **xóa sạch** dữ liệu hiện có (kể cả đơn hàng). Chỉ chạy khi cần đặt lại về dữ liệu gốc.
 
-Dữ liệu mẫu: 2 tài khoản (`customer@brewlite.com` và `staff@brewlite.com`; mật khẩu mẫu `password123`, đã băm bcrypt, chỉ dùng để phát triển), 12 sản phẩm và 4 topping khớp với giao diện, 2 mã khuyến mãi (`WELCOME10` giảm 10% cho đơn từ 50.000đ, `SAVE20K` giảm 20.000đ cho đơn từ 100.000đ).
-
-> Nếu bạn đã chạy bản cũ: sau khi `docker compose up --build` (tự áp dụng migration mới), hãy chạy lại seed một lần để có sản phẩm và tài khoản mới.
+Dữ liệu mẫu: 2 tài khoản (`customer@brewlite.com`, `staff@brewlite.com`; mật khẩu mẫu `password123`, chỉ dùng để phát triển), 3 sản phẩm, 3 topping, 2 mã khuyến mãi (`WELCOME10`, `SAVE20K`).
 
 Sau khi chạy xong:
 
@@ -271,44 +269,40 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ### 8.1. API
 
-Mọi route (trừ `/`, `/health`, `/products*`, `/toppings`, `/auth/register`, `/auth/login`) cần header `Authorization: Bearer <JWT>`. Cập nhật 23/10/2026; các test tích hợp trong `backend/test/assign1.e2e-spec.ts` kiểm tra từng dòng dưới đây trên PostgreSQL thật.
+Trạng thái ghi theo việc đọc mã nguồn trên nhánh `main` (cập nhật 23/10/2026); chưa chạy toàn bộ test.
 
-| Method | Endpoint | Chức năng | Quyền | Task |
+| Method | Endpoint | Chức năng | Task | Trạng thái |
 |---|---|---|---|---|
-| GET | `/` | "Hello BrewLite!" | công khai | 1 |
-| GET | `/health` | Kiểm tra backend sống | công khai | 1 |
-| GET | `/products`, `/products/:id` | Danh sách / chi tiết sản phẩm (id, name, price, category, imageUrl, stock) | công khai | 2 |
-| GET | `/toppings` | Danh sách topping | công khai | 2, 4 |
-| POST | `/auth/register` | Đăng ký (bcrypt; luôn tạo CUSTOMER); nhận `email`, `password`, `name` (tùy chọn) | công khai | 7 |
-| POST | `/auth/login` | Đăng nhập, trả `accessToken` (JWT) | công khai | 7 |
-| GET | `/auth/me` | Thông tin người dùng hiện tại | đăng nhập | 7 |
-| POST | `/orders` | Tạo đơn PENDING; bắt buộc header `Idempotency-Key`; giá theo size S/M/L (+0/+5.000/+10.000đ) và topping; trừ kho có điều kiện; mã khuyến mãi; `userId` lấy từ JWT | đăng nhập | 6, 10 |
-| GET | `/orders/me` | Lịch sử đơn của người dùng | đăng nhập | 9 |
-| GET | `/orders/:id` | Chi tiết đơn (chủ đơn hoặc STAFF) | đăng nhập | 9 |
-| GET | `/orders` | Tất cả đơn | STAFF | 6 |
-| POST | `/payments` | Thanh toán mô phỏng (`method`: `WALLET` hoặc `CARD`; `simulate: "FAIL"` để ép lỗi khi demo); idempotent theo `Idempotency-Key`; PAID cộng điểm, lỗi thì PAYMENT_FAILED | đăng nhập | 8, 10 |
-| PATCH | `/orders/:id/status` | STAFF chuyển PREPARING, READY, COMPLETED, CANCELLED (hủy hoàn kho) | STAFF | 10 |
+| GET | `/` | "Hello BrewLite!" | 1 | Xong |
+| GET | `/health` | Kiểm tra backend sống | 1 | Xong |
+| GET | `/products` | Danh sách sản phẩm (menu) | 2 | Chưa làm (menu đang dùng dữ liệu cứng ở frontend) |
+| GET | `/products/:id` | Chi tiết sản phẩm | 2 | Chưa làm |
+| POST | `/auth/register` | Đăng ký | 7 | Chưa làm (đã có trang giao diện) |
+| POST | `/auth/login` | Đăng nhập, trả JWT | 7 | Chưa làm (đã có trang giao diện) |
+| POST | `/orders` | Tạo đơn (PENDING); bắt buộc header `Idempotency-Key`; trừ kho có điều kiện; mã khuyến mãi | 6, 10 | Có, thiếu JWT và validate bằng class-validator (hiện nhận `userId` trong body) |
+| GET | `/orders` | Liệt kê đơn hàng | 6 | Có (chưa lọc theo người dùng) |
+| POST | `/payments` | Thanh toán (idempotent, header `Idempotency-Key`) | 8, 10 | Chưa làm |
+| GET | `/orders/me` | Lịch sử đơn của người dùng | 9 | Chưa làm (trang lịch sử đã gọi endpoint này) |
+| PATCH | `/orders/:id/status` | Cập nhật trạng thái đơn, chỉ role STAFF (để demo và test) | 10 | Chưa làm |
 
-> `GET /health`, `GET /toppings`, `GET /auth/me`, `GET /orders/:id` và `PATCH /orders/:id/status` là bổ sung của nhóm (đề không nêu).
+> `GET /health` và `PATCH /orders/:id/status` là bổ sung của nhóm (đề không nêu).
 
 ### 8.2. Tiến độ 10 task
 
-"Xong" nghĩa là chức năng chạy đầu-cuối (đã chạy thử bằng trình duyệt thật và test tích hợp). Task chỉ được tính điểm khi **một thành viên khác nghiệm thu** theo Definition of Done, nên cột cuối ghi rõ.
+"Một phần" nghĩa là đã có mã nhưng chưa đạt Definition of Done (chưa nối đủ frontend–backend, thiếu test hoặc chưa được thành viên khác nghiệm thu).
 
-| # | Task | Trạng thái | Nghiệm thu chéo |
-|---|---|---|---|
-| 1 | Khởi tạo dự án và cấu trúc | Xong | Chưa |
-| 2 | API danh sách sản phẩm | Xong (`/products`, seed 12 sản phẩm + 4 topping) | Chưa |
-| 3 | Trang Menu | Xong (gọi API; có loading, lỗi, rỗng) | Chưa |
-| 4 | Chi tiết và tùy chọn sản phẩm | Xong (size, topping; giá do server tính lại) | Chưa |
-| 5 | Giỏ hàng | Xong (thêm, sửa số lượng, xóa, tổng tiền, badge) | Chưa |
-| 6 | API tạo đơn hàng | Xong (JWT, class-validator, lưu PENDING) | Chưa |
-| 7 | Đăng ký / đăng nhập (JWT) | Xong (bcrypt, JWT, guard, trang `/login`, `/register`) | Chưa |
-| 8 | Thanh toán không tiền mặt | Xong (Ví/Thẻ mô phỏng, PAID/PAYMENT_FAILED, giữ giỏ khi lỗi) | Chưa |
-| 9 | Xác nhận, lịch sử đơn và bàn giao | Xong (`/orders/me`, trang xác nhận, Docker, README) | Chưa |
-| 10 | Nghiệp vụ backend nâng cao | Xong (state machine, idempotent, tồn kho đồng thời, khuyến mãi, điểm thưởng; test a, b, c) | Chưa |
-
-Giới hạn đã biết: thanh toán chỉ mô phỏng; không có giao diện barista (STAFF thao tác qua API); các trường đường/đá trong giỏ chỉ hiển thị, chưa lưu vào đơn.
+| # | Task | Trạng thái |
+|---|---|---|
+| 1 | Khởi tạo dự án và cấu trúc | Xong (đã build, test, chạy thử; Docker đã chạy thử) |
+| 2 | API danh sách sản phẩm | Một phần: có schema Prisma, migration, seed; chưa có `GET /products` |
+| 3 | Trang Menu | Một phần: có giao diện `/menu` (dữ liệu cứng), chưa gọi API |
+| 4 | Chi tiết và tùy chọn sản phẩm | Một phần: chọn size S/M/L và topping trong `/menu` |
+| 5 | Giỏ hàng | Một phần: giỏ hàng trong `/menu` (lưu localStorage) |
+| 6 | API tạo đơn hàng | Một phần: `POST /orders` có; thiếu JWT, class-validator |
+| 7 | Đăng ký / đăng nhập (JWT) | Một phần: có trang `/login`, `/register`; chưa có API |
+| 8 | Thanh toán không tiền mặt | Chưa làm |
+| 9 | Xác nhận, lịch sử đơn và bàn giao | Một phần: có trang xác nhận và lịch sử; chưa có `GET /orders/me` |
+| 10 | Nghiệp vụ backend nâng cao | Một phần: Idempotency-Key, kiểm soát tồn kho bằng cập nhật có điều kiện, khuyến mãi; chưa có state machine, test (a)(b)(c) chưa được xác nhận chạy |
 
 Cập nhật bảng này khi hoàn thành từng task (một phần của Definition of Done).
 
@@ -350,15 +344,9 @@ npm run lint          # ESLint
 npm run build         # build production
 ```
 
-Test tích hợp (`test:e2e`) chạy trên PostgreSQL thật: cần đã migrate và seed, cùng biến `DATABASE_URL` và `JWT_SECRET` (ví dụ `docker compose up -d db`, rồi `npx prisma migrate deploy --config prisma7.config.ts` và `npx prisma db seed --config prisma7.config.ts` trong `backend/`). Các test tự tạo dữ liệu riêng nên không làm hỏng dữ liệu mẫu, nhưng **không** nên chạy trên CSDL có dữ liệu thật.
+Hiện có: 2 unit test và 2 e2e test cho `/` và `/health`.
 
-Hiện có: 22 unit test (gồm máy trạng thái đơn hàng) và 32 test tích hợp.
-
-**Bắt buộc theo đề (Task 10), nơi nằm các test:**
-
-- (a) chặn chuyển trạng thái sai: `src/orders/order-state.spec.ts` (duyệt toàn bộ cặp trạng thái) và nhóm "Task 8 + 10a" trong `test/assign1.e2e-spec.ts`.
-- (b) gửi 2 lần (và 10 lần song song) cùng `Idempotency-Key` chỉ tạo 1 đơn: nhóm "Task 10b".
-- (c) 20 yêu cầu đặt song song khi kho chỉ còn 5 thì đúng 5 đơn thành công, kho về 0: nhóm "Task 10c".
+**Bắt buộc theo đề (Task 10):** test chứng minh (a) chặn được chuyển trạng thái sai; (b) gửi 2 lần cùng `Idempotency-Key` chỉ tạo 1 đơn; (c) đặt đồng thời không vượt tồn kho.
 
 ---
 
@@ -404,14 +392,14 @@ Bằng chứng Scrum lưu trong `docs/scrum/`: Product Backlog, Sprint Backlog, 
 
 | Ký hiệu | Họ tên | MSSV | Vai trò |
 |---|---|---|---|
-| A | Nguyễn Lê Nhựt Thắng | | Scrum Master + Dev nền tảng |
-| B | Hồ Thiên Ngân | | Dev backend (dữ liệu, nghiệp vụ lõi) |
-| C | Hà Thiên Long | | Dev backend (xác thực, thanh toán, state machine) |
-| D | Giản Thiên Lực | | Dev frontend, slide |
-| E | Lê Thuận | | Dev frontend, kiểm thử, PO tạm |
+| A | | | Scrum Master + Dev nền tảng |
+| B | | | Dev backend (dữ liệu, nghiệp vụ lõi) |
+| C | | | Dev backend (xác thực, thanh toán, state machine) |
+| D | | | Dev frontend, slide |
+| E | | | Dev frontend, kiểm thử, PO tạm |
 
 **Giảng viên hướng dẫn:** …………………………………………
 
 ---
 
-*README phiên bản 1.2 (cập nhật 23/10/2026, Assignment 1 hoàn thành code; chờ nghiệm thu chéo). Cập nhật sau mỗi Sprint khi có thay đổi về cài đặt hoặc cách chạy.*
+*README phiên bản 1.1 (sau Task 1). Cập nhật sau mỗi Sprint khi có thay đổi về cài đặt hoặc cách chạy.*
