@@ -7,6 +7,23 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
+import type { Prisma } from '../generated/prisma/client.js';
+import { OrderStatus } from '../generated/prisma/enums.js';
+import { assertTransition, pointsForTotal } from './order-state.js';
+
+const STAFF_TARGETS: readonly OrderStatus[] = [
+  OrderStatus.PREPARING,
+  OrderStatus.READY,
+  OrderStatus.COMPLETED,
+  OrderStatus.CANCELLED,
+];
+
+// Phụ thuộc size (đồng): S +0, M +5.000, L +10.000.
+export const SIZE_SURCHARGE: Record<string, number> = {
+  S: 0,
+  M: 5000,
+  L: 10000,
+};
 
 const orderInclude = {
   items: {
@@ -62,7 +79,7 @@ export class OrdersService {
         !Number.isInteger(item.quantity) ||
         item.quantity <= 0 ||
         typeof item.size !== 'string' ||
-        !item.size.trim()
+        !(item.size.trim() in SIZE_SURCHARGE)
       ) {
         throw new BadRequestException('Invalid order item');
       }
@@ -212,12 +229,14 @@ if (stockUpdate.count !== 1) {
             });
           }
 
-          subtotal += (product.price + toppingUnitTotal) * item.quantity;
+          const sizeSurcharge = SIZE_SURCHARGE[item.size.trim()] ?? 0;
+          const unitPrice = product.price + sizeSurcharge;
+          subtotal += (unitPrice + toppingUnitTotal) * item.quantity;
 
           orderItems.push({
             productId: product.id,
             quantity: item.quantity,
-            unitPrice: product.price,
+            unitPrice,
             size: item.size.trim(),
             toppings,
           });
@@ -334,5 +353,100 @@ if (stockUpdate.count !== 1) {
 
       return existing.order;
     }
+  }
+
+  /** Đơn của người dùng hiện tại (Task 9). */
+  findByUser(userId: number) {
+    return this.prisma.order.findMany({
+      where: { userId },
+      include: orderInclude,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /** Chủ đơn hoặc STAFF mới xem được; người khác nhận 404 để không lộ sự tồn tại. */
+  async findOneFor(id: number, user: { id: number; role: string }) {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: orderInclude,
+    });
+    if (!order || (user.role !== 'STAFF' && order.userId !== user.id)) {
+      throw new NotFoundException(`Order ${id} not found`);
+    }
+    return order;
+  }
+
+  /** STAFF cập nhật trạng thái theo máy trạng thái (Task 10a). */
+  updateStatus(id: number, to: OrderStatus) {
+    // PAID / PAYMENT_FAILED / PENDING chỉ do luồng thanh toán đặt, không cho STAFF đặt tay.
+    if (!STAFF_TARGETS.includes(to)) {
+      throw new BadRequestException(
+        `STAFF không được chuyển đơn sang ${to}; dùng POST /payments`,
+      );
+    }
+    return this.prisma.$transaction((tx) => this.changeStatus(tx, id, to));
+  }
+
+  /**
+   * Chuyển trạng thái trong một transaction đã mở.
+   * - Chặn chuyển sai bằng assertTransition.
+   * - Cập nhật có điều kiện theo trạng thái cũ để hai yêu cầu đồng thời không cùng thắng.
+   * - PAID: cộng điểm thưởng; CANCELLED: hoàn kho (và trừ điểm nếu đã PAID).
+   */
+  async changeStatus(
+    tx: Prisma.TransactionClient,
+    id: number,
+    to: OrderStatus,
+  ) {
+    const order = await tx.order.findUnique({
+      where: { id },
+      include: orderInclude,
+    });
+    if (!order) {
+      throw new NotFoundException(`Order ${id} not found`);
+    }
+
+    assertTransition(order.status, to);
+
+    const updated = await tx.order.updateMany({
+      where: { id, status: order.status },
+      data: { status: to },
+    });
+    if (updated.count !== 1) {
+      throw new ConflictException('Order status was changed concurrently');
+    }
+
+    if (to === OrderStatus.PAID) {
+      const points = pointsForTotal(order.total);
+      if (points > 0) {
+        await tx.user.update({
+          where: { id: order.userId },
+          data: { points: { increment: points } },
+        });
+      }
+    }
+
+    if (to === OrderStatus.CANCELLED) {
+      for (const item of order.items) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { stock: { increment: item.quantity } },
+        });
+      }
+      if (order.status === OrderStatus.PAID) {
+        const points = pointsForTotal(order.total);
+        if (points > 0) {
+          await tx.user.update({
+            where: { id: order.userId },
+            data: { points: { decrement: points } },
+          });
+        }
+      }
+    }
+
+    return tx.order.findUniqueOrThrow({
+      where: { id },
+      include: orderInclude,
+    });
   }
 }
