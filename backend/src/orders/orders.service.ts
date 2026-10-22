@@ -164,6 +164,25 @@ export class OrdersService {
           if (!product) {
             throw new NotFoundException(`Product ${item.productId} not found`);
           }
+          const stockUpdate = await tx.product.updateMany({
+  where: {
+    id: item.productId,
+    stock: {
+      gte: item.quantity,
+    },
+  },
+  data: {
+    stock: {
+      decrement: item.quantity,
+    },
+  },
+});
+
+if (stockUpdate.count !== 1) {
+  throw new BadRequestException(
+    `Insufficient stock for product ${item.productId}`,
+  );
+}
 
           let toppingUnitTotal = 0;
 
