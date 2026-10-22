@@ -295,16 +295,16 @@ Mọi route (trừ `/`, `/health`, `/products*`, `/toppings`, `/auth/register`, 
 
 | # | Task | Trạng thái | Nghiệm thu chéo |
 |---|---|---|---|
-| 1 | Khởi tạo dự án và cấu trúc | Xong | Rồi |
-| 2 | API danh sách sản phẩm | Xong (`/products`, seed 12 sản phẩm + 4 topping) | Rồi |
-| 3 | Trang Menu | Xong (gọi API; có loading, lỗi, rỗng) | Rồi |
-| 4 | Chi tiết và tùy chọn sản phẩm | Xong (size, topping; giá do server tính lại) | Rồi |
-| 5 | Giỏ hàng | Xong (thêm, sửa số lượng, xóa, tổng tiền, badge) | Rồi |
-| 6 | API tạo đơn hàng | Xong (JWT, class-validator, lưu PENDING) | Rồi |
-| 7 | Đăng ký / đăng nhập (JWT) | Xong (bcrypt, JWT, guard, trang `/login`, `/register`) | Rồi |
-| 8 | Thanh toán không tiền mặt | Xong (Ví/Thẻ mô phỏng, PAID/PAYMENT_FAILED, giữ giỏ khi lỗi) | Rồi |
-| 9 | Xác nhận, lịch sử đơn và bàn giao | Xong (`/orders/me`, trang xác nhận, Docker, README) | Rồi |
-| 10 | Nghiệp vụ backend nâng cao | Xong (state machine, idempotent, tồn kho đồng thời, khuyến mãi, điểm thưởng; test a, b, c) | Rồi |
+| 1 | Khởi tạo dự án và cấu trúc | Xong | Đạt |
+| 2 | API danh sách sản phẩm | Xong (`/products`, seed 12 sản phẩm + 4 topping) | Đạt |
+| 3 | Trang Menu | Xong (gọi API; có loading, lỗi, rỗng) | Đạt |
+| 4 | Chi tiết và tùy chọn sản phẩm | Xong (size, topping; giá do server tính lại) | Đạt |
+| 5 | Giỏ hàng | Xong (thêm, sửa số lượng, xóa, tổng tiền, badge) | Đạt |
+| 6 | API tạo đơn hàng | Xong (JWT, class-validator, lưu PENDING) | Đạt |
+| 7 | Đăng ký / đăng nhập (JWT) | Xong (bcrypt, JWT, guard, trang `/login`, `/register`) | Đạt |
+| 8 | Thanh toán không tiền mặt | Xong (Ví/Thẻ mô phỏng, PAID/PAYMENT_FAILED, giữ giỏ khi lỗi) | Đạt |
+| 9 | Xác nhận, lịch sử đơn và bàn giao | Xong (`/orders/me`, trang xác nhận, Docker, README) | Đạt |
+| 10 | Nghiệp vụ backend nâng cao | Xong (state machine, idempotent, tồn kho đồng thời, khuyến mãi, điểm thưởng; test a, b, c) | Đạt |
 
 Giới hạn đã biết: thanh toán chỉ mô phỏng; không có giao diện barista (STAFF thao tác qua API); các trường đường/đá trong giỏ chỉ hiển thị, chưa lưu vào đơn.
 
