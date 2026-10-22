@@ -441,7 +441,7 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 | D | Giản Thiên Lực | | Dev frontend, slide |
 | E | Lê Thuận | | Dev frontend, kiểm thử, Product Owner tạm |
 
-**Giảng viên hướng dẫn:** …………………………………………
+**Giảng viên hướng dẫn:** Từ Lãng Phiêu
 
 ---
 
