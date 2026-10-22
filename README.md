@@ -162,16 +162,26 @@ nvm use            # (nếu dùng nvm) chọn đúng phiên bản Node trong .nv
 
 ### 6.2. Cách 1 – Chạy toàn bộ bằng Docker Compose
 
-`[Chưa kiểm chứng]` (file đã viết và kiểm tra cú pháp, chưa build image thật)
+`[Đã chạy thử]` trên Windows (Docker Desktop + WSL 2): build thành công, 2 migration tự áp dụng, backend và frontend khởi động, seed chạy được.
 
 ```bash
 cp .env.example .env          # Windows PowerShell: Copy-Item .env.example .env
 docker compose up --build
 ```
 
+Khi backend khởi động, container tự chạy `prisma migrate deploy` (tạo bảng). Dữ liệu mẫu **không** tự nạp. Mở terminal thứ hai và nạp **một lần**:
+
+```bash
+docker compose exec backend npx prisma db seed --config prisma7.config.ts
+```
+
+> Cảnh báo: `prisma/seed.ts` bắt đầu bằng `deleteMany()` trên mọi bảng. Chạy lại seed sẽ **xóa sạch** dữ liệu hiện có (kể cả đơn hàng). Chỉ chạy khi cần đặt lại về dữ liệu gốc.
+
+Dữ liệu mẫu: 2 tài khoản (`customer@brewlite.com`, `staff@brewlite.com`; mật khẩu mẫu `password123`, chỉ dùng để phát triển), 3 sản phẩm, 3 topping, 2 mã khuyến mãi (`WELCOME10`, `SAVE20K`).
+
 Sau khi chạy xong:
 
-- Frontend: http://localhost:3000
+- Frontend: http://localhost:3000 (thực đơn ở `/menu`)
 - Backend: http://localhost:3001 (thử `http://localhost:3001/health`)
 - PostgreSQL: `localhost:5432`
 
@@ -181,6 +191,8 @@ Dừng hệ thống:
 docker compose down           # giữ lại dữ liệu
 docker compose down -v        # xóa cả dữ liệu CSDL
 ```
+
+Prisma 7: client được sinh vào `backend/src/generated/prisma` (thư mục này nằm trong `.gitignore`); `backend/Dockerfile` tự chạy `prisma generate` khi build. Tệp cấu hình Prisma tên `prisma7.config.ts` nên mọi lệnh Prisma cần thêm `--config prisma7.config.ts`.
 
 ### 6.3. Cách 2 – Chạy từng phần để phát triển
 
@@ -208,7 +220,7 @@ npm run dev
 
 Mở http://localhost:3000. Trang hiển thị "Hello BrewLite!" và trạng thái kết nối backend.
 
-> Khi có PostgreSQL (từ Task 2): chạy `docker compose up -d db` rồi cấu hình `DATABASE_URL` trong `backend/.env`.
+> Backend đã dùng PostgreSQL (Prisma). Trước khi `npm run start:dev`: chạy `docker compose up -d db`, đặt `DATABASE_URL` trong `backend/.env` (trỏ `localhost:5432`), rồi trong `backend` chạy lần lượt `npx prisma generate --config prisma7.config.ts`, `npx prisma migrate deploy --config prisma7.config.ts` và (một lần) `npx prisma db seed --config prisma7.config.ts`.
 
 ---
 
@@ -257,35 +269,40 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ### 8.1. API
 
+Trạng thái ghi theo việc đọc mã nguồn trên nhánh `main` (cập nhật 23/10/2026); chưa chạy toàn bộ test.
+
 | Method | Endpoint | Chức năng | Task | Trạng thái |
 |---|---|---|---|---|
 | GET | `/` | "Hello BrewLite!" | 1 | Xong |
 | GET | `/health` | Kiểm tra backend sống | 1 | Xong |
-| GET | `/products` | Danh sách sản phẩm (menu) | 2 | Chưa làm |
+| GET | `/products` | Danh sách sản phẩm (menu) | 2 | Chưa làm (menu đang dùng dữ liệu cứng ở frontend) |
 | GET | `/products/:id` | Chi tiết sản phẩm | 2 | Chưa làm |
-| POST | `/auth/register` | Đăng ký | 7 | Chưa làm |
-| POST | `/auth/login` | Đăng nhập, trả JWT | 7 | Chưa làm |
-| POST | `/orders` | Tạo đơn (PENDING) | 6 | Chưa làm |
+| POST | `/auth/register` | Đăng ký | 7 | Chưa làm (đã có trang giao diện) |
+| POST | `/auth/login` | Đăng nhập, trả JWT | 7 | Chưa làm (đã có trang giao diện) |
+| POST | `/orders` | Tạo đơn (PENDING); bắt buộc header `Idempotency-Key`; trừ kho có điều kiện; mã khuyến mãi | 6, 10 | Có, thiếu JWT và validate bằng class-validator (hiện nhận `userId` trong body) |
+| GET | `/orders` | Liệt kê đơn hàng | 6 | Có (chưa lọc theo người dùng) |
 | POST | `/payments` | Thanh toán (idempotent, header `Idempotency-Key`) | 8, 10 | Chưa làm |
-| GET | `/orders/me` | Lịch sử đơn của người dùng | 9 | Chưa làm |
+| GET | `/orders/me` | Lịch sử đơn của người dùng | 9 | Chưa làm (trang lịch sử đã gọi endpoint này) |
 | PATCH | `/orders/:id/status` | Cập nhật trạng thái đơn, chỉ role STAFF (để demo và test) | 10 | Chưa làm |
 
 > `GET /health` và `PATCH /orders/:id/status` là bổ sung của nhóm (đề không nêu).
 
 ### 8.2. Tiến độ 10 task
 
+"Một phần" nghĩa là đã có mã nhưng chưa đạt Definition of Done (chưa nối đủ frontend–backend, thiếu test hoặc chưa được thành viên khác nghiệm thu).
+
 | # | Task | Trạng thái |
 |---|---|---|
-| 1 | Khởi tạo dự án và cấu trúc | Xong (đã build, test, chạy thử) |
-| 2 | API danh sách sản phẩm | Chưa làm |
-| 3 | Trang Menu | Chưa làm |
-| 4 | Chi tiết và tùy chọn sản phẩm | Chưa làm |
-| 5 | Giỏ hàng | Chưa làm |
-| 6 | API tạo đơn hàng | Chưa làm |
-| 7 | Đăng ký / đăng nhập (JWT) | Chưa làm |
+| 1 | Khởi tạo dự án và cấu trúc | Xong (đã build, test, chạy thử; Docker đã chạy thử) |
+| 2 | API danh sách sản phẩm | Một phần: có schema Prisma, migration, seed; chưa có `GET /products` |
+| 3 | Trang Menu | Một phần: có giao diện `/menu` (dữ liệu cứng), chưa gọi API |
+| 4 | Chi tiết và tùy chọn sản phẩm | Một phần: chọn size S/M/L và topping trong `/menu` |
+| 5 | Giỏ hàng | Một phần: giỏ hàng trong `/menu` (lưu localStorage) |
+| 6 | API tạo đơn hàng | Một phần: `POST /orders` có; thiếu JWT, class-validator |
+| 7 | Đăng ký / đăng nhập (JWT) | Một phần: có trang `/login`, `/register`; chưa có API |
 | 8 | Thanh toán không tiền mặt | Chưa làm |
-| 9 | Xác nhận, lịch sử đơn và bàn giao | Chưa làm |
-| 10 | Nghiệp vụ backend nâng cao | Chưa làm |
+| 9 | Xác nhận, lịch sử đơn và bàn giao | Một phần: có trang xác nhận và lịch sử; chưa có `GET /orders/me` |
+| 10 | Nghiệp vụ backend nâng cao | Một phần: Idempotency-Key, kiểm soát tồn kho bằng cập nhật có điều kiện, khuyến mãi; chưa có state machine, test (a)(b)(c) chưa được xác nhận chạy |
 
 Cập nhật bảng này khi hoàn thành từng task (một phần của Definition of Done).
 
