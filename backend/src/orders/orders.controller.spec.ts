@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersController } from './orders.controller.js';
 import { OrdersService } from './orders.service.js';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 
 describe('OrdersController', () => {
   let controller: OrdersController;
@@ -14,7 +15,10 @@ describe('OrdersController', () => {
           useValue: {},
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<OrdersController>(OrdersController);
   });

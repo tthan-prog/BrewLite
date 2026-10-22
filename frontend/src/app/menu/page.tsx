@@ -1,12 +1,15 @@
 
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { apiRequest } from "@/lib/api";
 import "./menu.css";
 
 type Category = "Tất cả" | "Cà phê" | "Trà" | "Trà sữa" | "Đá xay";
 type Size = "S" | "M" | "L";
-type View = "menu" | "cart" | "checkout" | "orders";
+type View = "menu" | "cart" | "checkout";
 
 type Topping = {
   id: string;
@@ -34,125 +37,26 @@ type CartItem = {
   quantity: number;
 };
 
-type SavedOrder = {
-  id: string;
-  createdAt: string;
-  customerName: string;
-  phone: string;
-  pickup: string;
-  payment: string;
-  note: string;
-  items: CartItem[];
-  total: number;
-  status: string;
+type ApiProduct = {
+  id: number;
+  name: string;
+  description: string | null;
+  price: number;
+  category: string;
+  imageUrl: string | null;
+  stock: number;
 };
 
-const STORAGE_KEY = "brewlite-orders-v1";
+type ApiTopping = { id: number; name: string; price: number };
 
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Cà phê sữa đá",
-    description: "Cà phê Việt đậm đà hòa cùng sữa đặc béo ngọt.",
-    category: "Cà phê",
-    price: 29000,
-    emoji: "☕",
-    popular: true,
-  },
-  {
-    id: 2,
-    name: "Bạc xỉu",
-    description: "Vị sữa thơm béo cùng chút cà phê dịu nhẹ.",
-    category: "Cà phê",
-    price: 32000,
-    emoji: "🥛",
-    popular: true,
-  },
-  {
-    id: 3,
-    name: "Americano",
-    description: "Espresso pha cùng nước, thanh nhẹ và tỉnh táo.",
-    category: "Cà phê",
-    price: 35000,
-    emoji: "☕",
-  },
-  {
-    id: 4,
-    name: "Caramel Latte",
-    description: "Espresso, sữa tươi và caramel ngọt thơm.",
-    category: "Cà phê",
-    price: 45000,
-    emoji: "🍮",
-    popular: true,
-  },
-  {
-    id: 5,
-    name: "Trà đào cam sả",
-    description: "Trà đào thanh mát kết hợp cam và hương sả.",
-    category: "Trà",
-    price: 39000,
-    emoji: "🍑",
-    popular: true,
-  },
-  {
-    id: 6,
-    name: "Trà vải",
-    description: "Hương trà nhẹ nhàng cùng vải ngọt thanh.",
-    category: "Trà",
-    price: 39000,
-    emoji: "🍹",
-  },
-  {
-    id: 7,
-    name: "Trà chanh mật ong",
-    description: "Trà chanh tươi mát, hòa quyện mật ong.",
-    category: "Trà",
-    price: 35000,
-    emoji: "🍋",
-  },
-  {
-    id: 8,
-    name: "Trà sữa trân châu",
-    description: "Trà sữa thơm béo cùng trân châu dai mềm.",
-    category: "Trà sữa",
-    price: 39000,
-    emoji: "🧋",
-    popular: true,
-  },
-  {
-    id: 9,
-    name: "Trà sữa matcha",
-    description: "Matcha thơm dịu kết hợp sữa tươi.",
-    category: "Trà sữa",
-    price: 45000,
-    emoji: "🍵",
-  },
-  {
-    id: 10,
-    name: "Trà sữa khoai môn",
-    description: "Hương khoai môn ngọt nhẹ và sữa béo.",
-    category: "Trà sữa",
-    price: 42000,
-    emoji: "🥤",
-  },
-  {
-    id: 11,
-    name: "Matcha đá xay",
-    description: "Matcha xay cùng đá và lớp kem mềm mịn.",
-    category: "Đá xay",
-    price: 49000,
-    emoji: "🍵",
-    popular: true,
-  },
-  {
-    id: 12,
-    name: "Chocolate đá xay",
-    description: "Chocolate đậm vị, mát lạnh và thơm béo.",
-    category: "Đá xay",
-    price: 49000,
-    emoji: "🍫",
-  },
-];
+type ApiOrder = {
+  id: number;
+  status: string;
+  total: number;
+  createdAt: string;
+};
+
+type PaymentMethod = "WALLET" | "CARD";
 
 const categories: Category[] = [
   "Tất cả",
@@ -162,18 +66,22 @@ const categories: Category[] = [
   "Đá xay",
 ];
 
-const toppings: Topping[] = [
-  { id: "pearl", name: "Trân châu đen", price: 7000 },
-  { id: "jelly", name: "Thạch cà phê", price: 6000 },
-  { id: "pudding", name: "Pudding trứng", price: 8000 },
-  { id: "cream", name: "Kem cheese", price: 10000 },
-];
-
 const sizePrices: Record<Size, number> = {
   S: 0,
   M: 5000,
   L: 10000,
 };
+
+function toProduct(p: ApiProduct): Product {
+  return {
+    id: p.id,
+    name: p.name,
+    description: p.description ?? "",
+    category: (p.category as Product["category"]) ?? "Cà phê",
+    price: p.price,
+    emoji: p.imageUrl || "☕",
+  };
+}
 
 function money(value: number) {
   return new Intl.NumberFormat("vi-VN").format(value) + "đ";
@@ -200,37 +108,58 @@ export default function MenuPage() {
   const [quantity, setQuantity] = useState(1);
 
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [orders, setOrders] = useState<SavedOrder[]>([]);
-  const [ordersLoaded, setOrdersLoaded] = useState(false);
+  const router = useRouter();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [toppings, setToppings] = useState<Topping[]>([]);
+  const [loadState, setLoadState] = useState<"loading" | "error" | "ready">(
+    "loading"
+  );
+  const [loadError, setLoadError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
 
   const [notice, setNotice] = useState("");
-  const [successOrder, setSuccessOrder] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [promo, setPromo] = useState("");
+  const [simulateFail, setSimulateFail] = useState(false);
+  // Khóa idempotency gắn với nội dung giỏ: bấm đặt lại / thử thanh toán lại không tạo thêm đơn.
+  const orderKeyRef = useRef<{ signature: string; key: string } | null>(null);
 
-  const [customer, setCustomer] = useState({
-    name: "",
-    phone: "",
-    note: "",
-    pickup: "Tại quán",
-    payment: "QR",
+  const [customer, setCustomer] = useState<{ payment: PaymentMethod }>({
+    payment: "WALLET",
   });
 
+  // Tải thực đơn và topping từ backend (Task 3).
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+    let alive = true;
+    Promise.all([
+      apiRequest<ApiProduct[]>("/products"),
+      apiRequest<ApiTopping[]>("/toppings"),
+    ])
+      .then(([apiProducts, apiToppings]) => {
+        if (!alive) return;
+        setProducts(apiProducts.map(toProduct));
+        setToppings(
+          apiToppings.map((t) => ({ id: String(t.id), name: t.name, price: t.price }))
+        );
+        setLoadError("");
+        setLoadState("ready");
+      })
+      .catch((error: unknown) => {
+        if (!alive) return;
+        setLoadError(
+          error instanceof Error ? error.message : "Không tải được thực đơn."
+        );
+        setLoadState("error");
+      });
+    return () => {
+      alive = false;
+    };
+  }, [reloadKey]);
 
-      if (saved) {
-        const parsed: unknown = JSON.parse(saved);
-
-        if (Array.isArray(parsed)) {
-          setOrders(parsed as SavedOrder[]);
-        }
-      }
-    } catch (error) {
-      console.error("Lỗi đọc lịch sử đơn hàng:", error);
-    } finally {
-      setOrdersLoaded(true);
-    }
-  }, []);
+  function reloadMenu() {
+    setLoadState("loading");
+    setReloadKey((n) => n + 1);
+  }
 
   const visibleProducts = useMemo(() => {
     return products.filter((product) => {
@@ -247,7 +176,7 @@ export default function MenuPage() {
 
       return matchCategory && matchSearch;
     });
-  }, [category, search]);
+  }, [products, category, search]);
 
   const cartCount = cart.reduce(
     (sum, item) => sum + item.quantity,
@@ -336,46 +265,82 @@ export default function MenuPage() {
     );
   }
 
-  function submitOrder(event: React.FormEvent<HTMLFormElement>) {
+  async function submitOrder(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!cart.length || submitting) return;
 
-    if (!cart.length || !ordersLoaded) return;
-
-    const order: SavedOrder = {
-      id: "BL" + Date.now(),
-      createdAt: new Date().toISOString(),
-      customerName: customer.name.trim(),
-      phone: customer.phone.trim(),
-      pickup: customer.pickup,
-      payment: customer.payment,
-      note: customer.note,
-      items: cart.map((item) => ({
-        ...item,
-        toppings: [...item.toppings],
-      })),
-      total: subtotal,
-      status: "Đã đặt (demo)",
-    };
-
-    const updatedOrders = [order, ...orders];
-
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(updatedOrders)
-      );
-    } catch (error) {
-      console.error("Lỗi lưu đơn hàng:", error);
-      setNotice("Không thể lưu đơn hàng. Vui lòng thử lại.");
+    const token = sessionStorage.getItem("brewlite_token");
+    if (!token) {
+      setNotice("Bạn cần đăng nhập để đặt hàng. Đang chuyển tới trang đăng nhập...");
+      router.push("/login");
       return;
     }
 
-    setOrders(updatedOrders);
-    setCart([]);
-    setSuccessOrder(order.id);
+    const items = cart.map((item) => ({
+      productId: item.product.id,
+      quantity: item.quantity,
+      size: item.size,
+      toppings: item.toppings.map((t) => ({
+        toppingId: Number(t.id),
+        quantity: 1,
+      })),
+    }));
+    const promoCode = promo.trim() || undefined;
+    const signature = JSON.stringify({ items, promoCode });
+    if (orderKeyRef.current?.signature !== signature) {
+      orderKeyRef.current = { signature, key: crypto.randomUUID() };
+    }
+
+    setSubmitting(true);
     setNotice("");
-    setView("orders");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    try {
+      const auth = { Authorization: `Bearer ${token}` };
+      const order = await apiRequest<ApiOrder>("/orders", {
+        method: "POST",
+        headers: { ...auth, "Idempotency-Key": orderKeyRef.current.key },
+        body: JSON.stringify({ items, promoCode }),
+      });
+
+      const result = await apiRequest<{
+        order: ApiOrder;
+        payment: { status: string };
+      }>("/payments", {
+        method: "POST",
+        headers: { ...auth, "Idempotency-Key": crypto.randomUUID() },
+        body: JSON.stringify({
+          orderId: order.id,
+          method: customer.payment,
+          simulate: simulateFail ? "FAIL" : "SUCCESS",
+        }),
+      });
+
+      if (result.payment.status !== "SUCCESS") {
+        // Thanh toán lỗi: giữ nguyên giỏ hàng để thử lại (cùng đơn, không trừ kho lần hai).
+        setNotice(
+          `Thanh toán thất bại (đơn #${result.order.id}: ${result.order.status}). Giỏ hàng được giữ nguyên, bạn có thể thử lại.`
+        );
+        return;
+      }
+
+      sessionStorage.setItem(
+        "brewlite_last_order",
+        JSON.stringify({
+          id: result.order.id,
+          status: result.order.status,
+          total: result.order.total,
+          createdAt: result.order.createdAt,
+        })
+      );
+      orderKeyRef.current = null;
+      setCart([]);
+      router.push("/orders/confirmation");
+    } catch (error) {
+      setNotice(
+        error instanceof Error ? error.message : "Không thể đặt hàng lúc này."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -406,9 +371,7 @@ export default function MenuPage() {
             Giỏ hàng <b>{cartCount}</b>
           </button>
 
-          <button onClick={() => goTo("orders")}>
-            Đơn hàng của tôi
-          </button>
+          <Link href="/orders/history">Đơn hàng của tôi</Link>
         </nav>
       </header>
 
@@ -416,20 +379,6 @@ export default function MenuPage() {
         <div className="brew-notice" role="status">
           <span>{notice}</span>
           <button onClick={() => setNotice("")}>×</button>
-        </div>
-      )}
-
-      {successOrder && (
-        <div className="brew-success" role="status">
-          <strong>✓ Đặt hàng demo thành công!</strong>
-          <p>Mã đơn hàng: {successOrder}</p>
-          <p>
-            Đơn đã được lưu vào lịch sử trên trình duyệt.
-            Chưa có giao dịch thanh toán thật.
-          </p>
-          <button onClick={() => setSuccessOrder("")}>
-            Đóng thông báo
-          </button>
         </div>
       )}
 
@@ -502,7 +451,23 @@ export default function MenuPage() {
               ))}
             </div>
 
-            {visibleProducts.length === 0 ? (
+            {loadState === "loading" ? (
+              <div className="brew-empty" role="status">
+                <h3>Đang tải thực đơn...</h3>
+              </div>
+            ) : loadState === "error" ? (
+              <div className="brew-empty" role="alert">
+                <h3>Không tải được thực đơn</h3>
+                <p>{loadError}</p>
+                <button className="brew-primary" onClick={reloadMenu}>
+                  Thử lại
+                </button>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="brew-empty">
+                <h3>Hiện chưa có đồ uống nào</h3>
+              </div>
+            ) : visibleProducts.length === 0 ? (
               <div className="brew-empty">
                 <h3>Không tìm thấy đồ uống</h3>
 
@@ -840,102 +805,54 @@ export default function MenuPage() {
                 <h2>Thông tin khách hàng</h2>
 
                 <label>
-                  Họ và tên
-                  <input
-                    required
-                    minLength={2}
-                    value={customer.name}
-                    onChange={(event) =>
-                      setCustomer({
-                        ...customer,
-                        name: event.target.value,
-                      })
-                    }
-                    placeholder="Nguyễn Văn A"
-                  />
-                </label>
-
-                <label>
-                  Số điện thoại
-                  <input
-                    required
-                    pattern="[0-9]{9,11}"
-                    value={customer.phone}
-                    onChange={(event) =>
-                      setCustomer({
-                        ...customer,
-                        phone: event.target.value,
-                      })
-                    }
-                    placeholder="0901234567"
-                  />
-                </label>
-
-                <label>
-                  Hình thức nhận đồ uống
-                  <select
-                    value={customer.pickup}
-                    onChange={(event) =>
-                      setCustomer({
-                        ...customer,
-                        pickup: event.target.value,
-                      })
-                    }
-                  >
-                    <option>Tại quán</option>
-                    <option>Mang đi</option>
-                  </select>
-                </label>
-
-                <label>
                   Phương thức thanh toán
                   <select
                     value={customer.payment}
                     onChange={(event) =>
                       setCustomer({
                         ...customer,
-                        payment: event.target.value,
+                        payment: event.target.value as PaymentMethod,
                       })
                     }
                   >
-                    <option value="QR">
-                      Chuyển khoản QR (demo)
-                    </option>
-                    <option value="Ví điện tử">
-                      Ví điện tử (demo)
-                    </option>
+                    <option value="WALLET">Ví điện tử (mô phỏng)</option>
+                    <option value="CARD">Thẻ (mô phỏng)</option>
                   </select>
                 </label>
 
                 <label>
-                  Ghi chú
-                  <textarea
-                    rows={3}
-                    value={customer.note}
-                    onChange={(event) =>
-                      setCustomer({
-                        ...customer,
-                        note: event.target.value,
-                      })
-                    }
-                    placeholder="Ghi chú cho quán..."
+                  Mã khuyến mãi (nếu có)
+                  <input
+                    value={promo}
+                    onChange={(event) => setPromo(event.target.value)}
+                    placeholder="WELCOME10"
+                    maxLength={32}
                   />
                 </label>
 
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={simulateFail}
+                    onChange={(event) => setSimulateFail(event.target.checked)}
+                  />{" "}
+                  Giả lập thanh toán thất bại (chỉ để demo)
+                </label>
+
                 <p className="brew-demo-alert">
-                  Đây là thanh toán mô phỏng.
-                  Chưa có mã QR thật, chưa trừ tiền
-                  và chưa gửi đơn hàng đến backend.
+                  Thanh toán là mô phỏng: không có giao dịch thật và không trừ
+                  tiền. Đơn được tạo trên backend; bạn cần đăng nhập để đặt hàng.
+                  Giá cuối cùng (kể cả khuyến mãi) do máy chủ tính.
                 </p>
 
                 <button
                   type="submit"
                   className="brew-primary brew-full"
-                  disabled={!ordersLoaded}
+                  disabled={submitting}
                 >
-                  {ordersLoaded
-                    ? `Xác nhận đơn demo · ${money(subtotal)}`
-                    : "Đang tải dữ liệu..."}
+                  {submitting
+                    ? "Đang xử lý..."
+                    : `Đặt hàng và thanh toán · ${money(subtotal)}`}
                 </button>
               </div>
 
@@ -965,157 +882,6 @@ export default function MenuPage() {
           )}
         </section>
       )}
-
-      {view === "orders" && (
-        <section className="brew-section">
-          <button
-            className="brew-back"
-            onClick={() => goTo("menu")}
-          >
-            ← Quay lại thực đơn
-          </button>
-
-          <h1 className="brew-page-title">
-            Đơn hàng của tôi
-          </h1>
-
-          <p className="brew-orders-intro">
-            Lịch sử đơn hàng demo đã lưu trên trình duyệt này.
-          </p>
-
-          {!ordersLoaded ? (
-            <div className="brew-empty">
-              Đang tải lịch sử đơn hàng...
-            </div>
-          ) : orders.length === 0 ? (
-            <div className="brew-empty">
-              <div>🧾</div>
-              <h3>Bạn chưa có đơn hàng nào</h3>
-              <p>Hãy chọn một thức uống yêu thích nhé!</p>
-
-              <button
-                className="brew-primary"
-                onClick={() => goTo("menu")}
-              >
-                Khám phá thực đơn
-              </button>
-            </div>
-          ) : (
-            <div className="brew-orders-list">
-              {orders.map((order) => (
-                <article
-                  className="brew-order-card"
-                  key={order.id}
-                >
-                  <div className="brew-order-header">
-                    <div>
-                      <h2>Đơn hàng #{order.id}</h2>
-
-                      <p>
-                        {new Date(
-                          order.createdAt
-                        ).toLocaleString("vi-VN")}
-                      </p>
-                    </div>
-
-                    <span className="brew-order-status">
-                      {order.status}
-                    </span>
-                  </div>
-
-                  <div className="brew-order-customer">
-                    <p>
-                      <strong>Khách hàng:</strong>{" "}
-                      {order.customerName}
-                    </p>
-
-                    <p>
-                      <strong>Số điện thoại:</strong>{" "}
-                      {order.phone}
-                    </p>
-
-                    <p>
-                      <strong>Nhận đồ uống:</strong>{" "}
-                      {order.pickup}
-                    </p>
-
-                    <p>
-                      <strong>Thanh toán:</strong>{" "}
-                      {order.payment} (demo)
-                    </p>
-
-                    {order.note && (
-                      <p>
-                        <strong>Ghi chú:</strong>{" "}
-                        {order.note}
-                      </p>
-                    )}
-                  </div>
-
-                  <h3 className="brew-order-subtitle">
-                    Chi tiết đồ uống
-                  </h3>
-
-                  <div className="brew-order-items">
-                    {order.items.map((item) => (
-                      <div
-                        className="brew-order-item"
-                        key={item.key}
-                      >
-                        <div>
-                          <strong>
-                            {item.product.emoji}{" "}
-                            {item.product.name}
-                          </strong>
-
-                          <p>
-                            Size {item.size} · Đường{" "}
-                            {item.sugar}% · Đá {item.ice}%
-                          </p>
-
-                          <p>
-                            {item.toppings.length
-                              ? item.toppings
-                                  .map(
-                                    (topping) => topping.name
-                                  )
-                                  .join(", ")
-                              : "Không thêm topping"}
-                          </p>
-
-                          <p>
-                            Số lượng: {item.quantity}
-                          </p>
-                        </div>
-
-                        <strong>
-                          {money(
-                            getItemPrice(item) *
-                              item.quantity
-                          )}
-                        </strong>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="brew-order-total">
-                    <span>Tổng thanh toán (demo)</span>
-                    <strong>{money(order.total)}</strong>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-      )}
-
-      <footer className="brew-footer">
-        <strong>BrewLite ☕</strong>
-        <span>Cà phê ngon, ngày thêm vui.</span>
-        <small>
-          © 2026 BrewLite · Frontend demo
-        </small>
-      </footer>
     </main>
   );
 }
