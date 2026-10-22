@@ -12,11 +12,11 @@
 
 | Ký hiệu | Họ tên | Vai trò |
 |---|---|---|
-| A | | Scrum Master + Dev nền tảng |
-| B | | Dev backend (dữ liệu, nghiệp vụ lõi) |
-| C | | Dev backend (xác thực, thanh toán, state machine) |
-| D | | Dev frontend, slide |
-| E | | Dev frontend, kiểm thử, PO tạm |
+| A | Nguyễn Lê Nhựt Thắng | Scrum Master + Dev nền tảng |
+| B | Hồ Thiên Ngân | Dev backend (dữ liệu, nghiệp vụ lõi) |
+| C | Hà Thiên Long | Dev backend (xác thực, thanh toán, state machine) |
+| D | Giản Thiên Lực | Dev frontend, slide |
+| E | Lê Thuận | Dev frontend, kiểm thử, PO tạm |
 
 Vai trò là "người chịu trách nhiệm chính", không phải "chỉ một mình làm".
 
