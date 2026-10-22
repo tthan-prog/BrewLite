@@ -304,7 +304,7 @@ Mọi route (trừ `/`, `/health`, `/products*`, `/toppings`, `/auth/register`, 
 | 7 | Đăng ký / đăng nhập (JWT) | Xong (bcrypt, JWT, guard, trang `/login`, `/register`) | Rôi |
 | 8 | Thanh toán không tiền mặt | Xong (Ví/Thẻ mô phỏng, PAID/PAYMENT_FAILED, giữ giỏ khi lỗi) | Rôi |
 | 9 | Xác nhận, lịch sử đơn và bàn giao | Xong (`/orders/me`, trang xác nhận, Docker, README) | Rôi |
-| 10 | Nghiệp vụ backend nâng cao | Xong (state machine, idempotent, tồn kho đồng thời, khuyến mãi, điểm thưởng; test a, b, c) | Chưa |
+| 10 | Nghiệp vụ backend nâng cao | Xong (state machine, idempotent, tồn kho đồng thời, khuyến mãi, điểm thưởng; test a, b, c) | Rôi |
 
 Giới hạn đã biết: thanh toán chỉ mô phỏng; không có giao diện barista (STAFF thao tác qua API); các trường đường/đá trong giỏ chỉ hiển thị, chưa lưu vào đơn.
 
