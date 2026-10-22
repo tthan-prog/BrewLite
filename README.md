@@ -4,7 +4,7 @@
 
 Đây là bài tập lớn môn **Công nghệ Phần mềm** (Trường Đại học Sài Gòn, Khoa Công nghệ Thông tin, học kỳ I năm học 2026–2027), thực hiện theo quy trình **Agile Scrum**.
 
-> **Trạng thái hiện tại (23/10/2026):** đã **hoàn thành code cả 10 task** của Assignment 1, chạy đầu-cuối bằng Docker Compose; 22 unit test và 32 test tích hợp đạt. *** (B–E nghiệm thu task của người khác), nên chưa tính điểm Definition of Done. Chi tiết ở [Mục 8](#8-api-và-tiến-độ-task).
+> **Trạng thái hiện tại (23/10/2026):** đã **hoàn thành code cả 10 task** của Assignment 1, chạy đầu-cuối bằng Docker Compose; 22 unit test và 32 test tích hợp đạt. Chi tiết ở [Mục 8](#8-api-và-tiến-độ-task).
 
 ---
 
