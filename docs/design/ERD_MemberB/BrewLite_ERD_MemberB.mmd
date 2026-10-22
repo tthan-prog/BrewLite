@@ -1,0 +1,70 @@
+erDiagram
+    USER ||--o{ ORDER : places
+    ORDER ||--|{ ORDER_ITEM : contains
+    PRODUCT ||--o{ ORDER_ITEM : included_in
+    ORDER_ITEM ||--o{ ORDER_ITEM_TOPPING : has
+    TOPPING ||--o{ ORDER_ITEM_TOPPING : selected_in
+    PROMOTION ||--o{ ORDER : applied_to
+
+    USER {
+        int id PK
+        string email
+        string password
+        string role
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    PRODUCT {
+        int id PK
+        string name
+        string description
+        int price
+        int stock
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    TOPPING {
+        int id PK
+        string name
+        int price
+    }
+
+    ORDER {
+        int id PK
+        int userId FK
+        string status
+        int subtotal
+        int discount
+        string promoCode
+        int total
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    ORDER_ITEM {
+        int id PK
+        int orderId FK
+        int productId FK
+        int quantity
+        int unitPrice
+        string size
+    }
+
+    ORDER_ITEM_TOPPING {
+        int orderItemId PK, FK
+        int toppingId PK, FK
+        int quantity
+        int price
+    }
+
+    PROMOTION {
+        int id PK
+        string code
+        string type
+        int value
+        int minOrder
+        datetime expiresAt
+        int usageCount
+    }
