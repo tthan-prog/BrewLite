@@ -1,60 +1,30 @@
-"use client";
-
-import { useEffect, useState } from "react";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
-
-type Health = { status: string; service: string };
-type State =
-  | { kind: "loading" }
-  | { kind: "ok"; data: Health }
-  | { kind: "error"; message: string };
+import Link from "next/link";
 
 export default function Home() {
-  const [state, setState] = useState<State>({ kind: "loading" });
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch(`${API_URL}/health`, { signal: controller.signal })
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<Health>;
-      })
-      .then((data) => setState({ kind: "ok", data }))
-      .catch((err: unknown) => {
-        if (controller.signal.aborted) return;
-        setState({
-          kind: "error",
-          message: err instanceof Error ? err.message : "Lỗi không xác định",
-        });
-      });
-    return () => controller.abort();
-  }, []);
-
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-24 text-center">
-      <h1 className="text-4xl font-semibold tracking-tight">BrewLite</h1>
-      <p className="text-lg text-zinc-600 dark:text-zinc-400">
-        Hello BrewLite! Đặt cà phê không dùng tiền mặt.
-      </p>
-
-      <section
-        aria-live="polite"
-        className="rounded-lg border border-zinc-300 px-5 py-4 text-sm dark:border-zinc-700"
-      >
-        <p className="font-medium">Trạng thái backend</p>
-        {state.kind === "loading" && <p>Đang kiểm tra...</p>}
-        {state.kind === "ok" && (
-          <p className="text-green-700 dark:text-green-400">
-            Kết nối được ({state.data.service}: {state.data.status})
-          </p>
-        )}
-        {state.kind === "error" && (
-          <p className="text-red-700 dark:text-red-400">
-            Không kết nối được ({state.message}). Kiểm tra backend đã chạy ở{" "}
-            {API_URL} chưa.
-          </p>
-        )}
+    <main>
+      <section className="container hero">
+        <div>
+          <span className="eyebrow">Cà phê ngon, ngày thêm vui</span>
+          <h1>Một chút cà phê.<br /><span>Một ngày tuyệt vời.</span></h1>
+          <p className="hero-copy">BrewLite giúp bạn đặt món yêu thích nhanh chóng, quản lý đơn hàng rõ ràng và dành nhiều thời gian hơn cho điều bạn thích.</p>
+          <div className="hero-actions">
+            <Link href="/register" className="btn btn-primary">Bắt đầu ngay</Link>
+            <Link href="/orders/history" className="btn btn-outline">Theo dõi đơn hàng</Link>
+          </div>
+          <div className="health-box"><span className="health-dot" /> API backend có thể được kiểm tra khi backend đang chạy tại cổng 3001.</div>
+        </div>
+        <div className="hero-art" aria-label="Minh họa cốc cà phê BrewLite" role="img">
+          <span className="art-leaf" /><span className="art-bean bean-one" /><span className="art-bean bean-two" /><span className="cup-handle" /><span className="cup" />
+        </div>
+      </section>
+      <section className="container section" id="features">
+        <div className="section-head"><div><h2>Đơn giản từ ngụm đầu tiên</h2><p>Những chức năng nền tảng đang được phát triển cho BrewLite.</p></div></div>
+        <div className="feature-grid">
+          <article className="feature-card"><h3>Tài khoản của bạn</h3><p>Đăng ký và đăng nhập để chuẩn bị cho quy trình đặt hàng cá nhân.</p><Link className="text-link" href="/register">Tạo tài khoản</Link></article>
+          <article className="feature-card"><h3>Xác nhận đơn hàng</h3><p>Xem mã đơn và trạng thái đơn sau khi backend hoàn tất API đặt hàng.</p><Link className="text-link" href="/orders/confirmation">Xem trang xác nhận</Link></article>
+          <article className="feature-card"><h3>Lịch sử đơn hàng</h3><p>Tra cứu đơn đã đặt qua API được bảo vệ của tài khoản.</p><Link className="text-link" href="/orders/history">Mở lịch sử đơn</Link></article>
+        </div>
       </section>
     </main>
   );

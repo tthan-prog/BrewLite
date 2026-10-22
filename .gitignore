@@ -20,3 +20,9 @@ coverage/
 # Nhật ký
 *.log
 npm-debug.log*
+
+# Cong cu AI (khong dua len Git)
+backend/.agents/
+backend/.claude/
+backend/.windsurf/
+backend/skills-lock.json

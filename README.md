@@ -162,16 +162,28 @@ nvm use            # (nếu dùng nvm) chọn đúng phiên bản Node trong .nv
 
 ### 6.2. Cách 1 – Chạy toàn bộ bằng Docker Compose
 
-`[Chưa kiểm chứng]` (file đã viết và kiểm tra cú pháp, chưa build image thật)
+`[Đã chạy thử]` trên Windows (Docker Desktop + WSL 2): build thành công, 2 migration tự áp dụng, backend và frontend khởi động, seed chạy được.
 
 ```bash
 cp .env.example .env          # Windows PowerShell: Copy-Item .env.example .env
 docker compose up --build
 ```
 
+Khi backend khởi động, container tự chạy `prisma migrate deploy` (tạo bảng). Dữ liệu mẫu **không** tự nạp. Mở terminal thứ hai và nạp **một lần**:
+
+```bash
+docker compose exec backend npx prisma db seed --config prisma7.config.ts
+```
+
+> Cảnh báo: `prisma/seed.ts` bắt đầu bằng `deleteMany()` trên mọi bảng. Chạy lại seed sẽ **xóa sạch** dữ liệu hiện có (kể cả đơn hàng). Chỉ chạy khi cần đặt lại về dữ liệu gốc.
+
+Dữ liệu mẫu: 2 tài khoản (`customer@brewlite.com` và `staff@brewlite.com`; mật khẩu mẫu `password123`, đã băm bcrypt, chỉ dùng để phát triển), 12 sản phẩm và 4 topping khớp với giao diện, 2 mã khuyến mãi (`WELCOME10` giảm 10% cho đơn từ 50.000đ, `SAVE20K` giảm 20.000đ cho đơn từ 100.000đ).
+
+> Nếu bạn đã chạy bản cũ: sau khi `docker compose up --build` (tự áp dụng migration mới), hãy chạy lại seed một lần để có sản phẩm và tài khoản mới.
+
 Sau khi chạy xong:
 
-- Frontend: http://localhost:3000
+- Frontend: http://localhost:3000 (thực đơn ở `/menu`)
 - Backend: http://localhost:3001 (thử `http://localhost:3001/health`)
 - PostgreSQL: `localhost:5432`
 
@@ -181,6 +193,8 @@ Dừng hệ thống:
 docker compose down           # giữ lại dữ liệu
 docker compose down -v        # xóa cả dữ liệu CSDL
 ```
+
+Prisma 7: client được sinh vào `backend/src/generated/prisma` (thư mục này nằm trong `.gitignore`); `backend/Dockerfile` tự chạy `prisma generate` khi build. Tệp cấu hình Prisma tên `prisma7.config.ts` nên mọi lệnh Prisma cần thêm `--config prisma7.config.ts`.
 
 ### 6.3. Cách 2 – Chạy từng phần để phát triển
 
@@ -208,7 +222,7 @@ npm run dev
 
 Mở http://localhost:3000. Trang hiển thị "Hello BrewLite!" và trạng thái kết nối backend.
 
-> Khi có PostgreSQL (từ Task 2): chạy `docker compose up -d db` rồi cấu hình `DATABASE_URL` trong `backend/.env`.
+> Backend đã dùng PostgreSQL (Prisma). Trước khi `npm run start:dev`: chạy `docker compose up -d db`, đặt `DATABASE_URL` trong `backend/.env` (trỏ `localhost:5432`), rồi trong `backend` chạy lần lượt `npx prisma generate --config prisma7.config.ts`, `npx prisma migrate deploy --config prisma7.config.ts` và (một lần) `npx prisma db seed --config prisma7.config.ts`.
 
 ---
 
@@ -257,35 +271,44 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ### 8.1. API
 
-| Method | Endpoint | Chức năng | Task | Trạng thái |
-|---|---|---|---|---|
-| GET | `/` | "Hello BrewLite!" | 1 | Xong |
-| GET | `/health` | Kiểm tra backend sống | 1 | Xong |
-| GET | `/products` | Danh sách sản phẩm (menu) | 2 | Chưa làm |
-| GET | `/products/:id` | Chi tiết sản phẩm | 2 | Chưa làm |
-| POST | `/auth/register` | Đăng ký | 7 | Chưa làm |
-| POST | `/auth/login` | Đăng nhập, trả JWT | 7 | Chưa làm |
-| POST | `/orders` | Tạo đơn (PENDING) | 6 | Chưa làm |
-| POST | `/payments` | Thanh toán (idempotent, header `Idempotency-Key`) | 8, 10 | Chưa làm |
-| GET | `/orders/me` | Lịch sử đơn của người dùng | 9 | Chưa làm |
-| PATCH | `/orders/:id/status` | Cập nhật trạng thái đơn, chỉ role STAFF (để demo và test) | 10 | Chưa làm |
+Mọi route (trừ `/`, `/health`, `/products*`, `/toppings`, `/auth/register`, `/auth/login`) cần header `Authorization: Bearer <JWT>`. Cập nhật 23/10/2026; các test tích hợp trong `backend/test/assign1.e2e-spec.ts` kiểm tra từng dòng dưới đây trên PostgreSQL thật.
 
-> `GET /health` và `PATCH /orders/:id/status` là bổ sung của nhóm (đề không nêu).
+| Method | Endpoint | Chức năng | Quyền | Task |
+|---|---|---|---|---|
+| GET | `/` | "Hello BrewLite!" | công khai | 1 |
+| GET | `/health` | Kiểm tra backend sống | công khai | 1 |
+| GET | `/products`, `/products/:id` | Danh sách / chi tiết sản phẩm (id, name, price, category, imageUrl, stock) | công khai | 2 |
+| GET | `/toppings` | Danh sách topping | công khai | 2, 4 |
+| POST | `/auth/register` | Đăng ký (bcrypt; luôn tạo CUSTOMER); nhận `email`, `password`, `name` (tùy chọn) | công khai | 7 |
+| POST | `/auth/login` | Đăng nhập, trả `accessToken` (JWT) | công khai | 7 |
+| GET | `/auth/me` | Thông tin người dùng hiện tại | đăng nhập | 7 |
+| POST | `/orders` | Tạo đơn PENDING; bắt buộc header `Idempotency-Key`; giá theo size S/M/L (+0/+5.000/+10.000đ) và topping; trừ kho có điều kiện; mã khuyến mãi; `userId` lấy từ JWT | đăng nhập | 6, 10 |
+| GET | `/orders/me` | Lịch sử đơn của người dùng | đăng nhập | 9 |
+| GET | `/orders/:id` | Chi tiết đơn (chủ đơn hoặc STAFF) | đăng nhập | 9 |
+| GET | `/orders` | Tất cả đơn | STAFF | 6 |
+| POST | `/payments` | Thanh toán mô phỏng (`method`: `WALLET` hoặc `CARD`; `simulate: "FAIL"` để ép lỗi khi demo); idempotent theo `Idempotency-Key`; PAID cộng điểm, lỗi thì PAYMENT_FAILED | đăng nhập | 8, 10 |
+| PATCH | `/orders/:id/status` | STAFF chuyển PREPARING, READY, COMPLETED, CANCELLED (hủy hoàn kho) | STAFF | 10 |
+
+> `GET /health`, `GET /toppings`, `GET /auth/me`, `GET /orders/:id` và `PATCH /orders/:id/status` là bổ sung của nhóm (đề không nêu).
 
 ### 8.2. Tiến độ 10 task
 
-| # | Task | Trạng thái |
-|---|---|---|
-| 1 | Khởi tạo dự án và cấu trúc | Xong (đã build, test, chạy thử) |
-| 2 | API danh sách sản phẩm | Chưa làm |
-| 3 | Trang Menu | Chưa làm |
-| 4 | Chi tiết và tùy chọn sản phẩm | Chưa làm |
-| 5 | Giỏ hàng | Chưa làm |
-| 6 | API tạo đơn hàng | Chưa làm |
-| 7 | Đăng ký / đăng nhập (JWT) | Chưa làm |
-| 8 | Thanh toán không tiền mặt | Chưa làm |
-| 9 | Xác nhận, lịch sử đơn và bàn giao | Chưa làm |
-| 10 | Nghiệp vụ backend nâng cao | Chưa làm |
+"Xong" nghĩa là chức năng chạy đầu-cuối (đã chạy thử bằng trình duyệt thật và test tích hợp). Task chỉ được tính điểm khi **một thành viên khác nghiệm thu** theo Definition of Done, nên cột cuối ghi rõ.
+
+| # | Task | Trạng thái | Nghiệm thu chéo |
+|---|---|---|---|
+| 1 | Khởi tạo dự án và cấu trúc | Xong | Chưa |
+| 2 | API danh sách sản phẩm | Xong (`/products`, seed 12 sản phẩm + 4 topping) | Chưa |
+| 3 | Trang Menu | Xong (gọi API; có loading, lỗi, rỗng) | Chưa |
+| 4 | Chi tiết và tùy chọn sản phẩm | Xong (size, topping; giá do server tính lại) | Chưa |
+| 5 | Giỏ hàng | Xong (thêm, sửa số lượng, xóa, tổng tiền, badge) | Chưa |
+| 6 | API tạo đơn hàng | Xong (JWT, class-validator, lưu PENDING) | Chưa |
+| 7 | Đăng ký / đăng nhập (JWT) | Xong (bcrypt, JWT, guard, trang `/login`, `/register`) | Chưa |
+| 8 | Thanh toán không tiền mặt | Xong (Ví/Thẻ mô phỏng, PAID/PAYMENT_FAILED, giữ giỏ khi lỗi) | Chưa |
+| 9 | Xác nhận, lịch sử đơn và bàn giao | Xong (`/orders/me`, trang xác nhận, Docker, README) | Chưa |
+| 10 | Nghiệp vụ backend nâng cao | Xong (state machine, idempotent, tồn kho đồng thời, khuyến mãi, điểm thưởng; test a, b, c) | Chưa |
+
+Giới hạn đã biết: thanh toán chỉ mô phỏng; không có giao diện barista (STAFF thao tác qua API); các trường đường/đá trong giỏ chỉ hiển thị, chưa lưu vào đơn.
 
 Cập nhật bảng này khi hoàn thành từng task (một phần của Definition of Done).
 
@@ -327,9 +350,15 @@ npm run lint          # ESLint
 npm run build         # build production
 ```
 
-Hiện có: 2 unit test và 2 e2e test cho `/` và `/health`.
+Test tích hợp (`test:e2e`) chạy trên PostgreSQL thật: cần đã migrate và seed, cùng biến `DATABASE_URL` và `JWT_SECRET` (ví dụ `docker compose up -d db`, rồi `npx prisma migrate deploy --config prisma7.config.ts` và `npx prisma db seed --config prisma7.config.ts` trong `backend/`). Các test tự tạo dữ liệu riêng nên không làm hỏng dữ liệu mẫu, nhưng **không** nên chạy trên CSDL có dữ liệu thật.
 
-**Bắt buộc theo đề (Task 10):** test chứng minh (a) chặn được chuyển trạng thái sai; (b) gửi 2 lần cùng `Idempotency-Key` chỉ tạo 1 đơn; (c) đặt đồng thời không vượt tồn kho.
+Hiện có: 22 unit test (gồm máy trạng thái đơn hàng) và 32 test tích hợp.
+
+**Bắt buộc theo đề (Task 10), nơi nằm các test:**
+
+- (a) chặn chuyển trạng thái sai: `src/orders/order-state.spec.ts` (duyệt toàn bộ cặp trạng thái) và nhóm "Task 8 + 10a" trong `test/assign1.e2e-spec.ts`.
+- (b) gửi 2 lần (và 10 lần song song) cùng `Idempotency-Key` chỉ tạo 1 đơn: nhóm "Task 10b".
+- (c) 20 yêu cầu đặt song song khi kho chỉ còn 5 thì đúng 5 đơn thành công, kho về 0: nhóm "Task 10c".
 
 ---
 
