@@ -1,6 +1,6 @@
 # Triển khai và rollback (Assignment 2 – Task 3.2 và 5.3–5.4)
 
-> **Trạng thái:** quy trình và pipeline đã viết (ADR-007: Render). **Chưa deploy thật**; các ô `[điền]` chỉ được điền bằng thông tin thật sau khi triển khai. Mục nào chưa chạy thử ghi **[Chưa kiểm chứng]**.
+> **Trạng thái (23/10/2026):** đã triển khai thật lên Render (ADR-007). Pipeline CD chạy xanh một lần đầy đủ (quality, build, push GHCR, deploy hook, smoke test) từ nhánh `fix/cd-config-check`. Mục nào chưa chạy thử ghi **[Chưa kiểm chứng]**.
 
 ## 1. Ba môi trường
 
@@ -14,11 +14,17 @@
 
 | Mục | Giá trị |
 |---|---|
-| URL frontend (HTTPS) | [điền] |
-| URL API | [điền] |
-| Health check | [điền URL]/health |
-| Nền tảng | Render |
-| Phiên bản hiện tại (tag) | [điền] |
+| URL frontend (HTTPS) | https://brewlite-web.onrender.com |
+| URL API | https://brewlite-api.onrender.com |
+| Health check | https://brewlite-api.onrender.com/health |
+| Nền tảng | Render (gói Free, region Singapore) |
+| Registry | GitHub Container Registry (`ghcr.io/tthan-prog/brewlite-api`, `brewlite-web`) |
+| Phiên bản hiện tại (tag) | [điền tag phát hành sau khi gắn, ví dụ v0.1.1] |
+| Database | Render PostgreSQL 16 (Free); chỉ truy cập qua Internal Database URL, inbound IP rules đã chặn toàn bộ truy cập từ Internet |
+
+**Giới hạn của gói Free (đã thấy trên bảng điều khiển Render ngày 23/10/2026):**
+- Web Service tự tắt khi không có truy cập; request đầu tiên sau đó có thể chậm khoảng 50 giây trở lên. Trước khi demo hoặc chấm bài, mở URL web một lần để đánh thức.
+- Database Free hết hạn ngày **22/11/2026** và bị xóa nếu không nâng cấp; không có sao lưu.
 
 ## 3. Biến môi trường và secret
 
@@ -34,7 +40,7 @@
 | `PRODUCTION_WEB_URL` | GitHub Variable | Dùng cho smoke test |
 | `RENDER_API_DEPLOY_HOOK`, `RENDER_WEB_DEPLOY_HOOK` | GitHub **Secrets** | Deploy Hook URL của từng service (Settings của service trên Render); là bí mật, không in ra log |
 
-## 4. Thiết lập lần đầu (làm một lần) [Chưa kiểm chứng]
+## 4. Thiết lập lần đầu (làm một lần) – đã làm thật ngày 23/10/2026
 
 1. **Đẩy repo lên GitHub** và để hai package GHCR là Public sau lần đẩy image đầu (Packages → brewlite-api/web → Package settings → Change visibility → Public). Image public thì Render không cần credential.
 2. **Tạo PostgreSQL trên Render** (New → PostgreSQL, gói Free). Chép **Internal Database URL**.
@@ -45,6 +51,13 @@
 5. **Lấy Deploy Hook** của từng service (Settings → Deploy Hook) và lưu vào GitHub Secrets như mục 3. Lưu URL API/Web vào GitHub Variables.
 6. **Chạy lại CD** (đẩy tag mới, hoặc Actions → CD → Run workflow). Pipeline sẽ build, đẩy image, gọi hook, rồi smoke test.
 7. Mở URL web, đăng nhập tài khoản mẫu `customer@brewlite.com` / `password123` (nếu đã bật `SEED_IF_EMPTY=true`) và chụp ảnh làm bằng chứng. **Đổi hoặc xóa tài khoản mẫu trước khi để lâu trên production** vì mật khẩu mẫu công khai trong README.
+
+**Những điểm đã vấp khi làm thật (để người sau tránh):**
+- GitHub **Variables** `PRODUCTION_API_URL`, `PRODUCTION_WEB_URL` phải tạo riêng từng biến, giá trị chỉ là một URL (không có tên biến, dấu `=`, hay `/` cuối). Nếu sai, smoke test lỗi `curl: (3) URL rejected`. Bước "Kiểm tra cấu hình" trong `cd.yml` in ra giá trị để phát hiện nhanh.
+- Biến môi trường của API phải nhập **trước** lần deploy đầu, nếu không container báo `datasource.url property is required` (thiếu `DATABASE_URL`) và khởi động lại liên tục.
+- Mặc định Render cho phép database nhận kết nối từ mọi IP (`0.0.0.0/0`); đã xóa rule này (Block All Inbound IPs) để database không public.
+- Chạy CD từ nhánh có dấu `/` (ví dụ `fix/abc`) từng làm hỏng tag Docker; `cd.yml` hiện đã đổi `/` thành `-`.
+- Package GHCR phải để Public để Render kéo image không cần credential.
 
 ## 5. Pipeline CD
 
