@@ -1,0 +1,66 @@
+@startuml sequence-checkout
+title UC-01 Đặt và thanh toán đơn hàng
+skinparam shadowing false
+autonumber
+
+actor Customer
+participant "Next.js UI" as UI
+participant "NestJS API" as API
+database "PostgreSQL" as DB
+participant "Payment Service\n(mô phỏng)" as PAY
+
+== Đặt đơn ==
+Customer -> UI : Bấm "Đặt đơn"
+UI -> API : POST /orders (JWT, danh sách món)
+API -> API : Kiểm tra JWT và validate dữ liệu
+alt JWT sai hoặc hết hạn
+  API --> UI : 401 Unauthorized
+  UI --> Customer : Yêu cầu đăng nhập (giữ giỏ hàng)
+else Dữ liệu hợp lệ
+  API -> DB : Tìm IdempotencyRecord (userId, Idempotency-Key)
+  alt khóa đã dùng và cùng nội dung
+    DB --> API : đơn đã tạo trước đó
+    API --> UI : trả lại đơn cũ (không tạo mới)
+  else khóa đã dùng nhưng nội dung khác
+    API --> UI : 409 Conflict
+  else khóa mới
+  API -> DB : BEGIN
+  loop mỗi món trong đơn
+    API -> DB : UPDATE product SET stock = stock - n\nWHERE id = ? AND stock >= n
+    DB --> API : số dòng cập nhật
+  end
+  alt có món hết hàng (0 dòng được cập nhật)
+    API -> DB : ROLLBACK
+    API --> UI : 400 Insufficient stock
+    UI --> Customer : Báo món hết hàng
+  else đủ hàng
+    API -> DB : INSERT order (PENDING), order_item, IdempotencyRecord
+    API -> DB : COMMIT
+    API --> UI : 201 {orderId, tổng tiền}
+  end
+  end
+end
+
+== Thanh toán ==
+Customer -> UI : Chọn Ví/Thẻ và xác nhận
+UI -> API : POST /payments (JWT, orderId, Idempotency-Key)
+API -> DB : Tìm payment theo Idempotency-Key
+alt khóa đã dùng (gửi lại yêu cầu)
+  DB --> API : payment đã có
+  API --> UI : Trả kết quả cũ (không thanh toán lại)
+else khóa mới
+  API -> DB : BEGIN (kiểm tra đơn của mình, trạng thái PENDING hoặc PAYMENT_FAILED)
+  API -> PAY : charge(orderId, số tiền, phương thức) [mô phỏng trong PaymentsService]
+  alt thanh toán thành công
+    PAY --> API : SUCCESS
+    API -> DB : INSERT payment SUCCESS, Order -> PAID, cộng điểm (User.points + LoyaltyTransaction EARN), COMMIT
+    API --> UI : 200 {payment, order: PAID}
+    UI --> Customer : Hiển thị xác nhận đơn
+  else thanh toán thất bại
+    PAY --> API : FAILED
+    API -> DB : INSERT payment FAILED, Order -> PAYMENT_FAILED, COMMIT
+    API --> UI : 200 {payment: FAILED, order: PAYMENT_FAILED}
+    UI --> Customer : Báo lỗi, cho thử lại với Idempotency-Key mới (PAYMENT_FAILED -> PENDING -> PAID)
+  end
+end
+@enduml

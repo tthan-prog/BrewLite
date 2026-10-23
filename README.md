@@ -14,6 +14,7 @@ Bài tập lớn môn **Công nghệ Phần mềm**, Trường Đại học Sài
 | Nghiệm thu chéo (điều kiện tính điểm) | **Đã nghiệm thu, cả 10 task đạt DoD** (xác nhận 23/10/2026, xem `docs/scrum/dod-nghiem-thu.md`) |
 | Bằng chứng Scrum | Product Backlog, 3 Sprint Backlog, Burndown, biên bản (`docs/scrum/`) |
 | Báo cáo | `docs/report/BrewLite_BaoCao.docx`; còn chèn ảnh và điền MSSV |
+| Assignment 2 (Requirements to Deployment) | Đã có SRS, use-case, sơ đồ, ADR, ma trận truy vết, CI/CD; **chưa deploy production** (xem [Mục 15](#15-assignment-2-từ-yêu-cầu-đến-triển-khai)) |
 | Sprint 3 Review và Retrospective | Dự kiến 25/10/2026; đã soạn bản nháp biên bản |
 
 Chi tiết từng task ở [Mục 8](#8-api-và-tiến-độ-task).
@@ -36,6 +37,7 @@ Chi tiết từng task ở [Mục 8](#8-api-và-tiến-độ-task).
 12. [Tài liệu Scrum và báo cáo](#12-tài-liệu-scrum-và-báo-cáo)
 13. [Xử lý sự cố thường gặp](#13-xử-lý-sự-cố-thường-gặp)
 14. [Thành viên nhóm](#14-thành-viên-nhóm)
+15. [Assignment 2: từ yêu cầu đến triển khai](#15-assignment-2-từ-yêu-cầu-đến-triển-khai)
 
 ---
 
@@ -114,28 +116,30 @@ Phạm vi chạy: bằng docker-compose trên máy nhóm hoặc máy giảng vi�
 
 ```
 brewlite/
-├── backend/                       # NestJS
-│   ├── src/
-│   │   ├── auth/                  # đăng ký, đăng nhập, JWT, guard, phân quyền
-│   │   ├── products/              # /products, /toppings
-│   │   ├── orders/                # tạo đơn, state machine, lịch sử, đổi trạng thái
-│   │   ├── payments/              # thanh toán mô phỏng
-│   │   ├── prisma/                # PrismaService
-│   │   ├── app.setup.ts, main.ts, app.module.ts
-│   │   └── generated/prisma/      # Prisma client (sinh tự động, không commit)
-│   ├── prisma/                    # schema.prisma, migrations/, seed.ts
-│   ├── test/                      # e2e: assign1.e2e-spec.ts, app.e2e-spec.ts
-│   ├── prisma7.config.ts          # cấu hình Prisma 7
-│   ├── Dockerfile
-│   └── package.json
-├── frontend/                      # Next.js (App Router)
-│   └── src/app/                   # menu, login, register, orders/confirmation, orders/history
+├── apps/
+│   ├── api/                       # NestJS (backend)
+│   │   ├── src/                   # auth, products, orders, payments, prisma
+│   │   ├── prisma/                # schema.prisma, migrations/, seed.ts
+│   │   ├── scripts/               # seed-if-empty.mjs (seed an toàn khi deploy)
+│   │   ├── test/                  # e2e: assign1.e2e-spec.ts, app.e2e-spec.ts
+│   │   ├── prisma7.config.ts
+│   │   └── Dockerfile
+│   └── web/                       # Next.js (frontend)
+│       └── src/app/               # menu, login, register, orders/confirmation, orders/history
 ├── docs/
-│   ├── team-agreement.md          # thỏa thuận nhóm
-│   ├── message-to-lecturer.md     # bản nháp tin nhắn hỏi giảng viên
-│   ├── scrum/                     # backlog, burndown, minutes/
+│   ├── requirements/              # context-and-scope, srs, use-case-checkout (Assignment 2, Task 1)
+│   ├── diagrams/                  # activity, sequence, class, use-case (.puml + .svg/.png) (Task 2)
+│   ├── architecture/              # architecture.md, adr/, deployment-diagram (Task 3)
+│   ├── traceability-matrix.md     # ma trận truy vết
+│   ├── deployment.md              # triển khai, rollback
+│   ├── scrum/                     # backlog, burndown, biên bản, quy trình DoD
+│   ├── progress/                  # bảng tiến độ
 │   ├── design/                    # ERD
-│   └── report/                    # báo cáo (BrewLite_BaoCao.docx)
+│   ├── report/                    # báo cáo (BrewLite_BaoCao.docx)
+│   ├── team-agreement.md
+│   └── message-to-lecturer.md
+├── tests/                         # (Assignment 2) integration/E2E bổ sung nếu có
+├── .github/workflows/             # ci.yml, cd.yml
 ├── docker-compose.yml
 ├── .env.example
 ├── .nvmrc
@@ -190,7 +194,7 @@ docker compose down           # giữ dữ liệu
 docker compose down -v        # xóa cả dữ liệu CSDL
 ```
 
-Nếu đổi mã nguồn, chạy lại `docker compose up --build` (lệnh `exec` không tự build lại). Prisma 7 sinh client vào `backend/src/generated/prisma`; `backend/Dockerfile` tự chạy `prisma generate` khi build. Mọi lệnh Prisma cần thêm `--config prisma7.config.ts`.
+Nếu đổi mã nguồn, chạy lại `docker compose up --build` (lệnh `exec` không tự build lại). Prisma 7 sinh client vào `apps/api/src/generated/prisma`; `apps/api/Dockerfile` tự chạy `prisma generate` khi build. Mọi lệnh Prisma cần thêm `--config prisma7.config.ts`.
 
 ### 6.3. Cách 2: chạy từng phần để phát triển
 
@@ -198,7 +202,7 @@ Nếu đổi mã nguồn, chạy lại `docker compose up --build` (lệnh `exec
 
 ```bash
 docker compose up -d db
-cd backend
+cd apps/api
 cp .env.example .env          # kiểm tra DATABASE_URL trỏ localhost:5432
 npm install
 npx prisma generate --config prisma7.config.ts
@@ -212,7 +216,7 @@ Kiểm tra: http://localhost:3001/health trả `{"status":"ok","service":"brewli
 **Frontend (terminal 2):**
 
 ```bash
-cd frontend
+cd apps/web
 cp .env.example .env.local
 npm install
 npm run dev
@@ -235,7 +239,7 @@ POSTGRES_DB=brewlite
 JWT_SECRET=change_me_to_a_long_random_string
 ```
 
-**`backend/.env.example`:**
+**`apps/api/.env.example`:**
 
 ```env
 PORT=3001
@@ -245,7 +249,7 @@ JWT_SECRET=change_me_to_a_long_random_string
 JWT_EXPIRES_IN=1d
 ```
 
-**`frontend/.env.example`:**
+**`apps/web/.env.example`:**
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
@@ -265,7 +269,7 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ### 8.1. API
 
-Mọi route (trừ `/`, `/health`, `/products*`, `/toppings`, `/auth/register`, `/auth/login`) cần header `Authorization: Bearer <JWT>`. Test tích hợp `backend/test/assign1.e2e-spec.ts` kiểm tra từng dòng dưới đây.
+Mọi route (trừ `/`, `/health`, `/products*`, `/toppings`, `/auth/register`, `/auth/login`) cần header `Authorization: Bearer <JWT>`. Test tích hợp `apps/api/test/assign1.e2e-spec.ts` kiểm tra từng dòng dưới đây.
 
 | Method | Endpoint | Chức năng | Quyền | Task |
 |---|---|---|---|---|
@@ -323,7 +327,7 @@ Luồng thành công: `PENDING → PAID → PREPARING → READY → COMPLETED`.
 | READY | COMPLETED |
 | COMPLETED, CANCELLED | (kết thúc) |
 
-Mọi chuyển tiếp khác bị chặn (lỗi 4xx). Mã nguồn: `backend/src/orders/order-state.ts`.
+Mọi chuyển tiếp khác bị chặn (lỗi 4xx). Mã nguồn: `apps/api/src/orders/order-state.ts`.
 
 ### 9.2. Quy tắc nghiệp vụ
 
@@ -339,7 +343,7 @@ Mọi chuyển tiếp khác bị chặn (lỗi 4xx). Mã nguồn: `backend/src/o
 
 ## 10. Kiểm thử và chất lượng code
 
-**Backend (trong `backend/`):**
+**Backend (trong `apps/api/`):**
 
 ```bash
 npm test              # unit test (Vitest)
@@ -349,7 +353,7 @@ npm run format        # Prettier
 npm run build         # biên dịch
 ```
 
-**Frontend (trong `frontend/`):**
+**Frontend (trong `apps/web/`):**
 
 ```bash
 npm run lint
@@ -423,7 +427,7 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 | `npm install` ở backend báo `Cannot read properties of null (reading 'edgesOut')` | Lỗi npm 10.x với peer dependency | Dùng `.npmrc` có `legacy-peer-deps=true`; nếu vẫn lỗi, cập nhật npm |
 | Cảnh báo `EBADENGINE` | Node thấp hơn yêu cầu | Dùng Node 24.15+ (`nvm use`) |
 | Frontend báo "Không kết nối được" | Backend chưa chạy hoặc sai `NEXT_PUBLIC_API_URL` | Chạy backend; kiểm tra http://localhost:3001/health |
-| Lỗi CORS trên trình duyệt | `FRONTEND_ORIGIN` không khớp | Sửa `FRONTEND_ORIGIN` trong `backend/.env` |
+| Lỗi CORS trên trình duyệt | `FRONTEND_ORIGIN` không khớp | Sửa `FRONTEND_ORIGIN` trong `apps/api/.env` |
 | Cổng bị chiếm (EADDRINUSE) | Tiến trình cũ ở 3000 hoặc 3001 | Tắt tiến trình đó hoặc đổi cổng |
 | Đổi `NEXT_PUBLIC_API_URL` không có tác dụng | Biến được gắn lúc build | Build lại (`docker compose up --build`) |
 | Docker chạy chậm hoặc lỗi trên Windows | Chưa bật WSL 2 | Bật WSL 2 trong Docker Desktop |
@@ -443,6 +447,25 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 
 **Giảng viên hướng dẫn:** …………………………………………
 
+
 ---
 
-*README phiên bản 2.0, viết lại ngày 23/10/2026 sau khi hoàn thành code Assignment 1. Cập nhật khi có thay đổi về cài đặt, cách chạy hoặc trạng thái nghiệm thu.*
+## 15. Assignment 2: từ yêu cầu đến triển khai
+
+Dùng chung mã nguồn với Assignment 1. Hạn nộp 27/10/2026. Năm task, mỗi task 2 điểm; task sau chỉ được nghiệm thu khi tạo phẩm của task trước đã có trên Git.
+
+| Task | Nội dung | Tạo phẩm | Trạng thái |
+|---|---|---|---|
+| 1 | Khai thác và đặc tả yêu cầu | `docs/requirements/` (context-and-scope, srs, use-case-checkout) | Có bản đầy đủ, cần E rà |
+| 2 | Mô hình hóa | `docs/diagrams/` (activity, sequence, class, use-case; `.puml` và `.svg`) | Đã vẽ lại khớp code |
+| 3 | Kiến trúc | `docs/architecture/` (architecture.md, 7 ADR, deployment diagram) | Đã chốt Prisma và Render |
+| 4 | Sprint 1 | Cấu trúc `apps/api`, `apps/web`; MVP menu; CI (`ci.yml`) | Code có; cần minh chứng CI chạy trên GitHub (một lần đạt, một lần lỗi) |
+| 5 | Sprint 2, CI/CD, production | `cd.yml`, `docs/deployment.md`, release notes | Pipeline đã viết; **chưa deploy, chưa có URL production** |
+
+Ma trận truy vết: `docs/traceability-matrix.md`. Hướng dẫn triển khai và rollback: `docs/deployment.md`.
+
+Điều kiện chấm cần nhớ: **không có URL production hoạt động lúc chấm thì phần triển khai của Task 5 không được tính.**
+
+---
+
+*README phiên bản 2.1, cập nhật ngày 23/10/2026: cấu trúc `apps/api`, `apps/web` và tài liệu Assignment 2. Cập nhật khi có thay đổi về cài đặt, cách chạy hoặc trạng thái nghiệm thu.*

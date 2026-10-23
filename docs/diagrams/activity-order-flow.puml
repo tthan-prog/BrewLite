@@ -1,0 +1,58 @@
+@startuml activity-order-flow
+title Activity diagram – luồng từ menu đến theo dõi đơn
+skinparam shadowing false
+
+|Khách hàng|
+start
+:Xem menu;
+:Chọn sản phẩm, size, topping;
+:Thêm vào giỏ hàng;
+:Bấm "Đặt đơn";
+
+|Hệ thống|
+if (Đã đăng nhập?) then (chưa)
+  |Khách hàng|
+  :Đăng nhập / đăng ký;
+  |Hệ thống|
+else (rồi)
+endif
+:Kiểm tra dữ liệu giỏ hàng;
+:Mở transaction, kiểm tra tồn kho;
+if (Đủ hàng?) then (hết hàng)
+  :Rollback, không tạo đơn;
+  |Khách hàng|
+  :Nhận thông báo hết hàng;
+  stop
+else (đủ)
+endif
+|Hệ thống|
+:Trừ tồn kho, tạo đơn PENDING;
+
+|Khách hàng|
+:Chọn Ví/Thẻ và xác nhận thanh toán;
+
+|Hệ thống|
+:Kiểm tra Idempotency-Key;
+:Gọi Payment Service;
+if (Thanh toán thành công?) then (thất bại)
+  :Đơn -> PAYMENT_FAILED;
+  |Khách hàng|
+  :Nhận lỗi, giữ giỏ hàng, có thể thử lại;
+  stop
+else (thành công)
+endif
+|Hệ thống|
+:Đơn -> PAID;
+:Cộng điểm thưởng (ghi LoyaltyTransaction EARN);
+
+|Khách hàng|
+:Xem xác nhận đơn;
+:Theo dõi trạng thái đơn;
+
+|Hệ thống|
+:Nhân viên cập nhật: PREPARING -> READY -> COMPLETED;
+
+|Khách hàng|
+:Nhận đồ uống;
+stop
+@enduml
