@@ -21,6 +21,8 @@ COPY --from=build /app/prisma ./prisma
 # seed.ts import client từ src/generated/prisma nên cần giữ thư mục này trong image.
 COPY --from=build /app/src/generated ./src/generated
 COPY --from=build /app/prisma7.config.ts /app/package.json ./
+COPY --from=build /app/scripts ./scripts
 EXPOSE 3001
-# Áp dụng migration rồi chạy server. KHÔNG seed tự động vì seed.ts xoá sạch dữ liệu.
-CMD ["sh", "-c", "npx prisma migrate deploy --config prisma7.config.ts && node dist/main.js"]
+# Áp dụng migration (chỉ thêm, an toàn khi rollback), tùy chọn seed khi CSDL rỗng, rồi chạy server.
+# Seed thủ công (docker compose exec ... db seed) vẫn xoá sạch dữ liệu; còn SEED_IF_EMPTY=true chỉ chạy khi chưa có sản phẩm.
+CMD ["sh", "-c", "npx prisma migrate deploy --config prisma7.config.ts && if [ \"$SEED_IF_EMPTY\" = \"true\" ]; then node scripts/seed-if-empty.mjs; fi && node dist/main.js"]
