@@ -53,7 +53,7 @@ else khóa mới
   API -> PAY : charge(orderId, số tiền, phương thức) [mô phỏng trong PaymentsService]
   alt thanh toán thành công
     PAY --> API : SUCCESS
-    API -> DB : INSERT payment SUCCESS, Order -> PAID, cộng điểm, COMMIT
+    API -> DB : INSERT payment SUCCESS, Order -> PAID, cộng điểm (User.points + LoyaltyTransaction EARN), COMMIT
     API --> UI : 200 {payment, order: PAID}
     UI --> Customer : Hiển thị xác nhận đơn
   else thanh toán thất bại

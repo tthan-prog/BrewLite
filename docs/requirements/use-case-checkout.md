@@ -11,6 +11,8 @@
 | Trigger | Khách bấm "Đặt đơn" trong giỏ hàng |
 | Mã yêu cầu liên quan | FR-04, FR-05, FR-06, FR-07, FR-08, FR-09, FR-10, FR-13, FR-14, FR-15, NFR-02, NFR-04 |
 
+Sơ đồ use-case của phạm vi UC-01: `docs/diagrams/usecase-checkout.puml` (kết xuất `usecase-checkout.svg`); sơ đồ tổng quát toàn hệ thống: `docs/diagrams/usecase-overview.puml`.
+
 ## Tiền điều kiện
 
 1. Khách đã đăng nhập (có JWT hợp lệ).

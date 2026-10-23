@@ -28,6 +28,6 @@ Customer --> UC_History
 Staff --> UC_Status
 UC_Checkout --> PAY
 UC_Checkout ..> UC_Auth : <<include>>
-UC_Checkout ..> UC_Promo : <<extend>>
-UC_Status ..> UC_Loyalty : <<extend>>
+UC_Promo ..> UC_Checkout : <<extend>>
+UC_Loyalty ..> UC_Checkout : <<extend>>
 @enduml

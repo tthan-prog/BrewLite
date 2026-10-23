@@ -19,6 +19,7 @@ model User {
   orders    Order[]
   idempotencyRecords IdempotencyRecord[]
   payments  Payment[]
+  loyaltyTransactions LoyaltyTransaction[]
 }
 
 model Product {
@@ -55,6 +56,7 @@ model Order {
   items     OrderItem[]
   idempotencyRecord IdempotencyRecord?
   payments  Payment[]
+  loyaltyTransactions LoyaltyTransaction[]
 
   @@index([userId])
 }
@@ -93,6 +95,25 @@ model Promotion {
   minOrder   Int           @default(0)
   expiresAt  DateTime?
   usageCount Int           @default(0)
+}
+
+model LoyaltyTransaction {
+  id        Int         @id @default(autoincrement())
+  userId    Int
+  orderId   Int
+  type      LoyaltyType
+  points    Int
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id])
+  order     Order       @relation(fields: [orderId], references: [id])
+
+  @@unique([orderId, type])
+  @@index([userId])
+}
+
+enum LoyaltyType {
+  EARN
+  REVERSAL
 }
 
 enum Role {

@@ -8,7 +8,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import type { Prisma } from '../generated/prisma/client.js';
-import { OrderStatus } from '../generated/prisma/enums.js';
+import { LoyaltyType, OrderStatus } from '../generated/prisma/enums.js';
 import { assertTransition, pointsForTotal } from './order-state.js';
 
 const STAFF_TARGETS: readonly OrderStatus[] = [
@@ -423,6 +423,14 @@ if (stockUpdate.count !== 1) {
           where: { id: order.userId },
           data: { points: { increment: points } },
         });
+        await tx.loyaltyTransaction.create({
+          data: {
+            userId: order.userId,
+            orderId: order.id,
+            type: LoyaltyType.EARN,
+            points,
+          },
+        });
       }
     }
 
@@ -439,6 +447,14 @@ if (stockUpdate.count !== 1) {
           await tx.user.update({
             where: { id: order.userId },
             data: { points: { decrement: points } },
+          });
+          await tx.loyaltyTransaction.create({
+            data: {
+              userId: order.userId,
+              orderId: order.id,
+              type: LoyaltyType.REVERSAL,
+              points: -points,
+            },
           });
         }
       }

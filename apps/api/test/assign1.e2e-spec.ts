@@ -263,6 +263,9 @@ describe('BrewLite API (e2e, PostgreSQL)', () => {
       expect(res.body.payment.status).toBe('SUCCESS');
       const after = (await prisma.user.findUniqueOrThrow({ where: { id: alice.id } })).points;
       expect(after - before).toBe(5);
+      const tx = await prisma.loyaltyTransaction.findMany({ where: { orderId: order.id } });
+      expect(tx).toHaveLength(1);
+      expect(tx[0]).toMatchObject({ type: 'EARN', points: 5, userId: alice.id });
     });
 
     it('thanh toán lỗi -> PAYMENT_FAILED, thử lại được rồi PAID', async () => {
@@ -339,6 +342,8 @@ describe('BrewLite API (e2e, PostgreSQL)', () => {
       await request(http).patch(`/orders/${order.id}/status`).set(auth(staffToken)).send({ status: 'CANCELLED' }).expect(200);
       const after = (await prisma.user.findUniqueOrThrow({ where: { id: alice.id } })).points;
       expect(after).toBe(before);
+      const tx = await prisma.loyaltyTransaction.findMany({ where: { orderId: order.id }, orderBy: { id: 'asc' } });
+      expect(tx.map((t) => [t.type, t.points])).toEqual([['EARN', 5], ['REVERSAL', -5]]);
     });
   });
 

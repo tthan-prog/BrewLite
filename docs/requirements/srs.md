@@ -20,7 +20,7 @@
 | FR-12 | Lịch sử | Khách xem lịch sử và chi tiết đơn của mình | Must | `GET /orders/me` chỉ trả đơn của người dùng hiện tại; `GET /orders/:id` chỉ chủ đơn hoặc STAFF xem được (người khác nhận 404) |
 | FR-13 | Tồn kho | Đặt đồng thời không làm tồn kho âm; hủy đơn hoàn lại tồn kho | Must | Test chạy N request đồng thời, số đơn thành công ≤ tồn kho |
 | FR-14 | Khuyến mãi | Áp mã khuyến mãi hợp lệ để giảm giá | Should | Mã hợp lệ giảm đúng; mã sai/hết hạn bị từ chối |
-| FR-15 | Điểm thưởng | Cộng điểm khi đơn thanh toán thành công (PAID): 1 điểm / 10.000đ; hủy đơn đã PAID thì trừ lại | Should | `User.points` tăng đúng số điểm khi đơn PAID và giảm lại khi hủy đơn đã PAID |
+| FR-15 | Điểm thưởng | Cộng điểm khi đơn thanh toán thành công (PAID): 1 điểm / 10.000đ; hủy đơn đã PAID thì trừ lại; mỗi lần đổi điểm ghi một giao dịch điểm (`LoyaltyTransaction`) | Should | `User.points` tăng đúng số điểm khi đơn PAID và giảm lại khi hủy đơn đã PAID; có bản ghi `LoyaltyTransaction` loại EARN (và REVERSAL khi hủy) tương ứng |
 | FR-16 | Quản trị | Giao diện quản lý sản phẩm và khuyến mãi | Could | Ngoài MVP |
 | FR-17 | Thanh toán | Kết nối cổng thanh toán thật | Won't | Không thực hiện |
 

@@ -12,7 +12,7 @@ Kiến trúc phân lớp kết hợp mức container của mô hình C4: ngườ
 |---|---|---|---|---|
 | Web (frontend) | Next.js (App Router), mobile-first/PWA | Giao diện: menu, chi tiết, giỏ hàng, thanh toán, đơn | `apps/web` | Có: menu, chi tiết, giỏ hàng, đăng nhập/đăng ký, xác nhận đơn, lịch sử đơn |
 | API (backend) | NestJS, JWT, validation | Nghiệp vụ, xác thực, phân quyền, truy cập DB | `apps/api` | Có: auth, products, orders, payments, `/health` |
-| Cơ sở dữ liệu | PostgreSQL 16 + migration | Lưu người dùng, sản phẩm, đơn, thanh toán, điểm | `docker-compose.yml` (db), thư mục migration trong `apps/api` | Có schema Prisma và migration; seed 12 sản phẩm, 4 topping |
+| Cơ sở dữ liệu | PostgreSQL 16 + migration | Lưu người dùng, sản phẩm, đơn, thanh toán, giao dịch điểm | `docker-compose.yml` (db), thư mục migration trong `apps/api` | Có schema Prisma và migration; seed 12 sản phẩm, 4 topping |
 | Payment Service (mô phỏng) | Module trong NestJS | Giả lập Ví/Thẻ thành công hoặc thất bại | `apps/api/src/payments` | Có (Ví/Thẻ, giả lập lỗi bằng `simulate`) |
 | CI/CD | GitHub Actions + GHCR | Lint, test, build, đóng gói image, deploy, smoke test | `.github/workflows` | Có `ci.yml` và `cd.yml`; chưa chạy thật trên GitHub |
 
@@ -25,7 +25,7 @@ Kiến trúc phân lớp kết hợp mức container của mô hình C4: ngườ
 | `orders` | Tạo đơn trong transaction, máy trạng thái, lịch sử đơn |
 | `payments` | Thanh toán mô phỏng, Idempotency-Key |
 | `prisma` | `PrismaService` truy cập PostgreSQL (adapter pg) |
-| (trong `orders`) | Khuyến mãi (`promoCode`) và điểm thưởng (`User.points`) nằm trong dịch vụ đơn hàng |
+| (trong `orders`) | Khuyến mãi (`promoCode`) và điểm thưởng (`User.points` và lịch sử `LoyaltyTransaction`) nằm trong dịch vụ đơn hàng |
 | `app.controller` | `GET /` và `GET /health` |
 
 ## 4. Cross-cutting
