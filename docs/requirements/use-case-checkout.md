@@ -1,7 +1,5 @@
 # Đặc tả use-case: UC-01 Đặt và thanh toán đơn hàng (Assignment 2 – Task 1.3)
 
-> **Trạng thái: bản nháp để E hoàn thiện.** Đối chiếu với `srs.md` và `docs/diagrams/sequence-checkout.puml`.
-
 | Mục | Nội dung |
 |---|---|
 | Mã | UC-01 |
