@@ -2,7 +2,7 @@
 
 ## 1. Vấn đề nghiệp vụ
 
-Quán cà phê quy mô nhỏ cần để khách đặt món và thanh toán không dùng tiền mặt ngay trên điện thoại, tránh xếp hàng và nhầm đơn. BrewLite là ứng dụng web mobile-first cho phép khách xem menu, chọn size và topping, đặt đơn, thanh toán mô phỏng và theo dõi trạng thái đơn. [điền: bối cảnh cụ thể nhóm chọn]
+Quán cà phê quy mô nhỏ cần để khách đặt món và thanh toán không dùng tiền mặt ngay trên điện thoại, tránh xếp hàng và nhầm đơn. BrewLite là ứng dụng web mobile-first cho phép khách xem menu, chọn size và topping, đặt đơn, thanh toán mô phỏng và theo dõi trạng thái đơn.
 
 ## 2. Stakeholder
 
