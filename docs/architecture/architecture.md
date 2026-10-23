@@ -60,5 +60,5 @@ Mỗi container trong `deployment-diagram.puml` phải khớp một dòng ở b�
 | 003 | JWT và phân quyền theo vai trò | Đã chốt |
 | 004 | Thanh toán mô phỏng và Idempotency-Key | Đã chốt |
 | 005 | Kiểm soát tồn kho bằng cập nhật có điều kiện trong transaction | Đã chốt |
-| 006 | CI/CD bằng GitHub Actions và registry GHCR | Đã chốt (chờ chạy thật) |
-| 007 | Nền tảng triển khai production: Render | Đã chọn mặc định, chờ A xác nhận |
+| 006 | CI/CD bằng GitHub Actions và registry GHCR | Đã chốt |
+| 007 | Nền tảng triển khai production: Render | Đã chọn |

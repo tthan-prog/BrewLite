@@ -2,7 +2,7 @@
 
 - **Trạng thái:** Đã chốt
 - **Ngày:** 20/10/2026
-- **Người quyết định:** Cả nhóm (đề xuất bởi A)
+- **Người quyết định:** Cả nhóm 
 
 ## Bối cảnh
 

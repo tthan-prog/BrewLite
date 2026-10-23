@@ -1,6 +1,6 @@
 # ADR-005: Kiểm soát tồn kho bằng cập nhật có điều kiện trong transaction
 
-- **Trạng thái:** Đã chốt (nhóm tự chọn; đã nêu trong tin nhắn hỏi giảng viên)
+- **Trạng thái:** Đã chốt
 - **Ngày:** 20/10/2026
 
 ## Bối cảnh

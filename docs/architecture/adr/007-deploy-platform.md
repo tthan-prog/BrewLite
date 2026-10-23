@@ -1,7 +1,7 @@
 # ADR-007: Nền tảng triển khai production
 
-- **Trạng thái:** Đã chọn mặc định: **Render** (23/10/2026). A xác nhận hoặc đổi trước khi deploy thật.
-- **Người phụ trách:** A
+- **Trạng thái:** Đã chọn: **Render** (23/10/2026).
+- **Người phụ trách:** Nguyễn Lê Nhựt Thắng
 
 ## Bối cảnh
 

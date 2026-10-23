@@ -4,9 +4,10 @@
 
 - **Thời gian:** 24/10/2026, 20:00 – 21:00
 - **Người ghi biên bản:** Nguyễn Lê Nhựt Thắng
-- **Có mặt:** 
+- **Có mặt:**
+  
 | Ký hiệu | Họ tên | 
-|---|---|---|---|
+|---|---|
 | A | Nguyễn Lê Nhựt Thắng | 
 | B | Hồ Thiên Ngân | 
 | C | Hà Thiên Long | 
@@ -46,7 +47,7 @@
 | Mỗi PR có ít nhất 1 review trước khi merge | B, C, D, E (mỗi người review PR của người khác) | Mỗi PR của Sprint 2 |
 | Tạo PR bằng đường dẫn `compare/main...<nhánh>` để đúng nhánh đích | A | Mỗi PR |
 | Ghi kết quả nghiệm thu chéo vào PR (comment hoặc Approve) | Người nghiệm thu theo bảng Review | 26/10 |
-| Merge PR sớm trong ngày, tránh dồn cuối ngày | B, C, D, E | Daily Scrum 21:00 |
+| Merge PR sớm trong ngày, tránh dồn cuối ngày | B, C, D, E | Daily Scrum 20:00 |
 
 ## Phần 3. Burndown
 

@@ -6,8 +6,9 @@
 - **Thời gian Sprint:** 20/10 – 23/10/2026 (Sprint Review và Retrospective: 24/10/2026)
 - **Người ghi biên bản:** Nguyễn Lê Nhựt Thắng
 - **Có mặt:**
+
 | Ký hiệu | Họ tên | 
-|---|---|---|---|
+|---|---|
 | A | Nguyễn Lê Nhựt Thắng | 
 | B | Hồ Thiên Ngân | 
 | C | Hà Thiên Long | 
@@ -30,7 +31,7 @@ Tạo nền tảng kỹ thuật, tài liệu có kiểm soát phiên bản và m
 ## 3. Quy ước làm việc trong Sprint
 
 - Nhánh `main` được bảo vệ: phải qua PR, check `api` và `web` phải xanh, cần 1 approval, không force-push.
-- Daily Scrum: hằng ngày 21:00, tối đa 15 phút, qua nhóm chat.
+- Daily Scrum: hằng ngày 20:00, tối đa 15 phút, qua nhóm chat.
 - Definition of Done: theo `docs/scrum/dod-nghiem-thu.md`.
 
 ## 4. Phân công và người nghiệm thu chéo
