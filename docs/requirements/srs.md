@@ -1,7 +1,5 @@
 # Đặc tả yêu cầu phần mềm rút gọn – SRS (Assignment 2 – Task 1.2)
 
-> **Trạng thái: bản nháp để E hoàn thiện.** Mã yêu cầu dùng cho `traceability-matrix.md`. Mức ưu tiên theo MoSCoW. Cột "Tiêu chí chấp nhận" phải kiểm chứng được và là cơ sở viết test.
-
 ## 1. Yêu cầu chức năng
 
 | Mã | Nhóm | Yêu cầu | Ưu tiên | Tiêu chí chấp nhận |
