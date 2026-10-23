@@ -6,6 +6,7 @@
 - **Thời gian Sprint:** 20/10 – 23/10/2026 (Sprint Review và Retrospective: 24/10/2026)
 - **Người ghi biên bản:** Nguyễn Lê Nhựt Thắng
 - **Có mặt:**
+
 | Ký hiệu | Họ tên | 
 |---|---|---|---|
 | A | Nguyễn Lê Nhựt Thắng | 
