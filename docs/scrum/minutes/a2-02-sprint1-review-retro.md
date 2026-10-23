@@ -4,7 +4,8 @@
 
 - **Thời gian:** 24/10/2026, 20:00 – 21:00
 - **Người ghi biên bản:** Nguyễn Lê Nhựt Thắng
-- **Có mặt:** 
+- **Có mặt:**
+  
 | Ký hiệu | Họ tên | 
 |---|---|
 | A | Nguyễn Lê Nhựt Thắng | 
