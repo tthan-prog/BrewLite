@@ -4,7 +4,7 @@
 
 Bài tập lớn môn **Công nghệ Phần mềm**, Trường Đại học Sài Gòn, học kỳ I năm học 2026–2027, làm theo quy trình **Agile Scrum**. Hạn nộp: 27/10/2026.
 
-## Trạng thái dự án (cập nhật 23/10/2026)
+## Trạng thái dự án (cập nhật 24/10/2026)
 
 | Hạng mục | Tình trạng |
 |---|---|
@@ -14,7 +14,8 @@ Bài tập lớn môn **Công nghệ Phần mềm**, Trường Đại học Sài
 | Nghiệm thu chéo (điều kiện tính điểm) | **Đã nghiệm thu, cả 10 task đạt DoD** (xác nhận 23/10/2026, xem `docs/scrum/dod-nghiem-thu.md`) |
 | Bằng chứng Scrum | Product Backlog, 3 Sprint Backlog, Burndown, biên bản (`docs/scrum/`) |
 | Báo cáo | `docs/report/BrewLite_BaoCao.docx`; còn chèn ảnh và điền MSSV |
-| Assignment 2 (Requirements to Deployment) | Đã có SRS, use-case, sơ đồ, ADR, ma trận truy vết, CI/CD; **chưa deploy production** (xem [Mục 15](#15-assignment-2-từ-yêu-cầu-đến-triển-khai)) |
+| Assignment 2 (Requirements to Deployment) | Đã có SRS, use-case, sơ đồ, ADR, ma trận truy vết, CI/CD; **đã triển khai production** (xem [Mục 15](#15-assignment-2-từ-yêu-cầu-đến-triển-khai)) |
+| Production (HTTPS) | Web https://brewlite-web.onrender.com/menu; API https://brewlite-api.onrender.com/health; bản hiện tại **v0.1.2** ([Release](https://github.com/tthan-prog/BrewLite/releases/tag/v0.1.2)) |
 | Sprint 3 Review và Retrospective | Dự kiến 25/10/2026; đã soạn bản nháp biên bản |
 
 Chi tiết từng task ở [Mục 8](#8-api-và-tiến-độ-task).
@@ -360,9 +361,19 @@ npm run lint
 npm run build
 ```
 
+**End-to-end bằng trình duyệt (trong `tests/e2e/`, Playwright):**
+
+```bash
+npm ci
+npx playwright install chromium
+npm test              # cần web ở http://localhost:3000, API ở :3001, CSDL đã seed
+```
+
+Bộ test E2E kiểm tra: thực đơn từ API, luồng đăng ký, đăng nhập, giỏ hàng, thanh toán lỗi rồi thử lại thành công, lịch sử đơn, giao diện điện thoại (390 px), các trạng thái loading/rỗng/lỗi và manifest PWA. Mỗi pull request đều chạy bộ test này trong job `e2e-browser` của CI.
+
 Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cùng `DATABASE_URL` và `JWT_SECRET` (ví dụ `docker compose up -d db`, rồi migrate và seed như Mục 6.3). Các test tự tạo dữ liệu riêng nhưng **không** nên chạy trên CSDL có dữ liệu thật.
 
-**Kết quả (23/10/2026, nhánh main):** 22 unit test và 32 test tích hợp đạt; build và lint backend sạch; lint và build frontend đạt.
+**Kết quả (23/10/2026, nhánh main):** 22 unit test và 32 test tích hợp đạt; 7 test E2E Playwright đạt trong CI; build và lint backend sạch; lint và build frontend đạt.
 
 **Ba test bắt buộc của Task 10:**
 
@@ -445,7 +456,7 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 | D | Giản Thiên Lực | | Dev frontend, slide |
 | E | Lê Thuận | | Dev frontend, kiểm thử, Product Owner tạm |
 
-**Giảng viên hướng dẫn:** …………………………………………
+**Giảng viên hướng dẫn:** Từ Lăng Phiêu
 
 
 ---
@@ -459,13 +470,42 @@ Dùng chung mã nguồn với Assignment 1. Hạn nộp 27/10/2026. Năm task, m
 | 1 | Khai thác và đặc tả yêu cầu | `docs/requirements/` (context-and-scope, srs, use-case-checkout) | Có bản đầy đủ, cần E rà |
 | 2 | Mô hình hóa | `docs/diagrams/` (activity, sequence, class, use-case; `.puml` và `.svg`) | Đã vẽ lại khớp code |
 | 3 | Kiến trúc | `docs/architecture/` (architecture.md, 7 ADR, deployment diagram) | Đã chốt Prisma và Render |
-| 4 | Sprint 1 | Cấu trúc `apps/api`, `apps/web`; MVP menu; CI (`ci.yml`) | Code có; cần minh chứng CI chạy trên GitHub (một lần đạt, một lần lỗi) |
-| 5 | Sprint 2, CI/CD, production | `cd.yml`, `docs/deployment.md`, release notes | Pipeline đã viết; **chưa deploy, chưa có URL production** |
+| 4 | Sprint 1 | Cấu trúc `apps/api`, `apps/web`; MVP menu; CI (`ci.yml`) | Đã có; CI chặn merge khi lỗi, có một lần đỏ (run #13) và một lần xanh (run #14), xem `docs/evidence/` |
+| 5 | Sprint 2, CI/CD, production | `cd.yml`, `docs/deployment.md`, `docs/release-notes/` | Đã deploy lên Render (HTTPS); CD chạy từ tag; đã thử rollback; release v0.1.2 |
 
 Ma trận truy vết: `docs/traceability-matrix.md`. Hướng dẫn triển khai và rollback: `docs/deployment.md`.
 
 Điều kiện chấm cần nhớ: **không có URL production hoạt động lúc chấm thì phần triển khai của Task 5 không được tính.**
 
+### 15.1. Production, CI/CD và rollback
+
+| Mục | Giá trị |
+|---|---|
+| Web (HTTPS) | https://brewlite-web.onrender.com/menu |
+| API | https://brewlite-api.onrender.com |
+| Health check | https://brewlite-api.onrender.com/health |
+| Bản phát hành | v0.1.2: [GitHub Releases](https://github.com/tthan-prog/BrewLite/releases) (release notes: `docs/release-notes/`) |
+| Nền tảng | Render gói Free (Singapore); PostgreSQL chỉ truy cập qua mạng nội bộ của Render, không public |
+| Tài khoản mẫu (dữ liệu seed) | `customer@brewlite.com` / `password123` (chỉ để demo) |
+
+> Render gói Free tự tắt khi không có truy cập, lần mở đầu có thể chờ khoảng 50 giây. Database Free hết hạn ngày 22/11/2026 và không có sao lưu.
+
+**CI** (`.github/workflows/ci.yml`, chạy mỗi pull request): bốn job `api` (lint, unit test, build), `api-e2e` (test tích hợp trên PostgreSQL), `web` (lint, build) và `e2e-browser` (Playwright). Nhánh `main` có quy tắc bảo vệ: phải qua pull request, cần check `api` và `web` đạt và có một lượt Approve mới merge được. Bằng chứng một lần CI đỏ và một lần xanh: `docs/evidence/` (ảnh 16 đến 18).
+
+**Deploy** (`.github/workflows/cd.yml`): đẩy tag phiên bản, ví dụ
+
+```bash
+git checkout main && git pull
+git tag v0.1.3
+git push origin v0.1.3
+```
+
+CD sẽ chạy kiểm tra chất lượng, build image Docker (gắn tag `sha-<7 ký tự commit>` và tên tag), đẩy lên GitHub Container Registry, gọi Deploy Hook của Render cho api và web, rồi chạy smoke test (`/health`, `/products`, `/menu`). Migration cơ sở dữ liệu chạy tự động khi API khởi động (`prisma migrate deploy`), các migration chỉ thêm nên bản cũ vẫn chạy được trên cơ sở dữ liệu mới.
+
+**Rollback:** vào GitHub, Actions, workflow **CD**, **Run workflow**, nhập `image_tag` của bản ổn định trước đó (ví dụ `sha-e445b63` là v0.1.1). Workflow bỏ qua bước build, deploy lại đúng image đó cho cả api và web rồi chạy smoke test. Đã chạy thử ngày 23/10/2026 (từ v0.1.2 về v0.1.1 rồi triển khai lại): xem ảnh 20 đến 25 trong `docs/evidence/`.
+
+Hướng dẫn thiết lập lần đầu, biến môi trường, các lỗi đã gặp: `docs/deployment.md`. Bằng chứng kiểm tra trên production: `docs/evidence/`.
+
 ---
 
-*README phiên bản 2.1, cập nhật ngày 23/10/2026: cấu trúc `apps/api`, `apps/web` và tài liệu Assignment 2. Cập nhật khi có thay đổi về cài đặt, cách chạy hoặc trạng thái nghiệm thu.*
+*README phiên bản 2.2, cập nhật ngày 24/10/2026: trạng thái production, CI/CD và rollback của Assignment 2. Cập nhật khi có thay đổi về cài đặt, cách chạy hoặc trạng thái nghiệm thu.*
