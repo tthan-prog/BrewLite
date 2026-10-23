@@ -8,7 +8,7 @@
 - **Có mặt:**
 
 | Ký hiệu | Họ tên | 
-|---|---|---|---|
+|---|---|
 | A | Nguyễn Lê Nhựt Thắng | 
 | B | Hồ Thiên Ngân | 
 | C | Hà Thiên Long | 
