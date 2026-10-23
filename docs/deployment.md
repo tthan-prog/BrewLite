@@ -10,7 +10,7 @@
 | CI | Kiểm tra tự động mỗi pull request | GitHub Actions (`.github/workflows/ci.yml`) | DB tạm trong job `api-e2e` |
 | Production | Bản chạy chấm điểm | Render (2 Web Service chạy image GHCR + PostgreSQL) | PostgreSQL của Render, không public |
 
-## 2. Thông tin production (điền sau khi triển khai)
+## 2. Thông tin production
 
 | Mục | Giá trị |
 |---|---|
@@ -19,7 +19,7 @@
 | Health check | https://brewlite-api.onrender.com/health |
 | Nền tảng | Render (gói Free, region Singapore) |
 | Registry | GitHub Container Registry (`ghcr.io/tthan-prog/brewlite-api`, `brewlite-web`) |
-| Phiên bản hiện tại (tag) | [điền tag phát hành sau khi gắn, ví dụ v0.1.1] |
+| Phiên bản hiện tại (tag) | v0.1.2 (commit `7b1ea96`, image `sha-7b1ea96`); bản trước: v0.1.1 |
 | Database | Render PostgreSQL 16 (Free); chỉ truy cập qua Internal Database URL, inbound IP rules đã chặn toàn bộ truy cập từ Internet |
 
 **Giới hạn của gói Free (đã thấy trên bảng điều khiển Render ngày 23/10/2026):**
@@ -75,7 +75,7 @@ Push tag `v*` → Lint, Test, Build (api và web) → Build Docker image (tag `s
 1. Tìm tag ổn định trước đó: GitHub → Releases/Tags, hoặc Packages → brewlite-api → danh sách tag `sha-...`.
 2. Actions → **CD** → **Run workflow** → nhập `image_tag` (ví dụ `sha-1a2b3c4`). Workflow bỏ qua build và deploy lại đúng tag đó cho cả api và web, rồi chạy smoke test.
 3. Cách thủ công: Render → service → Manual Deploy → chọn tag cũ.
-4. Migration đã chạy: vì migration chỉ thêm, bản cũ vẫn chạy được. Nếu thật sự phải lùi dữ liệu, khôi phục từ sao lưu (gói miễn phí **không có** sao lưu: [điền kế hoạch nếu dùng gói trả phí]).
+4. Migration đã chạy: vì migration chỉ thêm, bản cũ vẫn chạy được. Nếu thật sự phải lùi dữ liệu, khôi phục từ sao lưu (gói miễn phí **không có** sao lưu; dự án học tập này chấp nhận mất dữ liệu demo, nếu dùng gói trả phí thì bật sao lưu tự động của Render).
 5. Chạy lại smoke test để xác nhận.
 
 ## 7. Kiểm tra bàn giao
