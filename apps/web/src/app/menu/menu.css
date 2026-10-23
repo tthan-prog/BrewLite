@@ -939,3 +939,16 @@
     align-items: flex-start;
   }
 }
+
+.brew-payment-failed {
+  border: 1px solid #c0392b;
+  background: #fdecea;
+  color: #7a1f14;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 8px 0 12px;
+}
+.brew-payment-failed p {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+}

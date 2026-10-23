@@ -121,6 +121,7 @@ export default function MenuPage() {
   const [submitting, setSubmitting] = useState(false);
   const [promo, setPromo] = useState("");
   const [simulateFail, setSimulateFail] = useState(false);
+  const [paymentFailure, setPaymentFailure] = useState<{ orderId: number; status: string } | null>(null);
   // Khóa idempotency gắn với nội dung giỏ: bấm đặt lại / thử thanh toán lại không tạo thêm đơn.
   const orderKeyRef = useRef<{ signature: string; key: string } | null>(null);
 
@@ -293,6 +294,7 @@ export default function MenuPage() {
 
     setSubmitting(true);
     setNotice("");
+    setPaymentFailure(null);
     try {
       const auth = { Authorization: `Bearer ${token}` };
       const order = await apiRequest<ApiOrder>("/orders", {
@@ -319,6 +321,7 @@ export default function MenuPage() {
         setNotice(
           `Thanh toán thất bại (đơn #${result.order.id}: ${result.order.status}). Giỏ hàng được giữ nguyên, bạn có thể thử lại.`
         );
+        setPaymentFailure({ orderId: result.order.id, status: result.order.status });
         return;
       }
 
@@ -845,6 +848,18 @@ export default function MenuPage() {
                   Giá cuối cùng (kể cả khuyến mãi) do máy chủ tính.
                 </p>
 
+                {paymentFailure && (
+                  <div className="brew-payment-failed" role="alert">
+                    <strong>Thanh toán thất bại</strong>
+                    <p>
+                      Đơn #{paymentFailure.orderId} chưa được thanh toán
+                      (trạng thái: {paymentFailure.status}). Giỏ hàng vẫn được
+                      giữ nguyên. Bỏ chọn &quot;Giả lập thanh toán thất bại&quot;
+                      (nếu đang bật) rồi bấm &quot;Thử thanh toán lại&quot;.
+                    </p>
+                  </div>
+                )}
+
                 <button
                   type="submit"
                   className="brew-primary brew-full"
@@ -852,7 +867,9 @@ export default function MenuPage() {
                 >
                   {submitting
                     ? "Đang xử lý..."
-                    : `Đặt hàng và thanh toán · ${money(subtotal)}`}
+                    : paymentFailure
+                      ? `Thử thanh toán lại · ${money(subtotal)}`
+                      : `Đặt hàng và thanh toán · ${money(subtotal)}`}
                 </button>
               </div>
 
