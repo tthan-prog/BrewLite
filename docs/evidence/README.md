@@ -33,8 +33,20 @@ Sản phẩm triển khai: tag `v0.1.2` (commit `7b1ea96`, image `sha-7b1ea96`).
 | 13-cd-v0.1.2-xanh.png | CD chạy từ tag `v0.1.2` (commit `7b1ea96`) xanh |
 | 14-render-events-deploy-sha-7b1ea96.png | Render Events: "Deploy started ... Triggered via Deploy Hook" rồi "Deploy live" cho image `sha-7b1ea96` |
 
+## CI chặn merge khi test sai (Task 4.4)
+
+PR thử nghiệm #30 (đóng, không merge): cố ý đổi kỳ vọng một test trong `apps/api/src/orders/order-state.spec.ts`
+(đơn `PAID` không được nhảy thẳng sang `COMPLETED`), rồi sửa lại.
+
+| Ảnh | Nội dung |
+|---|---|
+| 19-test-loi-chay-o-may.png | Chạy test ở máy: `expected false to be true`, 1 test lỗi |
+| 16-ci-do-run13-job-api-loi.png | CI run #13 **đỏ**: job `api` lỗi, các job còn lại xanh |
+| 17-pr30-merge-bi-chan.png | PR #30: check `api` (Required) đỏ, "Merging is blocked", nút Merge bị làm mờ, thêm yêu cầu Review |
+| 18-ci-xanh-run14-sau-khi-sua.png | Sau commit khôi phục test, CI run #14 **xanh** cả 4 job |
+
 ## Chưa có trong thư mục này
 
-- CI đỏ rồi xanh (Task 4.4): sẽ bổ sung bằng một PR thử nghiệm.
+- Log chi tiết bước Unit test của run #13 trên GitHub (xem trên tab Actions).
 - CD đỏ lần đầu (tag `v0.1.0`, thiếu cấu hình URL và hook): lưu trên tab Actions của GitHub.
 - Ảnh cấu hình database chặn truy cập từ Internet (inbound IP rules trống): bổ sung từ trang Render, che các giá trị nhạy cảm.
