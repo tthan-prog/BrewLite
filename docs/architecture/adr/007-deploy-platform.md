@@ -29,11 +29,11 @@ Dùng **Render**: hai Web Service chạy **image Docker lấy từ GHCR** (`brew
 - 750 giờ chạy miễn phí mỗi tháng cho cả workspace. Hai service chạy liên tục sẽ vượt 750 giờ, nhưng vì có tự tắt khi rảnh nên đủ cho đợt chấm; cần theo dõi.
 - Một PostgreSQL miễn phí, tối đa 1 GB, **hết hạn sau 30 ngày** (có 14 ngày để nâng cấp trước khi xóa), không có sao lưu.
 - Image-backed service **không tự deploy** khi có image mới: phải dùng Deploy Hook (đã đưa vào `cd.yml`). Image public trên GHCR không cần credential.
-- Trang tài liệu không nêu hạn chế nào cho image deploy trên gói miễn phí, nhưng cũng không xác nhận rõ; cần thử thật.
+- Trang tài liệu không nêu hạn chế nào cho image deploy trên gói miễn phí. Đã thử thật ngày 23/10/2026: deploy image từ GHCR bằng Deploy Hook chạy được (xem `deployment.md`).
 
 ## Hệ quả và rủi ro
 
 - Lần gọi đầu có thể chậm do khởi động nguội: smoke test chờ tối đa 5 phút; trước khi demo nên mở trang web một lần để "làm nóng".
 - DB hết hạn sau 30 ngày: đủ cho đợt chấm; nếu giảng viên chấm muộn thì tạo DB mới hoặc nâng cấp.
 - Phương án dự phòng nếu Render không phù hợp: VPS tự quản chạy Docker Compose + reverse proxy (Caddy) lấy HTTPS tự động; khi đó phải cập nhật `cd.yml`, `deployment.md` và sơ đồ deployment.
-- Chưa deploy thử thật: mọi bước trong `deployment.md` ghi **[Chưa kiểm chứng]** cho đến khi A chạy xong và điền kết quả.
+- Đã deploy thật lên Render (web và API qua HTTPS, database nội bộ). Kết quả và bằng chứng nằm trong `deployment.md` và `docs/evidence/`.
