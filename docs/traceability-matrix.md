@@ -21,13 +21,17 @@ Quy ước mã: US = user story, UC = use-case, Activity/Sequence/Class = sơ đ
 | FR-13 Tồn kho đồng thời | UC-01 (E3) | Sequence-01, ADR-005 | Cập nhật có điều kiện trong transaction tạo đơn | INT-T11: "20 người đặt song song, kho 5 -> đúng 5 đơn…", "đơn thất bại giữa chừng được rollback…", "hủy đơn hoàn lại tồn kho…" |
 | FR-14 Khuyến mãi | UC-01 (A1) | Class-01 (Promotion) | Xử lý trong `orders.service.ts` (`promoCode`) | INT-T12: "mã khuyến mãi: WELCOME10 giảm 10% khi đủ điều kiện" |
 | FR-15 Điểm thưởng | UC-02 | Class-01 (User.points, LoyaltyTransaction) | `pointsForTotal` trong `order-state.ts`; `changeStatus` trong `orders.service.ts` ghi `LoyaltyTransaction` | API-T02: "gives 1 point per full 10.000đ"; INT-T13: "thanh toán thành công -> PAID và cộng điểm", "hủy đơn đã PAID trừ lại điểm thưởng" (kiểm tra cả bản ghi EARN/REVERSAL) |
+| NFR-01 Hiệu năng `GET /products` | – | Architecture | `GET /products` (`apps/api/src/products`) | Đo thủ công ngày 24/10/2026: 19,7 ms (lần chậm thứ 19 trong 20 yêu cầu, Docker Compose cục bộ, 12 sản phẩm). Chưa có test tự động |
 | NFR-02 Bảo mật mật khẩu, phân quyền | – | ADR-003 | bcrypt, `JwtAuthGuard`, `@Roles` | INT-T03, INT-T09 |
+| NFR-03 Secret không nằm trong repo hoặc log CI | – | ADR-006, deployment diagram | `.gitignore` chặn `.env`; `.env.example` chỉ có giá trị mẫu; secret triển khai nằm trong GitHub Secrets | Chưa có test tự động. Đã dò sơ bộ bằng tìm theo mẫu ngày 24/10/2026, chưa rà thủ công đầy đủ |
 | NFR-04 Validate đầu vào | – | – | class-validator, whitelist DTO | INT-T05: "validate: thiếu items, size sai, số lượng <= 0 -> 400" |
 | NFR-05 Mobile-first, PWA cơ bản | – | Architecture (frontend) | CSS responsive trong `apps/web`; `apps/web/src/app/manifest.ts` | E2E-T02 (viewport 390 px, không cuộn ngang), E2E-T04 (manifest và biểu tượng); chưa có service worker/offline |
-| NFR-07 Chạy bằng Docker Compose | – | Deployment diagram | `docker-compose.yml`, `apps/*/Dockerfile` | Đã chạy tay trên máy nhóm |
-| NFR-08 CI/CD | – | Deployment diagram, ADR-006 | `.github/workflows/ci.yml`, `cd.yml` | Chưa có: cần log lần chạy thật trên GitHub (xem `deployment.md`) |
+| NFR-06 Thông báo lỗi dễ hiểu | – | – | Thông báo tiếng Việt trong `apps/web`; `ValidationPipe` ở API | E2E-T03c kiểm thông báo "Không tải được thực đơn". Chưa có test kiểm không lộ stack trace |
+| NFR-07 Chạy bằng Docker Compose | – | Deployment diagram | `docker-compose.yml`, `apps/*/Dockerfile` | Đã chạy bằng `docker compose up --build` ngày 24/10/2026 (dịch vụ db, backend, frontend khởi động, `/products` trả 12 sản phẩm sau khi seed). Chưa có người ngoài nhóm chạy thử theo README |
+| NFR-08 CI/CD | – | Deployment diagram, ADR-006 | `.github/workflows/ci.yml`, `cd.yml` | CI run #13 đỏ (job `api`), run #14 xanh sau khi sửa, PR #30 bị chặn merge; CD chạy xanh từ tag `v0.1.1` và `v0.1.2`; rollback bằng `image_tag` (ảnh trong `docs/evidence/`: 12–14 và 16–25) |
 | NFR-09 Health check | – | Deployment diagram | `GET /health` | Smoke test trong `cd.yml` |
 | NFR-10 Migration và seed tái tạo được | – | ADR-002 | `apps/api/prisma/migrations`, `prisma/seed.ts` | Job `api-e2e` trong `ci.yml` chạy migrate + seed trên DB trống |
+| NFR-11 Mã nguồn có lint, định dạng và test tự động | – | ADR-006 | Job `api` và `web` trong `ci.yml` (install, lint, unit test, build) | Chính pipeline CI: run #13 (đỏ) và #14 (xanh) |
 
 ## Quy tắc cập nhật
 
