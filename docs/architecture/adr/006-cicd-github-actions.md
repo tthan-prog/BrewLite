@@ -1,6 +1,6 @@
 # ADR-006: CI/CD bằng GitHub Actions và registry GHCR
 
-- **Trạng thái:** Đã chốt; workflow đã viết, **chưa chạy thật trên GitHub**
+- **Trạng thái:** Đã chốt
 - **Ngày:** 20/10/2026
 
 ## Bối cảnh
