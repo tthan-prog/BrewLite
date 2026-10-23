@@ -1,6 +1,5 @@
 # Bản nháp tin nhắn gửi giảng viên
 
----
 
 **Tiêu đề (nếu gửi email):** [Lớp/Nhóm] – Xác nhận một số yêu cầu bài tập lớn BrewLite
 
