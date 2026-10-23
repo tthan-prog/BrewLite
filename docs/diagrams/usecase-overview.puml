@@ -1,0 +1,33 @@
+@startuml usecase-overview
+title Use-case tổng quát – BrewLite
+left to right direction
+skinparam shadowing false
+
+actor Customer
+actor Staff
+actor "Payment Service\n(mô phỏng)" as PAY
+
+rectangle BrewLite {
+  usecase "Xem menu" as UC_Menu
+  usecase "Xem chi tiết sản phẩm" as UC_Detail
+  usecase "Quản lý giỏ hàng" as UC_Cart
+  usecase "Đăng ký / Đăng nhập" as UC_Auth
+  usecase "Đặt và thanh toán đơn hàng (UC-01)" as UC_Checkout
+  usecase "Xem lịch sử đơn" as UC_History
+  usecase "Cập nhật trạng thái đơn" as UC_Status
+  usecase "Áp mã khuyến mãi" as UC_Promo
+  usecase "Nhận điểm thưởng" as UC_Loyalty
+}
+
+Customer --> UC_Menu
+Customer --> UC_Detail
+Customer --> UC_Cart
+Customer --> UC_Auth
+Customer --> UC_Checkout
+Customer --> UC_History
+Staff --> UC_Status
+UC_Checkout --> PAY
+UC_Checkout ..> UC_Auth : <<include>>
+UC_Checkout ..> UC_Promo : <<extend>>
+UC_Status ..> UC_Loyalty : <<extend>>
+@enduml

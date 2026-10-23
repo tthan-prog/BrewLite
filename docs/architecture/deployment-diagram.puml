@@ -1,0 +1,61 @@
+@startuml deployment-diagram
+title Deployment diagram – BrewLite (production: Render, xem ADR-007)
+skinparam shadowing false
+skinparam nodeStyle rectangle
+
+node "Thiết bị người dùng" as DEV {
+  artifact "Trình duyệt / PWA" as BROWSER
+}
+
+node "Máy lập trình viên (local)" as LOCAL {
+  node "Docker Compose" as COMPOSE {
+    artifact "web :3000" as L_WEB
+    artifact "api :3001" as L_API
+    database "db :5432\nvolume pgdata" as L_DB
+  }
+}
+
+cloud "GitHub (CI)" as GH {
+  node "GitHub Actions" as CI {
+    artifact "ci.yml: install, lint, test, build" as CIJOB
+    artifact "cd.yml: build image, push, deploy,\nsmoke test" as CDJOB
+  }
+  node "GitHub Secrets/Variables\nRENDER_*_DEPLOY_HOOK,\nPRODUCTION_*_URL" as SECRETS
+  artifact "Mã nguồn (repo)" as REPO
+}
+
+node "Container registry (GHCR)" as REG {
+  artifact "image api:<commit SHA>" as IMG_API
+  artifact "image web:<commit SHA>" as IMG_WEB
+}
+
+cloud "Render (production)" as PROD {
+  node "Web Service (Next.js)\nimage brewlite-web\nPORT 3000" as P_WEB
+  node "Web Service (NestJS)\nimage brewlite-api\nPORT 3001, GET /health\nprisma migrate deploy khi khởi động" as P_API
+  database "Render PostgreSQL\nInternal Database URL\nkhông public" as P_DB
+  node "Env của service\nDATABASE_URL, JWT_SECRET,\nFRONTEND_ORIGIN" as P_ENV
+  node "Log và health check" as P_LOG
+}
+
+BROWSER --> P_WEB : HTTPS 443
+BROWSER --> P_API : HTTPS 443 (REST/JSON, JWT)
+P_WEB ..> P_API : gọi API
+P_API --> P_DB : TCP 5432 (mạng nội bộ)
+P_ENV ..> P_API
+P_API ..> P_LOG
+P_WEB ..> P_LOG
+
+REPO --> CIJOB : pull request / push
+REPO --> CDJOB : push tag v* / chạy tay
+SECRETS ..> CDJOB
+CDJOB --> IMG_API : docker push
+CDJOB --> IMG_WEB : docker push
+CDJOB --> P_API : Deploy Hook + imgURL (tag sha)
+CDJOB --> P_WEB : Deploy Hook + imgURL
+CDJOB ..> P_API : smoke test GET /health
+IMG_API ..> P_API : kéo image
+IMG_WEB ..> P_WEB : kéo image
+
+L_WEB --> L_API : HTTP
+L_API --> L_DB : TCP 5432
+@enduml
