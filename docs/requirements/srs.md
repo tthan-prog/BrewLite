@@ -42,4 +42,3 @@
 
 Xem sơ đồ `docs/diagrams/usecase-overview.puml` (cần vẽ). Actor: Customer, Staff, Payment Service (mô phỏng). Use-case: Xem menu, Xem chi tiết, Quản lý giỏ hàng, Đăng ký/Đăng nhập, **Đặt và thanh toán đơn hàng**, Xem lịch sử đơn, Cập nhật trạng thái đơn.
 
-> [Điền] Nhóm thêm hoặc bớt yêu cầu theo quyết định thực tế và cập nhật `traceability-matrix.md`.
