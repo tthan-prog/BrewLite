@@ -37,7 +37,7 @@ async function main() {
     data: { email: "staff@brewlite.com", password, role: Role.STAFF },
   });
 
-  // Dữ liệu khớp với menu trên giao diện (frontend/src/app/menu/page.tsx).
+  // Dữ liệu khớp với menu trên giao diện (apps/web/src/app/menu/page.tsx).
   await prisma.product.createMany({
     data: [
     { id: 1, name: "Cà phê sữa đá", description: "Cà phê Việt đậm đà hòa cùng sữa đặc béo ngọt.", price: 29000, category: "Cà phê", imageUrl: "☕", stock: 100 },

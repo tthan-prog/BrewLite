@@ -14,7 +14,7 @@ npm run dev
 
 Mở http://localhost:3000.
 
-Trong `frontend/.env.local`, cấu hình URL backend mà trình duyệt truy cập được:
+Trong `apps/web/.env.local`, cấu hình URL backend mà trình duyệt truy cập được:
 
 ```dotenv
 NEXT_PUBLIC_API_URL=http://localhost:3001
