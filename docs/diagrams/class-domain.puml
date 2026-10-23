@@ -28,6 +28,10 @@ enum PromotionType {
   PERCENT
   FIXED
 }
+enum LoyaltyType {
+  EARN
+  REVERSAL
+}
 enum Size {
   S
   M
@@ -87,6 +91,12 @@ class Promotion {
   expiresAt : datetime
   usageCount : int
 }
+class LoyaltyTransaction {
+  id : int
+  type : LoyaltyType
+  points : int (âm khi REVERSAL)
+  createdAt : datetime
+}
 class IdempotencyRecord {
   id : int
   key : string
@@ -100,6 +110,8 @@ OrderItem "0..*" -- "0..*" Topping : topping đã chọn
 Order "1" -- "0..*" Payment : thanh toán
 Order "0..*" ..> "0..1" Promotion : áp dụng theo promoCode
 User "1" -- "0..*" Payment : thực hiện
+User "1" -- "0..*" LoyaltyTransaction : tích/hoàn điểm
+Order "1" -- "0..2" LoyaltyTransaction : EARN khi PAID, REVERSAL khi hủy
 User "1" -- "0..*" IdempotencyRecord
 Order "1" -- "0..1" IdempotencyRecord : chống tạo trùng
 User ..> Role
@@ -107,10 +119,12 @@ Order ..> OrderStatus
 Payment ..> PaymentStatus
 Payment ..> PaymentMethod
 Promotion ..> PromotionType
+LoyaltyTransaction ..> LoyaltyType
 OrderItem ..> Size
 note right of User
-  Điểm thưởng lưu ở User.points
-  (1 điểm / 10.000đ, cộng khi PAID,
-  trừ lại khi hủy đơn đã PAID).
+  Mỗi lần đổi điểm ghi một LoyaltyTransaction
+  (1 điểm / 10.000đ, EARN khi PAID,
+  REVERSAL khi hủy đơn đã PAID);
+  User.points là số dư hiện tại.
 end note
 @enduml

@@ -43,6 +43,7 @@ else (thành công)
 endif
 |Hệ thống|
 :Đơn -> PAID;
+:Cộng điểm thưởng (ghi LoyaltyTransaction EARN);
 
 |Khách hàng|
 :Xem xác nhận đơn;
@@ -50,7 +51,6 @@ endif
 
 |Hệ thống|
 :Nhân viên cập nhật: PREPARING -> READY -> COMPLETED;
-:Cộng điểm thưởng khi COMPLETED;
 
 |Khách hàng|
 :Nhận đồ uống;

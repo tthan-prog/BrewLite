@@ -7,7 +7,7 @@ Quy ước mã: US = user story, UC = use-case, Activity/Sequence/Class = sơ đ
 | Mã yêu cầu | Use-case / User story | Thiết kế / Sơ đồ | Code / API | Test |
 |---|---|---|---|---|
 | FR-01 Hiển thị danh sách sản phẩm | US-01 Xem menu | Activity-01, Class-01 (Product) | `GET /products` (`apps/api/src/products`); trang `apps/web/src/app/menu` | INT-T01: "GET /products trả danh sách có id, name, price, imageUrl" |
-| FR-02 Trạng thái loading/rỗng/lỗi | US-01 Xem menu | Activity-01 | Trang menu (`apps/web`) | E2E-T01a/T01b (Playwright, `tests/e2e/brewlite-flow.spec.ts`) |
+| FR-02 Trạng thái loading/rỗng/lỗi | US-01 Xem menu | Activity-01 | Trang menu (`apps/web`) | E2E-T03a (đang tải), E2E-T03b (rỗng), E2E-T03c (lỗi và thử lại) – Playwright, `tests/e2e/brewlite-flow.spec.ts` |
 | FR-03 Chi tiết, size, topping | US-02 Xem chi tiết | Class-01 (Product, Topping, Size) | `GET /products/:id`, `GET /toppings` | INT-T02: "GET /products/:id: có -> 200, không có -> 404, id sai -> 400" |
 | FR-04 Giỏ hàng, tổng tiền | US-03 Quản lý giỏ hàng | Activity-01 | Giỏ hàng trong trang menu (`apps/web`) | E2E-T01a/T01b (Playwright, `tests/e2e/brewlite-flow.spec.ts`) |
 | FR-05 Đăng ký, đăng nhập | US-04 Xác thực | Class-01 (User) | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` | INT-T03: "hash mật khẩu bằng bcrypt…", "trùng email -> 409; sai mật khẩu -> 401…", "đăng nhập đúng trả JWT dùng được" |
@@ -20,9 +20,10 @@ Quy ước mã: US = user story, UC = use-case, Activity/Sequence/Class = sơ đ
 | FR-12 Lịch sử đơn | US-05 Xem lịch sử | Class-01 | `GET /orders/me`, `GET /orders/:id`, `GET /orders` (STAFF); trang `/orders/history` | INT-T10: "GET /orders/me chỉ trả đơn của mình", "GET /orders/:id: chủ đơn 200, người khác 404…" |
 | FR-13 Tồn kho đồng thời | UC-01 (E3) | Sequence-01, ADR-005 | Cập nhật có điều kiện trong transaction tạo đơn | INT-T11: "20 người đặt song song, kho 5 -> đúng 5 đơn…", "đơn thất bại giữa chừng được rollback…", "hủy đơn hoàn lại tồn kho…" |
 | FR-14 Khuyến mãi | UC-01 (A1) | Class-01 (Promotion) | Xử lý trong `orders.service.ts` (`promoCode`) | INT-T12: "mã khuyến mãi: WELCOME10 giảm 10% khi đủ điều kiện" |
-| FR-15 Điểm thưởng | UC-02 | Class-01 (User.points) | `pointsForTotal` trong `order-state.ts`; cộng khi PAID | API-T02: "gives 1 point per full 10.000đ"; INT-T13: "thanh toán thành công -> PAID và cộng điểm", "hủy đơn đã PAID trừ lại điểm thưởng" |
+| FR-15 Điểm thưởng | UC-02 | Class-01 (User.points, LoyaltyTransaction) | `pointsForTotal` trong `order-state.ts`; `changeStatus` trong `orders.service.ts` ghi `LoyaltyTransaction` | API-T02: "gives 1 point per full 10.000đ"; INT-T13: "thanh toán thành công -> PAID và cộng điểm", "hủy đơn đã PAID trừ lại điểm thưởng" (kiểm tra cả bản ghi EARN/REVERSAL) |
 | NFR-02 Bảo mật mật khẩu, phân quyền | – | ADR-003 | bcrypt, `JwtAuthGuard`, `@Roles` | INT-T03, INT-T09 |
 | NFR-04 Validate đầu vào | – | – | class-validator, whitelist DTO | INT-T05: "validate: thiếu items, size sai, số lượng <= 0 -> 400" |
+| NFR-05 Mobile-first, PWA cơ bản | – | Architecture (frontend) | CSS responsive trong `apps/web`; `apps/web/src/app/manifest.ts` | E2E-T02 (viewport 390 px, không cuộn ngang), E2E-T04 (manifest và biểu tượng); chưa có service worker/offline |
 | NFR-07 Chạy bằng Docker Compose | – | Deployment diagram | `docker-compose.yml`, `apps/*/Dockerfile` | Đã chạy tay trên máy nhóm |
 | NFR-08 CI/CD | – | Deployment diagram, ADR-006 | `.github/workflows/ci.yml`, `cd.yml` | Chưa có: cần log lần chạy thật trên GitHub (xem `deployment.md`) |
 | NFR-09 Health check | – | Deployment diagram | `GET /health` | Smoke test trong `cd.yml` |
@@ -33,4 +34,4 @@ Quy ước mã: US = user story, UC = use-case, Activity/Sequence/Class = sơ đ
 1. Mỗi PR thêm tính năng phải sửa dòng tương ứng trong ma trận.
 2. E rà ma trận trước khi nộp: mọi FR mức Must phải có thiết kế, code và test.
 3. Nếu tạo phẩm của task trước thiếu, ghi rõ ở đây thay vì bỏ trống im lặng.
-4. FR-02 và FR-04 được kiểm bằng test E2E Playwright (`tests/e2e`, job `e2e-browser` trong CI); trạng thái loading/lỗi chưa có test riêng, chỉ kiểm thủ công.
+4. FR-02, FR-04 và NFR-05 được kiểm bằng test E2E Playwright (`tests/e2e`, job `e2e-browser` trong CI). PWA mới ở mức manifest, chưa có service worker.
