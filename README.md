@@ -1,12 +1,24 @@
 # BrewLite
 
-Ứng dụng đặt cà phê không dùng tiền mặt. Khách xem menu, chọn size và topping, thêm vào giỏ, đăng nhập, thanh toán (giả lập) và theo dõi đơn hàng.
+Ứng dụng đặt cà phê không dùng tiền mặt: khách xem menu, chọn size và topping, thêm vào giỏ, đăng nhập, thanh toán (mô phỏng) và theo dõi đơn hàng; nhân viên (STAFF) xử lý đơn qua API.
 
-Đây là bài tập lớn môn **Công nghệ Phần mềm** (Trường Đại học Sài Gòn, Khoa Công nghệ Thông tin, học kỳ I năm học 2026–2027), thực hiện theo quy trình **Agile Scrum**.
+Bài tập lớn môn **Công nghệ Phần mềm**, Trường Đại học Sài Gòn, học kỳ I năm học 2026–2027, làm theo quy trình **Agile Scrum**. Hạn nộp: 27/10/2026.
 
-> **Trạng thái hiện tại:** mới xong **Task 1** (khung dự án). Backend và frontend chạy được "Hello BrewLite". Các tính năng khác (menu, giỏ hàng, đăng nhập, thanh toán...) chưa làm; xem bảng ở [Mục 8](#8-api-và-tiến-độ-task).
->
-> Các mục gắn nhãn `[Chưa kiểm chứng]` là phần chưa chạy thử thực tế. Nhóm cần kiểm tra trước khi nộp.
+## Trạng thái dự án (cập nhật 24/10/2026)
+
+| Hạng mục | Tình trạng |
+|---|---|
+| Assignment 1 (10 task) | **Hoàn thành code cả 10 task**, chạy đầu-cuối từ giao diện đến CSDL |
+| Kiểm thử | 22 unit test và 32 test tích hợp đạt (PostgreSQL thật); lint và build backend, frontend sạch |
+| Docker Compose | Chạy được 3 dịch vụ (db, backend, frontend); đã chạy thử trên Windows (Docker Desktop + WSL 2) |
+| Nghiệm thu chéo (điều kiện tính điểm) | **Đã nghiệm thu, cả 10 task đạt DoD** (xác nhận 23/10/2026, xem `docs/scrum/dod-nghiem-thu.md`) |
+| Bằng chứng Scrum | Product Backlog, 3 Sprint Backlog, Burndown, biên bản (`docs/scrum/`) |
+| Báo cáo | `docs/report/BrewLite_BaoCao.docx`; còn chèn ảnh và điền MSSV |
+| Assignment 2 (Requirements to Deployment) | Đã có SRS, use-case, sơ đồ, ADR, ma trận truy vết, CI/CD; **đã triển khai production** (xem [Mục 15](#15-assignment-2-từ-yêu-cầu-đến-triển-khai)) |
+| Production (HTTPS) | Web https://brewlite-web.onrender.com/menu; API https://brewlite-api.onrender.com/health; bản hiện tại **v0.1.2** ([Release](https://github.com/tthan-prog/BrewLite/releases/tag/v0.1.2)) |
+| Sprint 3 Review và Retrospective | Dự kiến 25/10/2026; đã soạn bản nháp biên bản |
+
+Chi tiết từng task ở [Mục 8](#8-api-và-tiến-độ-task).
 
 ---
 
@@ -15,54 +27,50 @@
 1. [Giới thiệu và phạm vi](#1-giới-thiệu-và-phạm-vi)
 2. [Công nghệ sử dụng](#2-công-nghệ-sử-dụng)
 3. [Môi trường phát triển](#3-môi-trường-phát-triển)
-4. [Công cụ làm việc và triển khai](#4-công-cụ-làm-việc-và-triển-khai)
+4. [Công cụ làm việc](#4-công-cụ-làm-việc)
 5. [Cấu trúc thư mục](#5-cấu-trúc-thư-mục)
 6. [Cài đặt và chạy](#6-cài-đặt-và-chạy)
 7. [Biến môi trường](#7-biến-môi-trường)
 8. [API và tiến độ task](#8-api-và-tiến-độ-task)
-9. [Trạng thái đơn hàng](#9-trạng-thái-đơn-hàng)
+9. [Nghiệp vụ đơn hàng](#9-nghiệp-vụ-đơn-hàng)
 10. [Kiểm thử và chất lượng code](#10-kiểm-thử-và-chất-lượng-code)
 11. [Quy ước làm việc nhóm](#11-quy-ước-làm-việc-nhóm)
 12. [Tài liệu Scrum và báo cáo](#12-tài-liệu-scrum-và-báo-cáo)
 13. [Xử lý sự cố thường gặp](#13-xử-lý-sự-cố-thường-gặp)
 14. [Thành viên nhóm](#14-thành-viên-nhóm)
+15. [Assignment 2: từ yêu cầu đến triển khai](#15-assignment-2-từ-yêu-cầu-đến-triển-khai)
 
 ---
 
 ## 1. Giới thiệu và phạm vi
 
-**Product Vision:** BrewLite giúp khách hàng đặt và thanh toán đồ uống không dùng tiền mặt chỉ trong vài chạm, giảm thời gian xếp hàng và nhận đơn nhanh tại quầy.
+**Product Vision:** BrewLite giúp khách hàng đặt và thanh toán đồ uống không dùng tiền mặt chỉ trong vài chạm, giảm thời gian xếp hàng và hạn chế sai sót khi nhiều người đặt cùng lúc.
 
-**Luồng chính (MVP):**
+**Luồng chính:**
 
 ```
-Xem menu → Chọn sản phẩm (size, topping) → Thêm vào giỏ → Xem giỏ và tổng tiền
-        → Đăng nhập (nếu chưa) → Thanh toán không tiền mặt → Xác nhận đơn (mã đơn)
+Xem menu → Chọn sản phẩm (size, topping) → Thêm vào giỏ → Xem giỏ, nhập mã khuyến mãi
+        → Đăng nhập → Thanh toán (Ví/Thẻ mô phỏng) → Xác nhận đơn → Xem lịch sử đơn
 ```
 
-**Trong phạm vi:** menu, chi tiết sản phẩm (size, topping), giỏ hàng, đăng ký/đăng nhập (JWT), tạo đơn, thanh toán giả lập (Ví hoặc Thẻ), xác nhận đơn và lịch sử đơn; nghiệp vụ backend nâng cao (Task 10): máy trạng thái đơn hàng, thanh toán idempotent, kiểm soát tồn kho khi đặt đồng thời, khuyến mãi và điểm thưởng.
+**Đã làm:** menu từ API, chi tiết sản phẩm, giỏ hàng, đăng ký và đăng nhập (JWT, phân quyền CUSTOMER/STAFF), tạo đơn, thanh toán mô phỏng, xác nhận và lịch sử đơn, máy trạng thái đơn hàng, Idempotency-Key, kiểm soát tồn kho đồng thời, mã khuyến mãi, điểm thưởng.
 
-**Ngoài phạm vi:** giao diện cho nhân viên pha chế (barista), cổng thanh toán thật, quản lý kho nguyên liệu, quên mật khẩu, hồ sơ cá nhân.
+**Ngoài phạm vi:** giao diện cho barista (STAFF thao tác qua API), cổng thanh toán thật, quản lý kho nguyên liệu, quên mật khẩu, hồ sơ cá nhân.
 
 ---
 
 ## 2. Công nghệ sử dụng
 
-Bảng dưới ghi đúng những gì **đã có trong khung dự án** (lấy từ `package.json` do công cụ sinh ra) và những gì **dự kiến thêm** ở các task sau.
-
-| Lớp | Công nghệ | Trạng thái |
-|---|---|---|
-| Frontend | Next.js 16.4, React 19.3, TypeScript, TailwindCSS 4 | Đã có |
-| Backend | NestJS 12, TypeScript, REST API | Đã có |
-| Kiểm thử backend | Vitest, Supertest | Đã có (không phải Jest) |
-| Kiểm tra code | oxlint + Prettier (backend), ESLint (frontend) | Đã có |
-| Đóng gói | Docker, Docker Compose | Đã viết file, `[Chưa kiểm chứng]` build image |
-| CSDL | PostgreSQL (chạy bằng Docker) | Có trong compose, backend chưa dùng |
-| ORM | Prisma (hoặc TypeORM) | Dự kiến, nhóm chọn ở Task 2 |
-| Xác thực | JWT (Passport), bcrypt | Dự kiến, Task 7 |
-| Validate dữ liệu | class-validator, class-transformer | Dự kiến, Task 6 |
-| State giỏ hàng | Zustand (hoặc React Context) | Dự kiến, Task 5 |
-| Thanh toán | Mock Payment Service | Dự kiến, Task 8 |
+| Lớp | Công nghệ |
+|---|---|
+| Frontend | Next.js 16.4, React 19.3, TypeScript, TailwindCSS 4 |
+| Backend | NestJS 12, TypeScript, REST API |
+| CSDL và ORM | PostgreSQL 16, Prisma 7 (adapter pg) |
+| Xác thực | JWT (`@nestjs/jwt`), bcryptjs |
+| Validate dữ liệu | class-validator, class-transformer (whitelist DTO) |
+| Kiểm thử | Vitest, Supertest (e2e trên PostgreSQL thật) |
+| Chất lượng code | oxlint và Prettier (backend), ESLint (frontend) |
+| Đóng gói | Docker, Docker Compose |
 
 ---
 
@@ -70,52 +78,38 @@ Bảng dưới ghi đúng những gì **đã có trong khung dự án** (lấy t
 
 ### 3.1. Yêu cầu phần mềm
 
-| Công cụ | Yêu cầu | Dùng để |
-|---|---|---|
-| **Node.js** | **24.15 trở lên** (khuyến nghị, ghi trong `.nvmrc`), hoặc 22.22.3 trở lên | Chạy backend và frontend |
-| npm | Đi kèm Node.js; cả nhóm dùng **npm** (không trộn pnpm/yarn) | Cài thư viện |
-| Git | Bản mới | Quản lý mã nguồn |
-| Docker Desktop (hoặc Docker Engine + Compose) | Có lệnh `docker compose` | Chạy PostgreSQL và toàn bộ hệ thống |
-| Trình duyệt | Chrome hoặc Edge bản mới | Chạy và kiểm thử giao diện |
-| Hệ điều hành | Windows 10/11, macOS hoặc Linux | |
-
-**Vì sao Node.js 24.15+ (hoặc 22.22.3+):** một số gói của công cụ NestJS CLI khai báo yêu cầu `node: ^22.22.3 || ^24.15.0 || >=26.0.0`. Node 22.22.0 vẫn cài và chạy được trong lúc thử, nhưng npm in cảnh báo `EBADENGINE`. Dùng `nvm use` (đọc `.nvmrc`) để thống nhất cả nhóm.
-
-> Trên Windows, nên bật **WSL 2** để Docker chạy ổn định.
-
-### 3.2. Công cụ nên có
-
-| Công cụ | Mục đích |
+| Công cụ | Yêu cầu |
 |---|---|
-| Visual Studio Code | Trình soạn thảo. Gợi ý tiện ích có trong `.vscode/extensions.json` (Prettier, ESLint, oxc, Tailwind, Docker, Prisma) |
-| Postman hoặc Swagger UI | Gọi thử API |
-| DBeaver hoặc pgAdmin | Xem dữ liệu PostgreSQL |
+| Node.js | 24.15 trở lên (khuyến nghị, có trong `.nvmrc`), hoặc 22.22.3 trở lên |
+| npm | Đi kèm Node.js; cả nhóm chỉ dùng npm |
+| Git | Bản mới |
+| Docker Desktop | Có lệnh `docker compose`; trên Windows nên bật WSL 2 |
+| Trình duyệt | Chrome hoặc Edge bản mới |
 
-### 3.3. Cổng (port) mặc định
+Một số gói của NestJS CLI yêu cầu `node: ^22.22.3 || ^24.15.0 || >=26.0.0`; Node thấp hơn vẫn chạy nhưng npm cảnh báo `EBADENGINE`. Dùng `nvm use` để thống nhất.
+
+### 3.2. Cổng mặc định
 
 | Dịch vụ | Cổng |
 |---|---|
-| Frontend (Next.js) | 3000 |
-| Backend (NestJS) | 3001 (mặc định của NestJS là 3000, đã đổi để không trùng) |
+| Frontend | 3000 |
+| Backend | 3001 |
 | PostgreSQL | 5432 |
 
 ---
 
-## 4. Công cụ làm việc và triển khai
+## 4. Công cụ làm việc
 
-| Nhóm | Công cụ | Cách dùng trong dự án |
+| Nhóm | Công cụ | Cách dùng |
 |---|---|---|
-| Mã nguồn | Git + GitHub | Mỗi chức năng một branch, gộp qua pull request, không push thẳng lên `main` |
-| Theo dõi việc | GitHub Projects (hoặc Trello) | Product Backlog và Sprint Backlog |
-| Liên lạc | Nhóm chat | Trao đổi hằng ngày, đăng biên bản họp |
-| Tài liệu chung | Google Drive | Báo cáo, slide, bản nháp |
-| Vẽ sơ đồ | draw.io, StarUML hoặc PlantUML | Use case, ERD, state machine |
-| Đóng gói và chạy | Docker Compose | `docker compose up --build` chạy cả 3 dịch vụ |
-| Kiểm thử | Vitest, Supertest | Test Task 10 và các logic quan trọng |
-| Chất lượng code | oxlint, ESLint, Prettier | Thống nhất kiểu code |
-| CI (tùy chọn) | GitHub Actions | Chạy build và test mỗi pull request `[Tùy chọn, nếu còn thời gian]` |
+| Mã nguồn | Git, GitHub | Mỗi chức năng một nhánh, gộp qua Pull Request vào `main` |
+| Liên lạc | Nhóm chat | Daily Scrum, đăng biên bản |
+| Tài liệu | Google Drive, thư mục `docs/` | Báo cáo, slide, bản nháp |
+| Sơ đồ | Mermaid, draw.io | ERD (`docs/design/ERD_MemberB`), state machine |
+| Chạy và đóng gói | Docker Compose | `docker compose up --build` |
+| Kiểm thử | Vitest, Supertest | Unit, e2e, test bắt buộc Task 10 |
 
-**Triển khai:** phạm vi bài tập là **chạy được bằng docker-compose** trên máy nhóm hoặc máy giảng viên để demo. Đưa lên máy chủ công khai là việc ngoài yêu cầu của đề.
+Phạm vi chạy: bằng docker-compose trên máy nhóm hoặc máy giảng viên để demo.
 
 ---
 
@@ -123,28 +117,33 @@ Bảng dưới ghi đúng những gì **đã có trong khung dự án** (lấy t
 
 ```
 brewlite/
-├── backend/                 # NestJS
-│   ├── src/                 # mã nguồn (hiện: app.controller, app.service, main)
-│   ├── test/                # kiểm thử e2e (Vitest + Supertest)
-│   ├── .env.example
-│   ├── .npmrc               # legacy-peer-deps=true (xem Mục 13)
-│   ├── Dockerfile
-│   └── package.json
-├── frontend/                # Next.js (App Router, thư mục src/)
-│   ├── src/app/             # trang và layout
-│   ├── .env.example
-│   ├── Dockerfile
-│   └── package.json
+├── apps/
+│   ├── api/                       # NestJS (backend)
+│   │   ├── src/                   # auth, products, orders, payments, prisma
+│   │   ├── prisma/                # schema.prisma, migrations/, seed.ts
+│   │   ├── scripts/               # seed-if-empty.mjs (seed an toàn khi deploy)
+│   │   ├── test/                  # e2e: assign1.e2e-spec.ts, app.e2e-spec.ts
+│   │   ├── prisma7.config.ts
+│   │   └── Dockerfile
+│   └── web/                       # Next.js (frontend)
+│       └── src/app/               # menu, login, register, orders/confirmation, orders/history
 ├── docs/
-│   ├── team-agreement.md    # thỏa thuận nhóm
-│   ├── message-to-lecturer.md   # bản nháp tin nhắn hỏi giảng viên
-│   ├── scrum/               # Product Backlog, Sprint Backlog, Burndown, biên bản họp
-│   ├── design/              # ERD, state machine, use case, wireframe (sẽ bổ sung)
-│   └── report/              # báo cáo và slide (sẽ bổ sung)
+│   ├── requirements/              # context-and-scope, srs, use-case-checkout (Assignment 2, Task 1)
+│   ├── diagrams/                  # activity, sequence, class, use-case (.puml + .svg/.png) (Task 2)
+│   ├── architecture/              # architecture.md, adr/, deployment-diagram (Task 3)
+│   ├── traceability-matrix.md     # ma trận truy vết
+│   ├── deployment.md              # triển khai, rollback
+│   ├── scrum/                     # backlog, burndown, biên bản, quy trình DoD
+│   ├── progress/                  # bảng tiến độ
+│   ├── design/                    # ERD
+│   ├── report/                    # báo cáo (BrewLite_BaoCao.docx)
+│   ├── team-agreement.md
+│   └── message-to-lecturer.md
+├── tests/                         # (Assignment 2) integration/E2E bổ sung nếu có
+├── .github/workflows/             # ci.yml, cd.yml
 ├── docker-compose.yml
-├── .env.example             # biến cho docker-compose
+├── .env.example
 ├── .nvmrc
-├── .gitignore
 └── README.md
 ```
 
@@ -155,68 +154,84 @@ brewlite/
 ### 6.1. Lấy mã nguồn
 
 ```bash
-git clone <địa-chỉ-repo-GitHub-của-nhóm>
-cd brewlite
-nvm use            # (nếu dùng nvm) chọn đúng phiên bản Node trong .nvmrc
+git clone https://github.com/tthan-prog/BrewLite.git
+cd BrewLite
+nvm use            # nếu dùng nvm
 ```
 
-### 6.2. Cách 1 – Chạy toàn bộ bằng Docker Compose
-
-`[Chưa kiểm chứng]` (file đã viết và kiểm tra cú pháp, chưa build image thật)
+### 6.2. Cách 1: chạy toàn bộ bằng Docker Compose
 
 ```bash
-cp .env.example .env          # Windows PowerShell: Copy-Item .env.example .env
+cp .env.example .env          # PowerShell: Copy-Item .env.example .env
 docker compose up --build
 ```
 
-Sau khi chạy xong:
-
-- Frontend: http://localhost:3000
-- Backend: http://localhost:3001 (thử `http://localhost:3001/health`)
-- PostgreSQL: `localhost:5432`
-
-Dừng hệ thống:
+Khi backend khởi động, container tự chạy `prisma migrate deploy` (tạo bảng). Dữ liệu mẫu **không** tự nạp; mở terminal thứ hai và nạp **một lần**:
 
 ```bash
-docker compose down           # giữ lại dữ liệu
+docker compose exec backend npx prisma db seed --config prisma7.config.ts
+```
+
+> Cảnh báo: `prisma/seed.ts` bắt đầu bằng `deleteMany()` trên mọi bảng. Chạy lại seed sẽ **xóa sạch** dữ liệu hiện có (kể cả đơn hàng).
+
+**Dữ liệu mẫu:**
+
+| Loại | Nội dung |
+|---|---|
+| Tài khoản | `customer@brewlite.com` (CUSTOMER) và `staff@brewlite.com` (STAFF); mật khẩu `password123` (chỉ dùng phát triển) |
+| Sản phẩm, topping | 12 sản phẩm, 4 topping |
+| Mã khuyến mãi | `WELCOME10` (giảm 10%, đơn từ 50.000đ), `SAVE20K` (giảm 20.000đ, đơn từ 100.000đ) |
+
+**Sau khi chạy:**
+
+- Frontend: http://localhost:3000 (menu ở `/menu`)
+- Backend: http://localhost:3001 (kiểm tra `/health`)
+- PostgreSQL: `localhost:5432`
+
+**Dừng hệ thống:**
+
+```bash
+docker compose down           # giữ dữ liệu
 docker compose down -v        # xóa cả dữ liệu CSDL
 ```
 
-### 6.3. Cách 2 – Chạy từng phần để phát triển
+Nếu đổi mã nguồn, chạy lại `docker compose up --build` (lệnh `exec` không tự build lại). Prisma 7 sinh client vào `apps/api/src/generated/prisma`; `apps/api/Dockerfile` tự chạy `prisma generate` khi build. Mọi lệnh Prisma cần thêm `--config prisma7.config.ts`.
 
-Đã chạy thử các bước này.
+### 6.3. Cách 2: chạy từng phần để phát triển
 
-**Backend** (terminal 1):
+**CSDL và backend (terminal 1):**
 
 ```bash
-cd backend
-cp .env.example .env
+docker compose up -d db
+cd apps/api
+cp .env.example .env          # kiểm tra DATABASE_URL trỏ localhost:5432
 npm install
+npx prisma generate --config prisma7.config.ts
+npx prisma migrate deploy --config prisma7.config.ts
+npx prisma db seed --config prisma7.config.ts      # một lần
 npm run start:dev
 ```
 
-Kiểm tra: http://localhost:3001/ trả `Hello BrewLite!`; http://localhost:3001/health trả `{"status":"ok","service":"brewlite-backend"}`.
+Kiểm tra: http://localhost:3001/health trả `{"status":"ok","service":"brewlite-backend"}`.
 
-**Frontend** (terminal 2):
+**Frontend (terminal 2):**
 
 ```bash
-cd frontend
+cd apps/web
 cp .env.example .env.local
 npm install
 npm run dev
 ```
 
-Mở http://localhost:3000. Trang hiển thị "Hello BrewLite!" và trạng thái kết nối backend.
-
-> Khi có PostgreSQL (từ Task 2): chạy `docker compose up -d db` rồi cấu hình `DATABASE_URL` trong `backend/.env`.
+Mở http://localhost:3000/menu.
 
 ---
 
 ## 7. Biến môi trường
 
-Không đưa file `.env` hoặc `.env.local` lên Git. Chỉ đưa các file `.env.example`.
+Không đưa `.env` hoặc `.env.local` lên Git; chỉ đưa các file `.env.example`.
 
-### 7.1. `.env.example` (thư mục gốc, cho docker-compose)
+**`.env.example` (thư mục gốc, cho docker-compose):**
 
 ```env
 POSTGRES_USER=brewlite
@@ -225,7 +240,7 @@ POSTGRES_DB=brewlite
 JWT_SECRET=change_me_to_a_long_random_string
 ```
 
-### 7.2. `backend/.env.example`
+**`apps/api/.env.example`:**
 
 ```env
 PORT=3001
@@ -235,21 +250,19 @@ JWT_SECRET=change_me_to_a_long_random_string
 JWT_EXPIRES_IN=1d
 ```
 
-### 7.3. `frontend/.env.example`
+**`apps/web/.env.example`:**
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
-### 7.4. Giải thích
-
 | Biến | Ý nghĩa |
 |---|---|
 | `PORT` | Cổng backend (mặc định 3001) |
 | `FRONTEND_ORIGIN` | Địa chỉ frontend được phép gọi API (CORS); nhiều địa chỉ cách nhau bằng dấu phẩy |
-| `DATABASE_URL` | Chuỗi kết nối PostgreSQL. Trong Docker Compose, host là `db` (tên dịch vụ), không phải `localhost`. Chưa dùng ở khung dự án |
-| `JWT_SECRET`, `JWT_EXPIRES_IN` | Khóa ký và thời hạn JWT. Phải đổi khỏi giá trị mẫu. Chưa dùng ở khung dự án |
-| `NEXT_PUBLIC_API_URL` | Địa chỉ backend mà **trình duyệt** gọi tới. Biến `NEXT_PUBLIC_*` được gắn lúc **build**, nên đổi giá trị phải build lại |
+| `DATABASE_URL` | Chuỗi kết nối PostgreSQL. Trong Docker Compose, host là `db`, không phải `localhost` |
+| `JWT_SECRET`, `JWT_EXPIRES_IN` | Khóa ký và thời hạn JWT; phải đổi khỏi giá trị mẫu |
+| `NEXT_PUBLIC_API_URL` | Địa chỉ backend mà trình duyệt gọi; gắn lúc build nên đổi giá trị phải build lại |
 
 ---
 
@@ -257,41 +270,52 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ### 8.1. API
 
-| Method | Endpoint | Chức năng | Task | Trạng thái |
-|---|---|---|---|---|
-| GET | `/` | "Hello BrewLite!" | 1 | Xong |
-| GET | `/health` | Kiểm tra backend sống | 1 | Xong |
-| GET | `/products` | Danh sách sản phẩm (menu) | 2 | Chưa làm |
-| GET | `/products/:id` | Chi tiết sản phẩm | 2 | Chưa làm |
-| POST | `/auth/register` | Đăng ký | 7 | Chưa làm |
-| POST | `/auth/login` | Đăng nhập, trả JWT | 7 | Chưa làm |
-| POST | `/orders` | Tạo đơn (PENDING) | 6 | Chưa làm |
-| POST | `/payments` | Thanh toán (idempotent, header `Idempotency-Key`) | 8, 10 | Chưa làm |
-| GET | `/orders/me` | Lịch sử đơn của người dùng | 9 | Chưa làm |
-| PATCH | `/orders/:id/status` | Cập nhật trạng thái đơn, chỉ role STAFF (để demo và test) | 10 | Chưa làm |
+Mọi route (trừ `/`, `/health`, `/products*`, `/toppings`, `/auth/register`, `/auth/login`) cần header `Authorization: Bearer <JWT>`. Test tích hợp `apps/api/test/assign1.e2e-spec.ts` kiểm tra từng dòng dưới đây.
 
-> `GET /health` và `PATCH /orders/:id/status` là bổ sung của nhóm (đề không nêu).
+| Method | Endpoint | Chức năng | Quyền | Task |
+|---|---|---|---|---|
+| GET | `/` | "Hello BrewLite!" | công khai | 1 |
+| GET | `/health` | Kiểm tra backend sống | công khai | 1 |
+| GET | `/products`, `/products/:id` | Danh sách, chi tiết sản phẩm | công khai | 2 |
+| GET | `/toppings` | Danh sách topping | công khai | 2, 4 |
+| POST | `/auth/register` | Đăng ký (bcrypt; luôn tạo CUSTOMER) | công khai | 7 |
+| POST | `/auth/login` | Đăng nhập, trả `accessToken` | công khai | 7 |
+| GET | `/auth/me` | Thông tin người dùng hiện tại | đăng nhập | 7 |
+| POST | `/orders` | Tạo đơn PENDING; bắt buộc `Idempotency-Key`; giá theo size S/M/L (+0/+5.000/+10.000đ) và topping; trừ kho có điều kiện; mã khuyến mãi; `userId` lấy từ JWT | đăng nhập | 6, 10 |
+| GET | `/orders/me` | Lịch sử đơn của tôi | đăng nhập | 9 |
+| GET | `/orders/:id` | Chi tiết đơn (chủ đơn hoặc STAFF) | đăng nhập | 9 |
+| GET | `/orders` | Tất cả đơn | STAFF | 6 |
+| POST | `/payments` | Thanh toán mô phỏng (`WALLET` hoặc `CARD`; `simulate: "FAIL"` để ép lỗi khi demo); idempotent; PAID cộng điểm, lỗi thì PAYMENT_FAILED | đăng nhập | 8, 10 |
+| PATCH | `/orders/:id/status` | STAFF chuyển PREPARING, READY, COMPLETED, CANCELLED (hủy hoàn kho) | STAFF | 10 |
+
+`GET /health`, `GET /toppings`, `GET /auth/me`, `GET /orders/:id` và `PATCH /orders/:id/status` là bổ sung của nhóm (đề không nêu).
 
 ### 8.2. Tiến độ 10 task
 
-| # | Task | Trạng thái |
-|---|---|---|
-| 1 | Khởi tạo dự án và cấu trúc | Xong (đã build, test, chạy thử) |
-| 2 | API danh sách sản phẩm | Chưa làm |
-| 3 | Trang Menu | Chưa làm |
-| 4 | Chi tiết và tùy chọn sản phẩm | Chưa làm |
-| 5 | Giỏ hàng | Chưa làm |
-| 6 | API tạo đơn hàng | Chưa làm |
-| 7 | Đăng ký / đăng nhập (JWT) | Chưa làm |
-| 8 | Thanh toán không tiền mặt | Chưa làm |
-| 9 | Xác nhận, lịch sử đơn và bàn giao | Chưa làm |
-| 10 | Nghiệp vụ backend nâng cao | Chưa làm |
+"Xong" nghĩa là chức năng chạy đầu-cuối và có test. Task được tính điểm khi đạt Definition of Done và được nghiệm thu chéo.
 
-Cập nhật bảng này khi hoàn thành từng task (một phần của Definition of Done).
+| # | Task | Sprint | Người làm chính | Trạng thái | Nghiệm thu chéo |
+|---|---|---|---|---|---|
+| 1 | Khởi tạo dự án | 1 | A | Xong | Đạt |
+| 2 | API danh sách sản phẩm | 1 | C (B: schema, seed) | Xong | Đạt |
+| 3 | Trang Menu | 1 | D | Xong (gọi API; loading, lỗi, rỗng) | Đạt |
+| 4 | Chi tiết, size, topping | 1 | D | Xong (giá do server tính lại) | Đạt |
+| 5 | Giỏ hàng | 2 | D | Xong (thêm, sửa, xóa, tổng tiền, badge) | Đạt |
+| 6 | API tạo đơn | 2 | B | Xong (JWT, validate, PENDING) | Đạt |
+| 7 | Đăng ký, đăng nhập | 2 | C | Xong (bcrypt, JWT, guard, trang `/login`, `/register`) | Đạt |
+| 8 | Thanh toán không tiền mặt | 3 | C | Xong (Ví/Thẻ mô phỏng, PAID/PAYMENT_FAILED, thử lại) | Đạt |
+| 9 | Xác nhận, lịch sử đơn, bàn giao | 3 | E | Xong (`/orders/me`, trang xác nhận, Docker, README) | Đạt |
+| 10 | Nghiệp vụ nâng cao | 3 | B, C | Xong (state machine, idempotency, tồn kho, khuyến mãi, điểm; test a, b, c) | Đạt |
+
+**Giới hạn đã biết:** thanh toán chỉ mô phỏng; không có giao diện barista; trường đường/đá trong giỏ chỉ hiển thị, chưa lưu vào đơn; migration của các bảng bổ sung viết tay, cần đối chiếu với Prisma khi đổi môi trường.
+
+Kết quả nghiệm thu chi tiết: `docs/scrum/dod-nghiem-thu.md`.
 
 ---
 
-## 9. Trạng thái đơn hàng
+## 9. Nghiệp vụ đơn hàng
+
+### 9.1. Trạng thái đơn hàng
 
 Luồng thành công: `PENDING → PAID → PREPARING → READY → COMPLETED`.
 
@@ -304,56 +328,103 @@ Luồng thành công: `PENDING → PAID → PREPARING → READY → COMPLETED`.
 | READY | COMPLETED |
 | COMPLETED, CANCELLED | (kết thúc) |
 
-Mọi chuyển tiếp khác bị chặn. `[Cần đối chiếu với hình sơ đồ gốc trong file đề]`
+Mọi chuyển tiếp khác bị chặn (lỗi 4xx). Mã nguồn: `apps/api/src/orders/order-state.ts`.
+
+### 9.2. Quy tắc nghiệp vụ
+
+| Quy tắc | Cách làm |
+|---|---|
+| Giá | Server tính lại từ CSDL: giá gốc + phụ thu size (S +0, M +5.000, L +10.000đ) + topping; không tin giá từ client |
+| Tồn kho | Trừ bằng `updateMany` có điều kiện (stock ≥ số lượng) trong transaction; hủy đơn hoàn kho |
+| Idempotency | Header `Idempotency-Key` bắt buộc khi tạo đơn và thanh toán; ràng buộc unique, gửi lại cùng khóa trả về kết quả cũ |
+| Khuyến mãi | `WELCOME10`, `SAVE20K` (điều kiện đơn tối thiểu ở Mục 6.2) |
+| Điểm thưởng | 1 điểm cho mỗi 10.000đ, cộng khi đơn PAID, thu hồi khi hủy đơn đã PAID |
 
 ---
 
 ## 10. Kiểm thử và chất lượng code
 
-**Backend** (chạy trong thư mục `backend/`):
+**Backend (trong `apps/api/`):**
 
 ```bash
 npm test              # unit test (Vitest)
-npm run test:e2e      # kiểm thử e2e (Vitest + Supertest)
+npm run test:e2e      # kiểm thử tích hợp (Vitest + Supertest)
 npm run lint          # oxlint
 npm run format        # Prettier
 npm run build         # biên dịch
 ```
 
-**Frontend** (chạy trong thư mục `frontend/`):
+**Frontend (trong `apps/web/`):**
 
 ```bash
-npm run lint          # ESLint
-npm run build         # build production
+npm run lint
+npm run build
 ```
 
-Hiện có: 2 unit test và 2 e2e test cho `/` và `/health`.
+**End-to-end bằng trình duyệt (trong `tests/e2e/`, Playwright):**
 
-**Bắt buộc theo đề (Task 10):** test chứng minh (a) chặn được chuyển trạng thái sai; (b) gửi 2 lần cùng `Idempotency-Key` chỉ tạo 1 đơn; (c) đặt đồng thời không vượt tồn kho.
+```bash
+npm ci
+npx playwright install chromium
+npm test              # cần web ở http://localhost:3000, API ở :3001, CSDL đã seed
+```
+
+Bộ test E2E kiểm tra: thực đơn từ API, luồng đăng ký, đăng nhập, giỏ hàng, thanh toán lỗi rồi thử lại thành công, lịch sử đơn, giao diện điện thoại (390 px), các trạng thái loading/rỗng/lỗi và manifest PWA. Mỗi pull request đều chạy bộ test này trong job `e2e-browser` của CI.
+
+Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cùng `DATABASE_URL` và `JWT_SECRET` (ví dụ `docker compose up -d db`, rồi migrate và seed như Mục 6.3). Các test tự tạo dữ liệu riêng nhưng **không** nên chạy trên CSDL có dữ liệu thật.
+
+**Kết quả (23/10/2026, nhánh main):** 22 unit test và 32 test tích hợp đạt; 7 test E2E Playwright đạt trong CI; build và lint backend sạch; lint và build frontend đạt.
+
+**Ba test bắt buộc của Task 10:**
+
+| Test | Nội dung | Vị trí |
+|---|---|---|
+| (a) | Chặn chuyển trạng thái sai | `src/orders/order-state.spec.ts`; nhóm "Task 8 + 10a" trong `test/assign1.e2e-spec.ts` |
+| (b) | Gửi 2 lần (và 10 lần song song) cùng `Idempotency-Key` chỉ tạo 1 đơn | nhóm "Task 10b" |
+| (c) | 20 yêu cầu song song khi kho còn 5: đúng 5 đơn thành công, kho về 0 | nhóm "Task 10c" |
 
 ---
 
 ## 11. Quy ước làm việc nhóm
 
-**Nhánh:** `main` luôn chạy được, không push trực tiếp. Mỗi chức năng một nhánh `feature/task-<số>-<mô-tả-ngắn>` (ví dụ `feature/task-5-cart`); sửa lỗi dùng `fix/<mô-tả-ngắn>`.
+**Nhánh:** `main` luôn chạy được, không push trực tiếp. Mỗi chức năng một nhánh `feature/<mô-tả-ngắn>`; sửa lỗi dùng `fix/<mô-tả-ngắn>`.
 
-**Commit:** thông điệp ngắn, rõ, mỗi commit một việc. Ví dụ: `feat(cart): thêm xóa sản phẩm khỏi giỏ`, `fix(orders): chặn chuyển trạng thái sai`.
+**Commit:** thông điệp ngắn, rõ, mỗi commit một việc (ví dụ `feat(cart): thêm xóa sản phẩm khỏi giỏ`).
 
-**Pull request:** mô tả task nào, đã làm gì, cách kiểm tra; có ít nhất **một người khác** xem trước khi gộp; chỉ gộp khi build không lỗi.
+**Pull Request:** mô tả task, việc đã làm, cách kiểm tra; có ít nhất một người khác xem trước khi gộp; chỉ gộp khi build không lỗi.
 
 **Definition of Done** (task được tính điểm khi):
 
 - Code chạy được, không lỗi build, đúng tiêu chí chấp nhận.
 - Có commit rõ ràng và được review trong nhóm.
-- API có validate đầu vào; giao diện xử lý trạng thái loading và lỗi cơ bản.
+- API có validate đầu vào; giao diện xử lý loading và lỗi cơ bản.
 - Có hướng dẫn chạy trong README.
-- Được một thành viên khác nghiệm thu.
+- Được một thành viên khác nghiệm thu (không tự nghiệm thu task mình viết).
 
 ---
 
 ## 12. Tài liệu Scrum và báo cáo
 
-Bằng chứng Scrum lưu trong `docs/scrum/`: Product Backlog, Sprint Backlog, Burndown (cập nhật mỗi ngày), biên bản Sprint Planning, Review, Retrospective. Thỏa thuận nhóm ở `docs/team-agreement.md`. Thiết kế ở `docs/design/`; báo cáo và slide ở `docs/report/`.
+| Nội dung | Vị trí |
+|---|---|
+| Product Backlog (10 task, điểm, trạng thái) | `docs/scrum/product-backlog.md` |
+| Sprint Backlog 1, 2, 3 | `docs/scrum/sprint-1-backlog.md`, `sprint-2-backlog.md`, `sprint-3-backlog.md` |
+| Burndown và cách tính | `docs/scrum/burndown-sprint-*.csv`, `burndown-ghi-chu.md` |
+| Biên bản Planning, Review, Retrospective | `docs/scrum/minutes/` |
+| Mẫu biên bản | `docs/scrum/meeting-minutes-template.md`, `retrospective-template.md` |
+| Thỏa thuận nhóm | `docs/team-agreement.md` |
+| ERD | `docs/design/ERD_MemberB/` |
+| Báo cáo | `docs/report/BrewLite_BaoCao.docx` |
+
+**Nhịp Sprint:**
+
+| Sprint | Thời gian | Task theo kế hoạch | Kết quả |
+|---|---|---|---|
+| 1 | 14–18/10 | 1, 2, 3, 4 | Xong Task 1; còn 9/11 điểm |
+| 2 | 19–22/10 | 5, 6, 7 + tồn | Còn 8/22 điểm |
+| 3 | 23–25/10 | 8, 9, 10 + tồn | Hoàn thành, đạt DoD; Review ngày 25/10 |
+| Hoàn thiện | 26/10 | Rà DoD, tập demo | – |
+| Nộp | 27/10 | – | – |
 
 ---
 
@@ -361,13 +432,17 @@ Bằng chứng Scrum lưu trong `docs/scrum/`: Product Backlog, Sprint Backlog, 
 
 | Hiện tượng | Nguyên nhân thường gặp | Cách xử lý |
 |---|---|---|
-| `npm install` ở backend báo `Cannot read properties of null (reading 'edgesOut')` | Lỗi của npm 10.x khi xử lý peer dependency (gặp với npm 10.9.4) | Backend đã có `.npmrc` với `legacy-peer-deps=true`; dùng đúng file này. Nếu vẫn lỗi, cập nhật npm theo Node bản mới |
-| Cảnh báo `EBADENGINE` khi cài | Node thấp hơn yêu cầu của một số gói | Dùng Node 24.15+ (`nvm use`) |
+| `Cannot find module src/generated/prisma/client` | Chưa sinh Prisma client hoặc image cũ | Chạy `npx prisma generate --config prisma7.config.ts`; với Docker chạy `docker compose down` rồi `docker compose up --build` |
+| Seed hoặc API báo bảng không tồn tại | Chưa migrate | `npx prisma migrate deploy --config prisma7.config.ts` (Docker tự migrate khi backend khởi động) |
+| Đăng nhập báo sai mật khẩu với tài khoản mẫu | Chưa seed | Chạy seed (Mục 6.2) |
+| `npm install` ở backend báo `Cannot read properties of null (reading 'edgesOut')` | Lỗi npm 10.x với peer dependency | Dùng `.npmrc` có `legacy-peer-deps=true`; nếu vẫn lỗi, cập nhật npm |
+| Cảnh báo `EBADENGINE` | Node thấp hơn yêu cầu | Dùng Node 24.15+ (`nvm use`) |
 | Frontend báo "Không kết nối được" | Backend chưa chạy hoặc sai `NEXT_PUBLIC_API_URL` | Chạy backend; kiểm tra http://localhost:3001/health |
-| Lỗi CORS trên trình duyệt | `FRONTEND_ORIGIN` không khớp địa chỉ frontend | Sửa `FRONTEND_ORIGIN` trong `backend/.env` |
-| Cổng bị chiếm (EADDRINUSE) | Tiến trình cũ vẫn chạy ở 3000 hoặc 3001 | Tắt tiến trình đó hoặc đổi cổng |
-| Đổi `NEXT_PUBLIC_API_URL` nhưng không có tác dụng | Biến được gắn lúc build | Build lại (`npm run build` hoặc `docker compose up --build`) |
+| Lỗi CORS trên trình duyệt | `FRONTEND_ORIGIN` không khớp | Sửa `FRONTEND_ORIGIN` trong `apps/api/.env` |
+| Cổng bị chiếm (EADDRINUSE) | Tiến trình cũ ở 3000 hoặc 3001 | Tắt tiến trình đó hoặc đổi cổng |
+| Đổi `NEXT_PUBLIC_API_URL` không có tác dụng | Biến được gắn lúc build | Build lại (`docker compose up --build`) |
 | Docker chạy chậm hoặc lỗi trên Windows | Chưa bật WSL 2 | Bật WSL 2 trong Docker Desktop |
+| Cảnh báo "LF will be replaced by CRLF" khi `git add` | Khác kiểu xuống dòng giữa Windows và Linux | Có thể bỏ qua |
 
 ---
 
@@ -375,14 +450,62 @@ Bằng chứng Scrum lưu trong `docs/scrum/`: Product Backlog, Sprint Backlog, 
 
 | Ký hiệu | Họ tên | MSSV | Vai trò |
 |---|---|---|---|
-| A | | | Scrum Master + Dev nền tảng |
-| B | | | Dev backend (dữ liệu, nghiệp vụ lõi) |
-| C | | | Dev backend (xác thực, thanh toán, state machine) |
-| D | | | Dev frontend, slide |
-| E | | | Dev frontend, kiểm thử, PO tạm |
+| A | Nguyễn Lê Nhựt Thắng | | Scrum Master, Dev nền tảng |
+| B | Hồ Thiên Ngân | | Dev backend (dữ liệu, đơn hàng, nghiệp vụ lõi) |
+| C | Hà Thiên Long | | Dev backend (xác thực, thanh toán, state machine) |
+| D | Giản Thiên Lực | | Dev frontend, slide |
+| E | Lê Thuận | | Dev frontend, kiểm thử, Product Owner tạm |
 
-**Giảng viên hướng dẫn:** …………………………………………
+**Giảng viên hướng dẫn:** Từ Lăng Phiêu
+
 
 ---
 
-*README phiên bản 1.1 (sau Task 1). Cập nhật sau mỗi Sprint khi có thay đổi về cài đặt hoặc cách chạy.*
+## 15. Assignment 2: từ yêu cầu đến triển khai
+
+Dùng chung mã nguồn với Assignment 1. Hạn nộp 27/10/2026. Năm task, mỗi task 2 điểm; task sau chỉ được nghiệm thu khi tạo phẩm của task trước đã có trên Git.
+
+| Task | Nội dung | Tạo phẩm | Trạng thái |
+|---|---|---|---|
+| 1 | Khai thác và đặc tả yêu cầu | `docs/requirements/` (context-and-scope, srs, use-case-checkout) | Có bản đầy đủ, cần E rà |
+| 2 | Mô hình hóa | `docs/diagrams/` (activity, sequence, class, use-case; `.puml` và `.svg`) | Đã vẽ lại khớp code |
+| 3 | Kiến trúc | `docs/architecture/` (architecture.md, 7 ADR, deployment diagram) | Đã chốt Prisma và Render |
+| 4 | Sprint 1 | Cấu trúc `apps/api`, `apps/web`; MVP menu; CI (`ci.yml`) | Đã có; CI chặn merge khi lỗi, có một lần đỏ (run #13) và một lần xanh (run #14), xem `docs/evidence/` |
+| 5 | Sprint 2, CI/CD, production | `cd.yml`, `docs/deployment.md`, `docs/release-notes/` | Đã deploy lên Render (HTTPS); CD chạy từ tag; đã thử rollback; release v0.1.2 |
+
+Ma trận truy vết: `docs/traceability-matrix.md`. Hướng dẫn triển khai và rollback: `docs/deployment.md`.
+
+Điều kiện chấm cần nhớ: **không có URL production hoạt động lúc chấm thì phần triển khai của Task 5 không được tính.**
+
+### 15.1. Production, CI/CD và rollback
+
+| Mục | Giá trị |
+|---|---|
+| Web (HTTPS) | https://brewlite-web.onrender.com/menu |
+| API | https://brewlite-api.onrender.com |
+| Health check | https://brewlite-api.onrender.com/health |
+| Bản phát hành | v0.1.2: [GitHub Releases](https://github.com/tthan-prog/BrewLite/releases) (release notes: `docs/release-notes/`) |
+| Nền tảng | Render gói Free (Singapore); PostgreSQL chỉ truy cập qua mạng nội bộ của Render, không public |
+| Tài khoản mẫu (dữ liệu seed) | `customer@brewlite.com` / `password123` (chỉ để demo) |
+
+> Render gói Free tự tắt khi không có truy cập, lần mở đầu có thể chờ khoảng 50 giây. Database Free hết hạn ngày 22/11/2026 và không có sao lưu.
+
+**CI** (`.github/workflows/ci.yml`, chạy mỗi pull request): bốn job `api` (lint, unit test, build), `api-e2e` (test tích hợp trên PostgreSQL), `web` (lint, build) và `e2e-browser` (Playwright). Nhánh `main` có quy tắc bảo vệ: phải qua pull request, cần check `api` và `web` đạt và có một lượt Approve mới merge được. Bằng chứng một lần CI đỏ và một lần xanh: `docs/evidence/` (ảnh 16 đến 18).
+
+**Deploy** (`.github/workflows/cd.yml`): đẩy tag phiên bản, ví dụ
+
+```bash
+git checkout main && git pull
+git tag v0.1.3
+git push origin v0.1.3
+```
+
+CD sẽ chạy kiểm tra chất lượng, build image Docker (gắn tag `sha-<7 ký tự commit>` và tên tag), đẩy lên GitHub Container Registry, gọi Deploy Hook của Render cho api và web, rồi chạy smoke test (`/health`, `/products`, `/menu`). Migration cơ sở dữ liệu chạy tự động khi API khởi động (`prisma migrate deploy`), các migration chỉ thêm nên bản cũ vẫn chạy được trên cơ sở dữ liệu mới.
+
+**Rollback:** vào GitHub, Actions, workflow **CD**, **Run workflow**, nhập `image_tag` của bản ổn định trước đó (ví dụ `sha-e445b63` là v0.1.1). Workflow bỏ qua bước build, deploy lại đúng image đó cho cả api và web rồi chạy smoke test. Đã chạy thử ngày 23/10/2026 (từ v0.1.2 về v0.1.1 rồi triển khai lại): xem ảnh 20 đến 25 trong `docs/evidence/`.
+
+Hướng dẫn thiết lập lần đầu, biến môi trường, các lỗi đã gặp: `docs/deployment.md`. Bằng chứng kiểm tra trên production: `docs/evidence/`.
+
+---
+
+*README phiên bản 2.2, cập nhật ngày 24/10/2026: trạng thái production, CI/CD và rollback của Assignment 2. Cập nhật khi có thay đổi về cài đặt, cách chạy hoặc trạng thái nghiệm thu.*

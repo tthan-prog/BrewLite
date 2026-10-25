@@ -1,0 +1,132 @@
+@startuml class-domain
+title Class diagram mức domain – BrewLite (khớp apps/api/prisma/schema.prisma)
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+enum Role {
+  CUSTOMER
+  STAFF
+}
+enum OrderStatus {
+  PENDING
+  PAID
+  PAYMENT_FAILED
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
+enum PaymentMethod {
+  WALLET
+  CARD
+}
+enum PaymentStatus {
+  SUCCESS
+  FAILED
+}
+enum PromotionType {
+  PERCENT
+  FIXED
+}
+enum LoyaltyType {
+  EARN
+  REVERSAL
+}
+
+
+class User {
+  id : int
+  email : string
+  name : string
+  password : string (bcrypt)
+  role : Role
+  points : int
+}
+class Product {
+  id : int
+  name : string
+  price : int
+  stock : int
+  category : string
+  imageUrl : string
+}
+class Topping {
+  id : int
+  name : string
+  price : int
+}
+class Order {
+  id : int
+  status : OrderStatus
+  subtotal : int
+  discount : int
+  promoCode : string
+  total : int
+  createdAt : datetime
+}
+class OrderItem {
+  id : int
+  quantity : int
+  size : string
+  unitPrice : int
+}
+class OrderItemTopping {
+  orderItemId : int
+  toppingId : int
+  quantity : int
+  price : int
+}
+class Payment {
+  id : int
+  method : PaymentMethod
+  status : PaymentStatus
+  amount : int
+  idempotencyKey : string
+  requestHash : string
+}
+class Promotion {
+  id : int
+  code : string
+  type : PromotionType
+  value : int
+  minOrder : int
+  expiresAt : datetime
+  usageCount : int
+}
+class LoyaltyTransaction {
+  id : int
+  type : LoyaltyType
+  points : int (âm khi REVERSAL)
+  createdAt : datetime
+}
+class IdempotencyRecord {
+  id : int
+  key : string
+  requestHash : string
+}
+
+User "1" -- "0..*" Order : đặt
+Order "1" *-- "1..*" OrderItem : gồm
+OrderItem "0..*" -- "1" Product : tham chiếu
+OrderItem "1" -- "0..*" OrderItemTopping
+Topping "1" -- "0..*" OrderItemTopping
+Order "1" -- "0..*" Payment : thanh toán
+Order "0..*" ..> "0..1" Promotion : áp dụng theo promoCode
+User "1" -- "0..*" Payment : thực hiện
+User "1" -- "0..*" LoyaltyTransaction : tích/hoàn điểm
+Order "1" -- "0..2" LoyaltyTransaction : EARN khi PAID, REVERSAL khi hủy
+User "1" -- "0..*" IdempotencyRecord
+Order "1" -- "0..1" IdempotencyRecord : chống tạo trùng
+User ..> Role
+Order ..> OrderStatus
+Payment ..> PaymentStatus
+Payment ..> PaymentMethod
+Promotion ..> PromotionType
+LoyaltyTransaction ..> LoyaltyType
+note right of User
+  Mỗi lần đổi điểm ghi một LoyaltyTransaction
+  (1 điểm / 10.000đ, EARN khi PAID,
+  REVERSAL khi hủy đơn đã PAID);
+  User.points là số dư hiện tại.
+end note
+@enduml

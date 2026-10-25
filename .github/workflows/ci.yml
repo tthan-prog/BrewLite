@@ -1,0 +1,158 @@
+name: CI
+
+# Chạy khi mở hoặc cập nhật pull request vào main (Assignment 2 – Task 4.4):
+# Install -> Lint -> Unit Test -> Build.
+# Để chặn merge khi CI lỗi: GitHub -> Settings -> Branches -> rule cho main ->
+# "Require status checks to pass" -> chọn "api" và "web".
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  api:
+    name: api
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/api/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Generate Prisma client
+        # src/generated nằm trong .gitignore nên phải sinh lại; không kết nối CSDL.
+        run: npx prisma generate --config prisma7.config.ts
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      - name: Lint
+        run: npm run lint
+      - name: Unit test
+        run: npm test
+      - name: Build
+        run: npm run build
+
+  api-e2e:
+    name: api-e2e
+    # Integration test trên PostgreSQL thật (cùng bộ test Task 10: a, b, c). Không bắt buộc để merge.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: brewlite
+          POSTGRES_PASSWORD: brewlite
+          POSTGRES_DB: brewlite
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U brewlite -d brewlite"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://brewlite:brewlite@localhost:5432/brewlite
+      JWT_SECRET: ci-only-secret
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/api/package-lock.json
+      - run: npm ci
+      - name: Generate Prisma client
+        run: npx prisma generate --config prisma7.config.ts
+      - name: Migrate and seed
+        run: |
+          npx prisma migrate deploy --config prisma7.config.ts
+          npx prisma db seed --config prisma7.config.ts
+      - name: Integration test
+        run: npm run test:e2e
+
+  web:
+    name: web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Unit test
+        run: npm test --if-present
+      - name: Build
+        run: npm run build
+
+  e2e-browser:
+    name: e2e-browser
+    # Test E2E bằng trình duyệt thật (Playwright): menu -> đăng ký/đăng nhập -> giỏ hàng -> thanh toán -> xác nhận.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: brewlite
+          POSTGRES_PASSWORD: brewlite
+          POSTGRES_DB: brewlite
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U brewlite -d brewlite"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://brewlite:brewlite@localhost:5432/brewlite
+      JWT_SECRET: ci-only-secret
+      FRONTEND_ORIGIN: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Build and start API
+        working-directory: apps/api
+        run: |
+          npm ci
+          npx prisma generate --config prisma7.config.ts
+          npx prisma migrate deploy --config prisma7.config.ts
+          npx prisma db seed --config prisma7.config.ts
+          npm run build
+          nohup node dist/main.js > /tmp/api.log 2>&1 &
+          npx --yes wait-on -t 60000 http://localhost:3001/products
+      - name: Build and start web
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+        run: |
+          npm ci
+          npm run build
+          nohup npx next start -p 3000 > /tmp/web.log 2>&1 &
+          npx --yes wait-on -t 60000 http://localhost:3000
+      - name: Playwright
+        working-directory: tests/e2e
+        run: |
+          npm ci || npm install
+          npx playwright install --with-deps chromium
+          npx playwright test
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
