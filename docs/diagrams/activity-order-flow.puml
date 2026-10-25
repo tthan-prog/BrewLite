@@ -1,5 +1,6 @@
+
 @startuml activity-order-flow
-title Activity diagram – luồng từ menu đến theo dõi đơn
+title Activity Diagram - Luồng đặt hàng BrewLite
 skinparam shadowing false
 
 |Khách hàng|
@@ -10,47 +11,62 @@ start
 :Bấm "Đặt đơn";
 
 |Hệ thống|
-if (Đã đăng nhập?) then (chưa)
+if (Đã đăng nhập?) then (Chưa)
   |Khách hàng|
   :Đăng nhập / đăng ký;
   |Hệ thống|
-else (rồi)
+  :Xác thực tài khoản;
+else (Rồi)
 endif
+
 :Kiểm tra dữ liệu giỏ hàng;
 :Mở transaction, kiểm tra tồn kho;
-if (Đủ hàng?) then (hết hàng)
+
+if (Đủ hàng?) then (Không)
   :Rollback, không tạo đơn;
   |Khách hàng|
   :Nhận thông báo hết hàng;
+  :Quay lại điều chỉnh giỏ hàng;
   stop
-else (đủ)
+else (Có)
+  :Trừ tồn kho, tạo đơn PENDING;
 endif
-|Hệ thống|
-:Trừ tồn kho, tạo đơn PENDING;
 
 |Khách hàng|
-:Chọn Ví/Thẻ và xác nhận thanh toán;
+:Chọn Ví / Thẻ;
+:Xác nhận thanh toán;
 
 |Hệ thống|
-:Kiểm tra Idempotency-Key;
-:Gọi Payment Service;
-if (Thanh toán thành công?) then (thất bại)
-  :Đơn -> PAYMENT_FAILED;
-  |Khách hàng|
-  :Nhận lỗi, giữ giỏ hàng, có thể thử lại;
-  stop
-else (thành công)
-endif
+repeat
+  :Kiểm tra Idempotency-Key;
+  :Gọi Payment Service;
+
+  if (Thanh toán thành công?) then (Có)
+    :Đơn -> PAID;
+  else (Không)
+    :Đơn -> PAYMENT_FAILED;
+    |Khách hàng|
+    :Nhận thông báo thanh toán thất bại;
+    :Giữ giỏ hàng;
+    :Bỏ giả lập lỗi và thử lại;
+    |Hệ thống|
+    :Chuẩn bị xử lý lần thanh toán mới;
+  endif
+
+repeat while (Thanh toán thành công?) is (Không) not (Có)
+
 |Hệ thống|
-:Đơn -> PAID;
-:Cộng điểm thưởng (ghi LoyaltyTransaction EARN);
+:Cộng điểm thưởng;
+:Ghi LoyaltyTransaction EARN;
 
 |Khách hàng|
 :Xem xác nhận đơn;
+:Xem lịch sử và chi tiết đơn;
 :Theo dõi trạng thái đơn;
 
 |Hệ thống|
-:Nhân viên cập nhật: PREPARING -> READY -> COMPLETED;
+:Nhân viên cập nhật trạng thái;
+:PREPARING -> READY -> COMPLETED;
 
 |Khách hàng|
 :Nhận đồ uống;
