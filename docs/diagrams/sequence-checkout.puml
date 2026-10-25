@@ -1,66 +1,169 @@
+
 @startuml sequence-checkout
 title UC-01 Đặt và thanh toán đơn hàng
 skinparam shadowing false
+skinparam responseMessageBelowArrow true
 autonumber
+hide footbox
 
 actor Customer
 participant "Next.js UI" as UI
-participant "NestJS API" as API
+participant "OrdersController /\nPaymentsController" as API
+participant "OrdersService" as OS
+participant "PaymentsService" as PS
 database "PostgreSQL" as DB
-participant "Payment Service\n(mô phỏng)" as PAY
 
 == Đặt đơn ==
+
 Customer -> UI : Bấm "Đặt đơn"
-UI -> API : POST /orders (JWT, danh sách món)
-API -> API : Kiểm tra JWT và validate dữ liệu
-alt JWT sai hoặc hết hạn
-  API --> UI : 401 Unauthorized
-  UI --> Customer : Yêu cầu đăng nhập (giữ giỏ hàng)
-else Dữ liệu hợp lệ
-  API -> DB : Tìm IdempotencyRecord (userId, Idempotency-Key)
-  alt khóa đã dùng và cùng nội dung
-    DB --> API : đơn đã tạo trước đó
-    API --> UI : trả lại đơn cũ (không tạo mới)
-  else khóa đã dùng nhưng nội dung khác
+UI -> API : POST /orders\n(JWT, danh sách món, Idempotency-Key)
+API -> API : JwtAuthGuard xác thực JWT
+API -> OS : create({ ...dto, userId: user.id }, key)
+OS -> OS : Chuẩn hóa payload, tính requestHash
+OS -> DB : Tìm IdempotencyRecord\n(userId, idempotencyKey)
+DB --> OS : Record hoặc null
+
+alt Khóa đã dùng, cùng nội dung
+    OS --> API : Trả order đã tạo trước đó
+    API --> UI : 201 Created, order cũ
+    UI --> Customer : Hiển thị đơn hàng
+else Khóa đã dùng, nội dung khác
+    OS --> API : ConflictException
     API --> UI : 409 Conflict
-  else khóa mới
-  API -> DB : BEGIN
-  loop mỗi món trong đơn
-    API -> DB : UPDATE product SET stock = stock - n\nWHERE id = ? AND stock >= n
-    DB --> API : số dòng cập nhật
-  end
-  alt có món hết hàng (0 dòng được cập nhật)
-    API -> DB : ROLLBACK
-    API --> UI : 400 Insufficient stock
-    UI --> Customer : Báo món hết hàng
-  else đủ hàng
-    API -> DB : INSERT order (PENDING), order_item, IdempotencyRecord
-    API -> DB : COMMIT
-    API --> UI : 201 {orderId, tổng tiền}
-  end
-  end
+    UI --> Customer : Thông báo khóa đã dùng với nội dung khác
+else Khóa mới
+    OS -> DB : BEGIN transaction
+
+    loop Mỗi món trong đơn
+        OS -> DB : Kiểm tra Product và dữ liệu món
+        DB --> OS : Product / dữ liệu liên quan
+        OS -> DB : UPDATE Product\nSET stock = stock - quantity\nWHERE id = ? AND stock >= quantity
+        DB --> OS : Số dòng cập nhật
+
+        alt Không tìm thấy Product hoặc không đủ hàng
+            OS -> DB : ROLLBACK transaction
+            OS --> API : Exception
+            API --> UI : Lỗi tạo đơn
+            UI --> Customer : Thông báo lỗi sản phẩm hoặc tồn kho
+        else Đủ tồn kho
+            OS -> OS : Tính subtotal
+        end
+    end
+
+    opt Có mã khuyến mãi
+        OS -> DB : Kiểm tra Promotion và điều kiện
+        DB --> OS : Dữ liệu Promotion
+        OS -> OS : Tính discount
+        OS -> DB : Cập nhật usageCount nếu hợp lệ
+    end
+
+    OS -> OS : Tính tổng tiền
+    OS -> DB : INSERT Order và OrderItems
+    DB --> OS : Order đã tạo
+    OS -> DB : INSERT IdempotencyRecord
+    DB --> OS : Record đã tạo
+    OS -> DB : COMMIT transaction
+
+    OS --> API : Order đã tạo
+    API --> UI : 201 Created
+    UI --> Customer : Hiển thị orderId và tổng tiền
 end
 
 == Thanh toán ==
+
 Customer -> UI : Chọn Ví/Thẻ và xác nhận
-UI -> API : POST /payments (JWT, orderId, Idempotency-Key)
-API -> DB : Tìm payment theo Idempotency-Key
-alt khóa đã dùng (gửi lại yêu cầu)
-  DB --> API : payment đã có
-  API --> UI : Trả kết quả cũ (không thanh toán lại)
-else khóa mới
-  API -> DB : BEGIN (kiểm tra đơn của mình, trạng thái PENDING hoặc PAYMENT_FAILED)
-  API -> PAY : charge(orderId, số tiền, phương thức) [mô phỏng trong PaymentsService]
-  alt thanh toán thành công
-    PAY --> API : SUCCESS
-    API -> DB : INSERT payment SUCCESS, Order -> PAID, cộng điểm (User.points + LoyaltyTransaction EARN), COMMIT
-    API --> UI : 200 {payment, order: PAID}
-    UI --> Customer : Hiển thị xác nhận đơn
-  else thanh toán thất bại
-    PAY --> API : FAILED
-    API -> DB : INSERT payment FAILED, Order -> PAYMENT_FAILED, COMMIT
-    API --> UI : 200 {payment: FAILED, order: PAYMENT_FAILED}
-    UI --> Customer : Báo lỗi, cho thử lại với Idempotency-Key mới (PAYMENT_FAILED -> PENDING -> PAID)
-  end
+UI -> API : POST /payments\n(JWT, orderId, method, simulate, Idempotency-Key)
+API -> API : JwtAuthGuard xác thực JWT
+API -> PS : pay(user.id, dto, key)
+PS -> PS : Tính requestHash
+PS -> DB : Tìm Payment theo\n(userId, idempotencyKey)
+DB --> PS : Payment hoặc null
+
+alt Khóa đã dùng, cùng nội dung
+    PS --> API : Payment và Order cũ\n(replayed = true)
+    API --> UI : 200 OK, kết quả cũ
+    UI --> Customer : Hiển thị kết quả đã xử lý
+else Khóa đã dùng, nội dung khác
+    PS --> API : ConflictException
+    API --> UI : 409 Conflict
+    UI --> Customer : Thông báo khóa đã dùng với nội dung khác
+else Khóa mới
+    PS -> DB : BEGIN transaction
+    PS -> DB : Tìm Order theo orderId
+    DB --> PS : Order hoặc không tìm thấy
+
+    alt Order không tồn tại hoặc không thuộc user
+        PS -> DB : ROLLBACK transaction
+        PS --> API : NotFoundException
+        API --> UI : 404 Not Found
+    else Order thuộc user
+        alt Trạng thái không phải PENDING hoặc PAYMENT_FAILED
+            PS -> DB : ROLLBACK transaction
+            PS --> API : BadRequestException
+            API --> UI : 400 Bad Request
+        else Trạng thái cho phép thanh toán
+            opt Order đang PAYMENT_FAILED
+                PS -> OS : changeStatus(tx, orderId, PENDING)
+                OS -> DB : Kiểm tra và cập nhật trạng thái
+                DB --> OS : Kết quả cập nhật
+                OS --> PS : Order PENDING
+            end
+
+            PS -> PS : Mô phỏng kết quả từ dto.simulate
+            PS -> DB : INSERT Payment\n(SUCCESS hoặc FAILED)
+            DB --> PS : Payment đã tạo
+
+            alt Thanh toán thành công
+                PS -> OS : changeStatus(tx, orderId, PAID)
+                OS -> DB : Kiểm tra và cập nhật trạng thái
+                DB --> OS : Kết quả cập nhật
+
+                opt Cộng điểm thưởng
+                    OS -> DB : Cập nhật User.points
+                    OS -> DB : INSERT LoyaltyTransaction EARN
+                end
+
+                OS --> PS : Order PAID
+                PS -> DB : COMMIT transaction
+                PS --> API : Payment SUCCESS,\nOrder PAID, replayed = false
+                API --> UI : 200 OK
+                UI --> Customer : Hiển thị xác nhận đơn hàng
+            else Thanh toán thất bại
+                PS -> OS : changeStatus(tx, orderId, PAYMENT_FAILED)
+                OS -> DB : Kiểm tra và cập nhật trạng thái
+                DB --> OS : Kết quả cập nhật
+                OS --> PS : Order PAYMENT_FAILED
+                PS -> DB : COMMIT transaction
+                PS --> API : Payment FAILED,\nOrder PAYMENT_FAILED, replayed = false
+                API --> UI : 200 OK
+                UI --> Customer : Báo thanh toán thất bại
+            end
+        end
+    end
 end
+
+note over OS,DB
+Tạo đơn:
+Order, OrderItems, cập nhật tồn kho,
+khuyến mãi và IdempotencyRecord
+nằm trong transaction.
+
+Lỗi làm transaction thất bại sẽ rollback.
+Khi có unique constraint P2002,
+service thử đọc lại idempotency record.
+end note
+
+note over PS,DB
+Thanh toán:
+Payment và thay đổi trạng thái Order
+nằm trong cùng transaction.
+
+PAYMENT_FAILED là kết quả nghiệp vụ,
+không đồng nghĩa với rollback.
+
+Có thể thử lại bằng Idempotency-Key mới:
+PAYMENT_FAILED -> PENDING -> PAID
+nếu lần thử tiếp theo thành công.
+end note
+
 @enduml
