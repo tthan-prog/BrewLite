@@ -14,7 +14,7 @@ Kiến trúc phân lớp kết hợp mức container của mô hình C4: ngườ
 | API (backend) | NestJS, JWT, validation | Nghiệp vụ, xác thực, phân quyền, truy cập DB | `apps/api` | Có: auth, products, orders, payments, `/health` |
 | Cơ sở dữ liệu | PostgreSQL 16 + migration | Lưu người dùng, sản phẩm, đơn, thanh toán, giao dịch điểm và bản ghi idempotency | `docker-compose.yml` (db), thư mục migration trong `apps/api` | Có schema Prisma và migration; seed 12 sản phẩm, 4 topping |
 | Payment Service (mô phỏng) | Module trong NestJS | Giả lập thanh toán Ví/Thẻ thành công hoặc thất bại; xử lý `Idempotency-Key` cho payment | `apps/api/src/payments` | Có (Ví/Thẻ, giả lập lỗi bằng `simulate`) |
-| CI/CD | GitHub Actions + GHCR | Lint, test, build, đóng gói image, deploy, smoke test | `.github/workflows` | Có `ci.yml` và `cd.yml`; chưa chạy thật trên GitHub |
+| CI/CD | GitHub Actions + GHCR | Lint, test, build, đóng gói image, deploy, smoke test | `.github/workflows` | Có `ci.yml` và `cd.yml`; đã chạy thật trên GitHub (CI run #13 đỏ, #14 xanh; CD xanh ở v0.1.1 và v0.1.2) |
 
 ## 3. Cấu trúc module backend
 
@@ -60,5 +60,5 @@ Mỗi container trong `deployment-diagram.puml` phải khớp một dòng ở b�
 | 003 | JWT và phân quyền theo vai trò | Đã chốt |
 | 004 | Thanh toán mô phỏng và Idempotency-Key | Đã chốt |
 | 005 | Kiểm soát tồn kho bằng cập nhật có điều kiện trong transaction | Đã chốt |
-| 006 | CI/CD bằng GitHub Actions và registry GHCR | Đã chốt (chờ chạy thật) |
-| 007 | Nền tảng triển khai production: Render | Đã chọn mặc định, chờ A xác nhận |
+| 006 | CI/CD bằng GitHub Actions và registry GHCR | Đã chốt |
+| 007 | Nền tảng triển khai production: Render | Đã chọn (23/10/2026) |
