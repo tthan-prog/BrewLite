@@ -1,8 +1,5 @@
 # Bản nháp tin nhắn gửi giảng viên
 
-> Chưa gửi. Thành viên A sửa các chỗ `[…]` rồi gửi qua kênh giảng viên thường dùng (email hoặc Zalo/Teams). Tin nhắn ngắn, hỏi đúng những điểm nhóm không thể tự quyết.
-
----
 
 **Tiêu đề (nếu gửi email):** [Lớp/Nhóm] – Xác nhận một số yêu cầu bài tập lớn BrewLite
 

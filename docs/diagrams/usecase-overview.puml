@@ -1,0 +1,45 @@
+
+@startuml usecase-overview
+title Use Case Diagram - BrewLite
+left to right direction
+skinparam shadowing false
+
+actor Customer
+actor Staff
+actor "Payment Service\n(mô phỏng)" as PAY
+
+rectangle BrewLite {
+  usecase "Xem menu" as UC_Menu
+  usecase "Xem chi tiết sản phẩm" as UC_Detail
+  usecase "Quản lý giỏ hàng" as UC_Cart
+  usecase "Đăng ký" as UC_Register
+  usecase "Đăng nhập" as UC_Login
+  usecase "Đặt và thanh toán\nđơn hàng (UC-01)" as UC_Checkout
+  usecase "Xem lịch sử và\nchi tiết đơn" as UC_History
+  usecase "Cập nhật trạng thái đơn" as UC_Status
+  usecase "Áp mã khuyến mãi" as UC_Promo
+}
+
+Customer --> UC_Menu
+Customer --> UC_Detail
+Customer --> UC_Cart
+Customer --> UC_Register
+Customer --> UC_Login
+Customer --> UC_Checkout
+Customer --> UC_History
+
+Staff --> UC_Status
+PAY --> UC_Checkout
+
+UC_Checkout ..> UC_Login : <<include>>
+UC_Promo ..> UC_Checkout : <<extend>>
+
+note right of UC_Checkout
+  Yêu cầu đăng nhập trước khi đặt đơn.
+  Thanh toán Ví / Thẻ mô phỏng.
+  Thất bại có thể thử lại.
+  Khi PAID: tự động cộng điểm thưởng.
+  Khi hủy đơn PAID: hoàn tác điểm.
+end note
+
+@enduml
