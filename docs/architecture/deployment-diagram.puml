@@ -15,46 +15,45 @@ node "Máy lập trình viên (local)" as LOCAL {
   }
 }
 
-cloud "GitHub (CI)" as GH {
-  node "GitHub Actions" as CI {
-    artifact "ci.yml: install, lint, test, build" as CIJOB
-    artifact "cd.yml: build image, push, deploy,\nsmoke test" as CDJOB
-  }
-  node "GitHub Secrets/Variables\nRENDER_*_DEPLOY_HOOK,\nPRODUCTION_*_URL" as SECRETS
+cloud "GitHub" as GH {
   artifact "Mã nguồn (repo)" as REPO
+  node "GitHub Actions" as CI {
+    artifact "ci.yml: install, lint, unit test, build" as CIJOB
+    artifact "cd.yml: quality, build image, push GHCR,\ndeploy Render, smoke test" as CDJOB
+  }
+  node "GitHub Secrets / Variables\nSecrets: RENDER_API_DEPLOY_HOOK,\nRENDER_WEB_DEPLOY_HOOK\nVariables: PRODUCTION_API_URL,\nPRODUCTION_WEB_URL" as SECRETS
 }
 
-node "Container registry (GHCR)" as REG {
-  artifact "image api:<commit SHA>" as IMG_API
-  artifact "image web:<commit SHA>" as IMG_WEB
+node "GitHub Container Registry (GHCR)\nPackages cần Public nếu Render kéo image không credentials" as REG {
+  artifact "ghcr.io/<owner>/brewlite-api:sha-<7 ký tự>" as IMG_API
+  artifact "ghcr.io/<owner>/brewlite-web:sha-<7 ký tự>" as IMG_WEB
 }
 
 cloud "Render (production)" as PROD {
   node "Web Service (Next.js)\nimage brewlite-web\nPORT 3000" as P_WEB
-  node "Web Service (NestJS)\nimage brewlite-api\nPORT 3001, GET /health\nprisma migrate deploy khi khởi động" as P_API
+  node "Web Service (NestJS)\nimage brewlite-api\nPORT 3001\nGET /health" as P_API
   database "Render PostgreSQL\nInternal Database URL\nkhông public" as P_DB
-  node "Env của service\nDATABASE_URL, JWT_SECRET,\nFRONTEND_ORIGIN" as P_ENV
-  node "Log và health check" as P_LOG
+  node "Environment của service\nDATABASE_URL, JWT_SECRET,\nFRONTEND_ORIGIN" as P_ENV
+  node "Logs và health check" as P_LOG
 }
 
 BROWSER --> P_WEB : HTTPS 443
 BROWSER --> P_API : HTTPS 443 (REST/JSON, JWT)
-P_WEB ..> P_API : gọi API
+P_WEB ..> P_API : gọi API qua NEXT_PUBLIC_API_URL
 P_API --> P_DB : TCP 5432 (mạng nội bộ)
 P_ENV ..> P_API
 P_API ..> P_LOG
 P_WEB ..> P_LOG
 
-REPO --> CIJOB : pull request / push
+REPO --> CIJOB : pull request / push main
 REPO --> CDJOB : push tag v* / chạy tay
 SECRETS ..> CDJOB
-CDJOB --> IMG_API : docker push
-CDJOB --> IMG_WEB : docker push
-CDJOB --> P_API : Deploy Hook + imgURL (tag sha)
-CDJOB --> P_WEB : Deploy Hook + imgURL
-CDJOB ..> P_API : smoke test GET /health
-IMG_API ..> P_API : kéo image
-IMG_WEB ..> P_WEB : kéo image
+CDJOB --> IMG_API : docker build / push
+CDJOB --> IMG_WEB : docker build / push
+CDJOB --> P_API : Deploy Hook + imgURL (sha-...)
+CDJOB --> P_WEB : Deploy Hook + imgURL (sha-...)
+IMG_API ..> P_API : Render kéo image
+IMG_WEB ..> P_WEB : Render kéo image
 
 L_WEB --> L_API : HTTP
 L_API --> L_DB : TCP 5432
