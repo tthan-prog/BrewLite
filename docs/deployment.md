@@ -81,9 +81,9 @@ Push tag `v*` → Lint, Test, Build (api và web) → Build Docker image (tag `s
 ## 7. Kiểm tra bàn giao
 
 - [ ] Người ngoài nhóm clone repo, chạy theo README được.
-- [ ] URL frontend và API truy cập được qua HTTPS.
+- [x] URL frontend và API truy cập được qua HTTPS.
 - [ ] DB production chỉ dùng Internal URL, không mở truy cập từ Internet.
 - [ ] Secret không có trong repository hoặc log CI.
-- [ ] Có release/tag và release notes.
-- [ ] Có ảnh/log một lần CI **đạt** và một lần CI **phát hiện lỗi** (mở PR cố ý lỗi lint, chụp, rồi sửa).
-- [ ] Có ảnh/log một lần CD chạy thành công.
+- [x] Có release/tag và release notes.
+- [x] Có ảnh/log một lần CI **đạt** và một lần CI **phát hiện lỗi** (run #13 đỏ, run #14 xanh).
+- [x] Có ảnh/log một lần CD chạy thành công (v0.1.1, v0.1.2).

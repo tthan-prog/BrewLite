@@ -1,0 +1,70 @@
+\chapter{Quản lý dự án (Scrum)}\label{ch:quanly}
+\section{Vai trò / trách nhiệm trong nhóm}\label{sec:se-vaitro}
+Vai trò theo \path{docs/team-agreement.md}; đây là ``người chịu trách nhiệm chính'', không phải chỉ một người làm. Scrum Guide 2020 gọi các vai là \emph{accountabilities}; báo cáo dùng từ ``vai trò'' theo đề bài.
+\begin{table}[htbp]\centering
+\caption{Vai trò và trách nhiệm}\label{tab:vaitro}
+\begin{tabular}{@{}p{3.4cm}p{3.8cm}p{5.8cm}@{}}\toprule
+\textbf{Thành viên} & \textbf{Vai trò} & \textbf{Trách nhiệm cụ thể} \\ \midrule
+Nguyễn Lê Nhựt Thắng (A) & Scrum Master, phát triển nền tảng & Khởi tạo dự án, điều phối Scrum, Docker, tài liệu \\
+Hồ Thiên Ngân (B) & Backend & Dữ liệu, seed, tạo đơn, nghiệp vụ lõi \\
+Hà Thiên Long (C) & Backend & API sản phẩm, xác thực, thanh toán, máy trạng thái \\
+Giản Thiên Lực (D) & Frontend & Menu, chi tiết, giỏ hàng; slide \\
+Lê Thuận (E) & Frontend, kiểm thử & Xác nhận, lịch sử đơn, kiểm thử; Product Owner tạm thời \\ \bottomrule
+\end{tabular}
+\end{table}
+Quy ước: Daily Scrum 20:00, tối đa 15 phút (có thể qua chat); không đẩy trực tiếp lên \texttt{main}, mỗi chức năng một nhánh và gộp qua PR; task chỉ tính xong khi đạt DoD và được người khác nghiệm thu; đóng băng mã tối 25/10.
+
+\section{Sự kiện và artefact}\label{sec:se-suKien}
+Mỗi Sprint có Planning đầu kỳ và Review kết hợp Retrospective cuối kỳ; sáu biên bản (bản nháp do A soạn, nhóm hiệu chỉnh) nằm ở \path{docs/scrum/minutes}. Artefact gồm Product Backlog (10 Task), ba Sprint Backlog và Increment.
+
+\textbf{Product Backlog.} Điểm (story point) do nhóm ước lượng bằng planning poker khi Sprint Planning; tổng 40 điểm (\cref{tab:backlog}).
+\begin{longtable}{@{}p{1cm}p{3.3cm}p{4.8cm}p{1cm}p{2.4cm}@{}}
+\caption{Product Backlog}\label{tab:backlog}\\
+\toprule \textbf{Task} & \textbf{Hạng mục} & \textbf{Tiêu chí chính} & \textbf{Điểm} & \textbf{Phụ trách} \\ \midrule \endfirsthead
+\toprule \textbf{Task} & \textbf{Hạng mục} & \textbf{Tiêu chí chính} & \textbf{Điểm} & \textbf{Phụ trách} \\ \midrule \endhead
+\bottomrule \endlastfoot
+1 & Khởi tạo dự án & Cấu trúc, Git, README, cấu hình mẫu & 2 & A \\
+2 & API sản phẩm & \texttt{GET /products} từ CSDL, seed & 3 & C (B: schema, seed) \\
+3 & Trang Menu & Gọi API, loading, rỗng, lỗi & 3 & D \\
+4 & Chi tiết sản phẩm & Chọn size, topping, tính giá & 3 & D \\
+5 & Giỏ hàng & Thêm, sửa, xóa, tổng tiền & 3 & D \\
+6 & API tạo đơn & \texttt{POST /orders}, validate, PENDING & 5 & B \\
+7 & Đăng ký, đăng nhập & bcrypt, JWT, guard & 5 & C \\
+8 & Thanh toán & Ví/Thẻ mô phỏng, PAID hoặc PAYMENT\_FAILED & 5 & C \\
+9 & Xác nhận, lịch sử, bàn giao & Mã đơn, lịch sử, Docker, README & 3 & E \\
+10 & Nghiệp vụ nâng cao & Trạng thái, idempotency, tồn kho, khuyến mãi, điểm & 8 & B, C \\
+\end{longtable}
+
+\section{Kế hoạch và diễn biến từng Sprint}\label{sec:se-sprint}
+\begin{table}[htbp]\centering
+\caption{Kế hoạch và kết quả ba Sprint (điểm)}\label{tab:sprint}
+\begin{tabular}{@{}p{1.5cm}p{2.1cm}p{3cm}p{1.2cm}p{1.6cm}p{3cm}@{}}\toprule
+\textbf{Sprint} & \textbf{Thời gian} & \textbf{Cam kết} & \textbf{Xong} & \textbf{Còn lại} & \textbf{Ghi chú} \\ \midrule
+1 & 14--18/10 & 11 & 2 & 9 & Trễ: chỉ xong Task 1 \\
+2 & 19--22/10 & 22 (13 mới + 9 tồn) & 14 & 8 & Còn Task 7 phía backend và API sản phẩm \\
+3 & 23--25/10 & 24 (16 mới + 8 tồn) & 24 & 0 & Mã hoàn tất 23/10 \\ \bottomrule
+\end{tabular}
+\end{table}
+\cref{fig:burndown} vẽ từ \path{docs/scrum/burndown-sprint-*.csv}. Điểm thực tế được trừ theo \emph{ngày mã chạy được và có commit}. Sprint 1 nằm trên đường lý tưởng vì phần lớn mã bắt đầu từ 21/10; Sprint 2 bắt đầu bù và kết thúc còn 8 điểm; Sprint 3 hoàn tất toàn bộ phần còn lại ngay ngày đầu nên đường thực tế nằm dưới đường lý tưởng.
+\hinh{burndown.jpg}{\linewidth}{Burndown ba Sprint}{fig:burndown}
+\nguon{nhóm tổng hợp từ \path{docs/scrum/burndown-sprint-1.csv}, \path{-2.csv}, \path{-3.csv}}
+
+\section{Definition of Done}\label{sec:se-dod}
+Bốn mục DoD áp dụng cho mọi Task (\path{docs/scrum/dod-nghiem-thu.md}): (D1) chạy được, không lỗi build; (D2) commit rõ ràng và PR có ít nhất một Approve của người khác; (D3) API validate, giao diện có loading và lỗi; (D4) README có hướng dẫn chạy. Người nghiệm thu khác người viết task (\cref{tab:nghiemthu}). Ngày 23/10/2026 nhóm tự kiểm tra và ghi nhận cả 10 Task đạt, người xác nhận là A.
+\begin{table}[htbp]\centering
+\caption{Người viết và người nghiệm thu từng Task}\label{tab:nghiemthu}
+\begin{tabular}{@{}p{1cm}p{4.4cm}p{3.6cm}p{2.6cm}p{1.2cm}@{}}\toprule
+\textbf{Task} & \textbf{Nội dung} & \textbf{Người viết chính} & \textbf{Nghiệm thu} & \textbf{Kết quả} \\ \midrule
+1 & Khởi tạo dự án & A & B & Đạt \\
+2 & API sản phẩm & C (B: schema, seed) & D & Đạt \\
+3 & Trang Menu & D & E & Đạt \\
+4 & Chi tiết, size, topping & D & C & Đạt \\
+5 & Giỏ hàng & D & B & Đạt \\
+6 & API tạo đơn & B & D & Đạt \\
+7 & Đăng ký, đăng nhập & C & E & Đạt \\
+8 & Thanh toán & C & B & Đạt \\
+9 & Xác nhận, lịch sử & E & C & Đạt \\
+10 & Nghiệp vụ nâng cao & B, C & E & Đạt \\ \bottomrule
+\end{tabular}
+\end{table}
+\textbf{Hạn chế trung thực:} cột ``Đạt'' là ghi nhận trong tài liệu của nhóm. Các PR chưa có Approve hoặc bình luận nghiệm thu của người đánh giá trên GitHub, nên mục D2 chưa có dấu vết đầy đủ. Điểm này đã nêu ở Retrospective (\cref{sec:se-retro}).

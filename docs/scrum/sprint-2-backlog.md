@@ -2,7 +2,7 @@
 
 - **Thời gian:** 19/10 – 22/10/2026
 - **Sprint Goal:** Người dùng xem menu, quản lý giỏ hàng và tạo đơn; có đăng nhập (Task 5, 6, 7) và hoàn tất phần tồn từ Sprint 1 (Task 2, 3, 4).
-- **Daily Scrum:** hằng ngày 21:00 qua nhóm chat.
+- **Daily Scrum:** hằng ngày 20:00 qua nhóm chat.
 - **Sprint Review và Retrospective:** 22/10/2026, 21:30 (xem `minutes/04-sprint2-review-retro.md`).
 - **Tổng điểm:** 22 điểm = 13 điểm mới (T5 = 3, T6 = 5, T7 = 5) + 9 điểm tồn từ Sprint 1 (T2, T3, T4).
 

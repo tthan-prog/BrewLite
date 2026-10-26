@@ -1,0 +1,42 @@
+@startuml architecture-container
+title Kiến trúc BrewLite (phân lớp, mức container theo C4)
+skinparam shadowing false
+skinparam rectangle {
+  RoundCorner 8
+}
+actor "Khách hàng\n(trình duyệt / PWA)" as U
+actor "Nhân viên (STAFF)\n(gọi API)" as S
+
+rectangle "apps/web  -  Next.js (App Router), mobile-first" as WEB {
+  rectangle "Trang: menu, chi tiết, giỏ hàng,\nđăng nhập/đăng ký, thanh toán,\nxác nhận đơn, lịch sử đơn" as PAGES
+  rectangle "lib/api.ts\n(gọi REST qua NEXT_PUBLIC_API_URL)" as APICLIENT
+}
+
+rectangle "apps/api  -  NestJS (modular monolith)" as API {
+  rectangle "auth\nJWT, bcrypt, JwtAuthGuard, vai trò" as M_AUTH
+  rectangle "products\nGET /products, /products/:id, /toppings" as M_PROD
+  rectangle "orders\ntạo đơn (transaction), máy trạng thái,\ntồn kho, khuyến mãi, điểm thưởng" as M_ORD
+  rectangle "payments\nthanh toán Ví/Thẻ mô phỏng,\nIdempotency-Key" as M_PAY
+  rectangle "prisma\nPrismaService (adapter pg)" as M_PRISMA
+  rectangle "app.controller\nGET /, GET /health" as M_APP
+}
+
+database "PostgreSQL 16\n(Prisma migration + seed)" as DB
+
+U --> PAGES : HTTPS
+S --> API : HTTPS (JWT, role STAFF)
+PAGES --> APICLIENT
+APICLIENT --> API : REST / JSON, JWT\n(CORS theo FRONTEND_ORIGIN)
+M_AUTH ..> M_PRISMA
+M_PROD ..> M_PRISMA
+M_ORD ..> M_PRISMA
+M_PAY ..> M_ORD : changeStatus (trong transaction)
+M_PAY ..> M_PRISMA
+M_PRISMA --> DB : TCP 5432
+
+note bottom of API
+  Cross-cutting: cấu hình bằng biến môi trường,
+  validate đầu vào (ValidationPipe), log của NestJS,
+  health check /health dùng cho Docker và smoke test.
+end note
+@enduml

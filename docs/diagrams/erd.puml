@@ -1,0 +1,114 @@
+@startuml erd
+title Mô hình dữ liệu BrewLite (đối chiếu apps/api/prisma/schema.prisma)
+skinparam shadowing false
+hide circle
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+entity User {
+  * id : Int <<PK>>
+  --
+  email : String <<unique>>
+  name : String?
+  password : String (bcrypt)
+  role : Role
+  points : Int
+  createdAt, updatedAt
+}
+entity Product {
+  * id : Int <<PK>>
+  --
+  name : String
+  description : String?
+  price : Int
+  stock : Int
+  category : String
+  imageUrl : String?
+}
+entity Topping {
+  * id : Int <<PK>>
+  --
+  name : String
+  price : Int
+}
+entity "Order" as Order {
+  * id : Int <<PK>>
+  --
+  userId : Int <<FK>>
+  status : OrderStatus
+  subtotal : Int
+  discount : Int
+  promoCode : String?
+  total : Int
+  createdAt, updatedAt
+}
+entity OrderItem {
+  * id : Int <<PK>>
+  --
+  orderId : Int <<FK>>
+  productId : Int <<FK>>
+  quantity : Int
+  unitPrice : Int
+  size : String
+}
+entity OrderItemTopping {
+  * orderItemId : Int <<PK, FK>>
+  * toppingId : Int <<PK, FK>>
+  --
+  quantity : Int
+  price : Int
+}
+entity Payment {
+  * id : Int <<PK>>
+  --
+  orderId : Int <<FK>>
+  userId : Int <<FK>>
+  method : PaymentMethod
+  status : PaymentStatus
+  amount : Int
+  idempotencyKey : String
+  requestHash : String
+  (unique: userId + idempotencyKey)
+}
+entity IdempotencyRecord {
+  * id : Int <<PK>>
+  --
+  userId : Int <<FK>>
+  key : String
+  requestHash : String
+  orderId : Int <<FK, unique>>
+  (unique: userId + key)
+}
+entity LoyaltyTransaction {
+  * id : Int <<PK>>
+  --
+  userId : Int <<FK>>
+  orderId : Int <<FK>>
+  type : LoyaltyType
+  points : Int
+  (unique: orderId + type)
+}
+entity Promotion {
+  * id : Int <<PK>>
+  --
+  code : String <<unique>>
+  type : PromotionType
+  value : Int
+  minOrder : Int
+  expiresAt : DateTime?
+  usageCount : Int
+}
+
+User ||--o{ Order
+User ||--o{ Payment
+User ||--o{ IdempotencyRecord
+User ||--o{ LoyaltyTransaction
+Order ||--|{ OrderItem
+Order ||--o{ Payment
+Order ||--o| IdempotencyRecord
+Order ||--o{ LoyaltyTransaction
+Product ||--o{ OrderItem
+OrderItem ||--o{ OrderItemTopping
+Topping ||--o{ OrderItemTopping
+Promotion .. Order : áp theo promoCode\n(không có khóa ngoại)
+@enduml

@@ -1,0 +1,38 @@
+\chapter{Ma trận truy vết}\label{ch:truyvet}
+Ma trận nối yêu cầu $\to$ use case $\to$ thiết kế $\to$ mã nguồn $\to$ test. Bản đầy đủ và được cập nhật ở \path{docs/traceability-matrix.md} (23/10/2026); cột ``Mã nguồn'' và ``Test'' trỏ tới mã và test có thật trong repo. Ô ghi ``--'' nghĩa là không áp dụng hoặc chưa làm, không điền trước. Mã test: API-Txx là unit, INT-Txx là tích hợp, E2E-Txx là Playwright. Mọi yêu cầu mức Must đều có thiết kế, mã và test, trừ các điểm ghi ở cột Trạng thái.
+{\scriptsize\setlength{\tabcolsep}{3pt}\setstretch{1.0}
+\begin{longtable}{@{}p{1.25cm}p{1.05cm}p{1.8cm}p{2.7cm}p{3.1cm}p{2.1cm}p{2.1cm}@{}}
+\caption{Ma trận truy vết yêu cầu}\label{tab:truyvet}\\
+\toprule \textbf{Yêu cầu} & \textbf{Ưu tiên} & \textbf{Use case} & \textbf{Thiết kế} & \textbf{Mã nguồn} & \textbf{Test} & \textbf{Trạng thái} \\ \midrule \endfirsthead
+\toprule \textbf{Yêu cầu} & \textbf{Ưu tiên} & \textbf{Use case} & \textbf{Thiết kế} & \textbf{Mã nguồn} & \textbf{Test} & \textbf{Trạng thái} \\ \midrule \endhead
+\bottomrule \endlastfoot
+FR-01 & Must & US-01 & Activity, Class & \texttt{GET /products} & INT-T01 & Đạt \\
+FR-02 & Must & US-01 & Activity & Trang menu & E2E-T03a/b/c & Đạt \\
+FR-03 & Must & US-02 & Class & \texttt{GET /products/:id} & INT-T02 & Đạt \\
+FR-04 & Must & US-03 & Activity & Giỏ hàng (web) & E2E-T01a/b & Đạt \\
+FR-05 & Must & US-04 & Class (User) & \texttt{POST /auth/*} & INT-T03 & Đạt \\
+FR-06 & Must & UC-01 (E1) & Activity, Sequence & \texttt{JwtAuthGuard} & INT-T04 & Đạt \\
+FR-07 & Must & UC-01 & Sequence, Class & \texttt{POST /orders} & INT-T05 & Đạt \\
+FR-08 & Must & UC-01 & Sequence, Class & \texttt{POST /payments} & INT-T06 & Đạt \\
+FR-09 & Must & UC-01 (A2) & Sequence, ADR-004 & \texttt{Idempotency-Key} & INT-T07 & Đạt \\
+FR-10 & Must & UC-01, UC-02 & Class (OrderStatus) & \path{order-state.ts} & API-T01, INT-T08 & Đạt \\
+FR-11 & Should & UC-02 & Class (Role) & \texttt{PATCH /orders/:id/status} & INT-T09 & Đạt \\
+FR-12 & Must & US-05 & Class & \texttt{GET /orders/me} & INT-T10 & Đạt \\
+FR-13 & Must & UC-01 (E3) & Sequence, ADR-005 & Cập nhật có điều kiện & INT-T11 & Đạt \\
+FR-14 & Should & UC-01 (A1) & Class (Promotion) & \texttt{promoCode} & INT-T12 & Đạt \\
+FR-15 & Should & UC-02 & Class (LoyaltyTransaction) & \path{pointsForTotal} & API-T02, INT-T13 & Đạt \\
+FR-16 & Could & -- & -- & -- & -- & Ngoài MVP \\
+FR-17 & Won't & -- & -- & -- & -- & Không làm \\
+NFR-01 & Should & -- & Architecture & \texttt{GET /products} & Đo thủ công & Đạt, chưa tự động \\
+NFR-02 & Must & -- & ADR-003 & bcrypt, \path{JwtAuthGuard} & INT-T03, T09 & Đạt \\
+NFR-03 & Must & -- & ADR-006 & \path{.gitignore}, GitHub Secrets & Dò sơ bộ & Chưa rà đủ \\
+NFR-04 & Must & -- & -- & class-validator & INT-T05 & Đạt \\
+NFR-05 & Must & -- & Kiến trúc (web) & CSS, \path{manifest.ts} & E2E-T02, T04 & Đạt, chưa service worker \\
+NFR-06 & Should & -- & -- & Thông báo tiếng Việt & E2E-T03c & Một phần \\
+NFR-07 & Must & -- & Deployment & \path{docker-compose.yml} & Chạy 24/10 & Chưa có người ngoài nhóm thử \\
+NFR-08 & Must & -- & ADR-006 & \path{ci.yml}, \path{cd.yml} & CI \#13/\#14, CD & Đạt \\
+NFR-09 & Must & -- & Deployment & \texttt{GET /health} & Smoke test & Đạt \\
+NFR-10 & Must & -- & ADR-002 & \path{prisma/migrations}, seed & Job \texttt{api-e2e} & Đạt \\
+NFR-11 & Should & -- & ADR-006 & Job \texttt{api}, \texttt{web} & CI & Đạt \\
+\end{longtable}
+}

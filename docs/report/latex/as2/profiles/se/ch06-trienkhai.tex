@@ -1,0 +1,42 @@
+\chapter{Triển khai và tích hợp liên tục}\label{ch:trienkhai-se}
+\section{Kho mã và quản lý tài liệu}\label{sec:se-repo}
+Kho \texttt{tthan-prog/BrewLite} theo cấu trúc monorepo: \path{apps/web} (Next.js), \path{apps/api} (NestJS, Prisma), \path{tests/e2e} (Playwright), \path{docs} (yêu cầu, sơ đồ, kiến trúc, Scrum, bằng chứng, release notes), \path{.github/workflows} (\texttt{ci.yml}, \texttt{cd.yml}) và \path{docker-compose.yml}. Mỗi chức năng một nhánh; thay đổi vào \texttt{main} đi qua pull request. Nhánh \texttt{main} được bảo vệ: phải qua PR, hai check \texttt{api} và \texttt{web} phải xanh, cần một approval, không force-push. Tag \texttt{assign1-final} (commit \texttt{e7a627a}) đánh dấu bộ tài liệu Assignment 1; bản phát hành \texttt{v0.1.2} có ghi chú trong \path{docs/release-notes}.
+
+\section{Hiện thực các chức năng chính}\label{sec:se-hienthuc}
+Luồng menu $\to$ size, đường, đá $\to$ giỏ $\to$ thanh toán $\to$ xác nhận $\to$ lịch sử đã chạy trên production (23/10/2026, tài khoản \texttt{customer@brewlite.com}), kể cả thanh toán thất bại và thử lại. Các ảnh dưới đây là bằng chứng thu thập trong \path{docs/evidence}.
+\hinh{ev01-menu.jpg}{.92\linewidth}{Menu tải từ API trên production}{fig:menu}
+\hinh{ev02-chon-size.jpg}{.92\linewidth}{Chọn size, mức đường, mức đá}{fig:size}
+\hinh{ev03-gio-hang.jpg}{.92\linewidth}{Giỏ hàng: 10 ly, 34.000 đồng/ly, tạm tính 340.000 đồng}{fig:cart}
+\hinh{ev04-thanh-toan.jpg}{.92\linewidth}{Thanh toán bằng thẻ mô phỏng, mã \texttt{WELCOME10}}{fig:pay}
+\hinh{ev05-xac-nhan-don1-paid.jpg}{.92\linewidth}{Đơn \#1 PAID, 306.000 đồng (340.000 đồng giảm 10\%)}{fig:paid}
+\hinh{ev09-thanh-toan-that-bai.jpg}{.92\linewidth}{Giả lập thanh toán thất bại: đơn \#2 PAYMENT\_FAILED, có nút ``Thử thanh toán lại''}{fig:failed}
+\hinh{ev10-thu-lai-don2-paid.jpg}{.92\linewidth}{Thử lại thành công: đơn \#2 PAID, 585.000 đồng}{fig:retry}
+\hinh{ev11-lich-su-2-don.jpg}{.92\linewidth}{Lịch sử có đúng hai đơn \#1 và \#2, không tạo đơn trùng khi thử lại}{fig:history}
+\nguon{\path{docs/evidence/01}--\path{11}, nhóm chụp ngày 23/10/2026}
+Kết nối an toàn và endpoint health của production ở \cref{fig:https} và \cref{fig:health}.
+\hinh{ev07-https-ket-noi-an-toan.jpg}{.82\linewidth}{Trình duyệt báo kết nối an toàn (HTTPS)}{fig:https}
+\hinh{ev08-health-ok.jpg}{.82\linewidth}{\texttt{/health} trả \texttt{\{"status":"ok","service":"brewlite-backend"\}}}{fig:health}
+
+\section{CI}\label{sec:se-ci}
+\texttt{ci.yml} chạy cho mọi PR với bốn job: \texttt{api} (cài đặt, lint, unit test, build), \texttt{api-e2e} (migration, seed, test tích hợp trên PostgreSQL thật), \texttt{web} (lint, build) và \texttt{e2e-browser} (Playwright). Lần chạy gần nhất trên \texttt{main} (run \#60) xanh ở cả bốn job.
+
+\textbf{Minh chứng CI chặn merge (Task 4.4).} Nhóm tạo PR thử nghiệm \#30, cố ý đổi kỳ vọng một test trong \path{order-state.spec.ts} (đơn PAID không được nhảy thẳng sang COMPLETED). Kết quả: test lỗi ở máy (\cref{fig:localfail}), CI run \#13 đỏ ở job \texttt{api} (\cref{fig:run13}), PR bị chặn merge vì check \texttt{api} là Required (\cref{fig:blocked}); sau khi sửa, run \#14 xanh (\cref{fig:run14}). PR \#30 được đóng, không merge.
+\hinh{ev19-test-loi-chay-o-may.jpg}{.82\linewidth}{Test lỗi khi chạy ở máy: \texttt{expected false to be true}}{fig:localfail}
+\hinh{ev16-ci-do-run13-job-api-loi.jpg}{.92\linewidth}{CI run \#13 đỏ: job \texttt{api} lỗi, các job còn lại xanh}{fig:run13}
+\hinh{ev17-pr30-merge-bi-chan.jpg}{.92\linewidth}{PR \#30: check \texttt{api} (Required) đỏ, ``Merging is blocked''}{fig:blocked}
+\hinh{ev18-ci-xanh-run14-sau-khi-sua.jpg}{.92\linewidth}{CI run \#14 xanh sau khi sửa}{fig:run14}
+\hinh{ev15-ci-xanh-merge-pr22.jpg}{.92\linewidth}{CI xanh 4/4 job (api, api-e2e, web, e2e-browser) sau khi merge PR \#22}{fig:ci4}
+
+\section{CD, di trú dữ liệu và quay lui}\label{sec:se-cd}
+\texttt{cd.yml} chạy khi gắn tag \texttt{v*} hoặc chạy tay (\texttt{workflow\_dispatch}, tham số \texttt{image\_tag}) theo ba bước: (1) \emph{quality}: lint và test; (2) \emph{build}: dựng image Docker, đẩy lên GHCR với tag \texttt{sha-...}; (3) \emph{deploy}: gọi Deploy Hook của Render cho API và web kèm \texttt{imgURL}, rồi smoke test gọi \texttt{/health}. Secret nằm trong GitHub Secrets; migration chạy trước khi API khởi động. CD lần đầu (tag \texttt{v0.1.0}) đỏ vì thiếu cấu hình URL và hook; sau khi bổ sung, CD xanh từ \texttt{v0.1.1} và \texttt{v0.1.2}.
+\hinh{ev12-cd-v0.1.1-xanh.jpg}{.92\linewidth}{CD từ tag \texttt{v0.1.1}: các bước quality, build-and-push, deploy-and-smoke-test đều xanh}{fig:cd011}
+\hinh{ev13-cd-v0.1.2-xanh.jpg}{.92\linewidth}{CD từ tag \texttt{v0.1.2} (commit \texttt{7b1ea96}) xanh}{fig:cd012}
+\hinh{ev14-render-events-deploy-sha-7b1ea96.jpg}{.92\linewidth}{Render Events: deploy image \texttt{sha-7b1ea96} qua Deploy Hook}{fig:render}
+
+\textbf{Quay lui có minh chứng (23/10/2026).} Nhóm chạy lại workflow CD với \texttt{image\_tag} của bản ổn định trước đó (\texttt{sha-e445b63}, tức \texttt{v0.1.1}; CD \#11): bước build bị bỏ qua, chỉ deploy lại image cũ và chạy smoke test; giao diện quay về bản cũ (không có khung lỗi đỏ). Sau đó triển khai lại bản mới \texttt{sha-7b1ea96} (CD \#12), khung lỗi đỏ xuất hiện trở lại, chứng tỏ hai lần deploy khác nhau.
+\hinh{ev20-rollback-cd11-bo-qua-build.jpg}{.92\linewidth}{CD \#11: bỏ qua build, deploy lại image cũ}{fig:rb1}
+\hinh{ev21-rollback-cd11-log-deploy-sha-e445b63.jpg}{.92\linewidth}{Log deploy \texttt{sha-e445b63}}{fig:rb2}
+\hinh{ev22-rollback-render-events-sha-e445b63.jpg}{.92\linewidth}{Render Events của lần quay lui}{fig:rb3}
+\hinh{ev23-rollback-giao-dien-ban-cu-khong-co-khung-do.jpg}{.85\linewidth}{Giao diện bản cũ sau quay lui}{fig:rb4}
+\hinh{ev24-deploy-lai-cd12-log-sha-7b1ea96.jpg}{.92\linewidth}{CD \#12: triển khai lại \texttt{sha-7b1ea96}}{fig:rb5}
+\hinh{ev25-giao-dien-ban-moi-co-khung-do.jpg}{.92\linewidth}{Giao diện bản mới}{fig:rb6}

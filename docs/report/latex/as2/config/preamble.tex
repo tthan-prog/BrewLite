@@ -1,0 +1,91 @@
+% =====================================================================
+% config/preamble.tex  --  GÓI LỆNH VÀ CẤU HÌNH CHUNG
+% Trình biên dịch: XeLaTeX hoặc LuaLaTeX (KHÔNG dùng pdfLaTeX).
+% =====================================================================
+\RequirePackage{iftex}
+\ifPDFTeX
+  \PackageError{preamble}{Dang dung pdfLaTeX}{Hay doi trinh bien dich sang XeLaTeX hoac LuaLaTeX (Overleaf: Menu > Compiler).}
+\fi
+
+\usepackage[a4paper,top=\MarginTop,bottom=\MarginBottom,left=\MarginLeft,right=\MarginRight]{geometry}
+\usepackage[fontsize=\BodyPt]{fontsize}
+
+% --- Ngôn ngữ và font (Unicode) ---------------------------------------
+\usepackage{fontspec}
+\usepackage{anyfontsize} % cho phép cỡ chữ tùy ý (tránh cảnh báo cỡ 13pt của phông toán)
+\usepackage[vietnamese]{babel}
+\babelfont{rm}{\MainFont}
+\babelfont{sf}{TeX Gyre Heros}
+% Font đơn cách cho mã nguồn: TeX Gyre Cursor có sẵn trong TeX Live/Overleaf và có đủ dấu tiếng Việt.
+% (Một số bản DejaVu Sans Mono thiếu glyph tiếng Việt, nên không dùng làm mặc định.)
+\babelfont{tt}{TeX Gyre Cursor}
+
+% Việt hóa tên danh mục cho đồng bộ (babel mặc định: "Danh sách hình vẽ", "Danh sách bảng").
+\addto\captionsvietnamese{%
+  \renewcommand{\listfigurename}{Danh mục hình}%
+  \renewcommand{\listtablename}{Danh mục bảng}}
+
+% --- Gói thông dụng -----------------------------------------------------
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\graphicspath{{figures/}{uml/}}
+\usepackage{booktabs,longtable,array,tabularx,multirow}
+\usepackage{enumitem}
+\setlist{itemsep=2pt,topsep=4pt}
+\usepackage{setspace}
+\usepackage{comment}
+\usepackage{float}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf,labelsep=period}
+% Quy ước: chú thích bảng đặt TRÊN bảng, chú thích hình đặt DƯỚI hình.
+
+% --- Hộp màu (dùng cho hộp hướng dẫn) -----------------------------------
+
+% --- Mã nguồn ----------------------------------------------------------
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize, breaklines=true, columns=fullflexible,
+  keepspaces=true, frame=single, numbers=left, numberstyle=\tiny\color{gray},
+  tabsize=2, showstringspaces=false, captionpos=b}
+\renewcommand{\lstlistingname}{Mã nguồn}
+\renewcommand{\lstlistlistingname}{Danh mục mã nguồn}
+
+% --- Tiêu đề, giãn dòng, đầu/chân trang --------------------------------
+\usepackage{titlesec}
+\titleformat{\chapter}[hang]{\normalfont\bfseries\Large}{\chaptername\ \thechapter.}{0.5em}{}
+\titleformat{name=\chapter,numberless}[hang]{\normalfont\bfseries\Large}{}{0pt}{}
+\titlespacing*{\chapter}{0pt}{0pt}{22pt}
+\titleformat{\section}{\normalfont\bfseries\large}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\bfseries}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalfont\bfseries\itshape}{\thesubsubsection.}{0.5em}{}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+\setstretch{\LineStretch}
+\setlength{\parindent}{1cm}
+\setlength{\parskip}{3pt}
+
+\usepackage{fancyhdr}
+\setlength{\headheight}{15pt}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ #1}{}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\itshape\leftmark}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+
+% --- Liên kết (hyperref phải đứng trước cleveref; cleveref đứng cuối) -----
+\usepackage[unicode]{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!45!black,citecolor=blue!45!black,urlcolor=blue!45!black}
+% In ra giấy: đổi dòng trên thành  \hypersetup{hidelinks}
+\usepackage[nameinlink]{cleveref}
+\crefname{figure}{Hình}{Hình}\Crefname{figure}{Hình}{Hình}
+\crefname{table}{Bảng}{Bảng}\Crefname{table}{Bảng}{Bảng}
+\crefname{chapter}{Chương}{Chương}\Crefname{chapter}{Chương}{Chương}
+\crefname{section}{Mục}{Mục}\Crefname{section}{Mục}{Mục}
+\crefname{subsection}{Mục}{Mục}\Crefname{subsection}{Mục}{Mục}
+\crefname{subsubsection}{Mục}{Mục}\Crefname{subsubsection}{Mục}{Mục}
+\crefname{appendix}{Phụ lục}{Phụ lục}\Crefname{appendix}{Phụ lục}{Phụ lục}
+\crefname{equation}{Công thức}{Công thức}\Crefname{equation}{Công thức}{Công thức}
+\crefname{lstlisting}{Mã nguồn}{Mã nguồn}\Crefname{lstlisting}{Mã nguồn}{Mã nguồn}

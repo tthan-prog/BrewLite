@@ -1,0 +1,46 @@
+% =====================================================================
+% config/options.tex  --  CÁC CÔNG TẮC. Chỉnh ở đây, không sửa preamble.
+% =====================================================================
+
+% --- 1. Bộ nội dung (profile) -----------------------------------------
+% general : báo cáo tổng quát (mở đầu - cơ sở - thiết kế - triển khai - kết quả - kết luận)
+% se      : môn Công nghệ phần mềm (Scrum, yêu cầu, UML, kiến trúc, CI/CD, kiểm thử, truy vết)
+% paper   : bài tập phân tích bài báo khoa học (PPNCKH)
+% Để thêm bộ mới: xem README.md, mục "Thêm profile mới".
+\newcommand{\Profile}{se}
+
+% --- 2. Hộp hướng dẫn --------------------------------------------------
+% \guidetrue : hiện các hộp "Hướng dẫn" (khi đang soạn)
+% \guidefalse: ẩn toàn bộ hộp hướng dẫn (khi nộp)
+\newif\ifguide \guidefalse
+
+% --- 3. Trang đầu / danh mục (true = có, false = bỏ) ---------------------
+\newif\ifcover       \covertrue
+\newif\ifdeclaration \declarationfalse   % Lời cam đoan
+\newif\ifacknowledge \acknowledgefalse   % Lời cảm ơn
+\newif\ifabstract    \abstracttrue       % Tóm tắt
+\newif\iflistoffigs  \listoffigstrue
+\newif\iflistoftabs  \listoftabstrue
+\newif\iflistoflsts  \listoflstsfalse    % Danh mục mã nguồn (listings)
+\newif\ifabbrev      \abbrevtrue         % Từ viết tắt + thuật ngữ
+
+% --- 4. Phụ lục (true = có) ---------------------------------------------
+\newif\ifappmap  \appmaptrue   % Phụ lục: bảng đối chiếu đề bài - khung
+\newif\ifappteam \appteamtrue  % Phụ lục: phân công và nhật ký đóng góp
+\newif\ifapptool \apptoolfalse  % Phụ lục: khai báo công cụ hỗ trợ (AI, dịch, lập trình...)
+\newif\ifappmore \appmoretrue  % Phụ lục: tư liệu bổ sung (mã nguồn, bảng dài...)
+
+% --- 5. Trình bày -------------------------------------------------------
+\newcommand{\BodyPt}{13pt}          % cỡ chữ gốc (lớp report + gói fontsize cho phép cỡ tùy ý)
+\newcommand{\LineStretch}{1.3}      % giãn dòng
+\newcommand{\MainFont}{TeX Gyre Termes}   % hoặc: Times New Roman (máy phải có font)
+\newcommand{\MarginTop}{2.5cm}
+\newcommand{\MarginBottom}{2.5cm}
+\newcommand{\MarginLeft}{3.5cm}
+\newcommand{\MarginRight}{2cm}
+% >>> Các số lề/cỡ chữ/giãn dòng ở trên là GIÁ TRỊ TẠM. Thay theo quy định của giảng viên/khoa.
+
+% --- 6. Trích dẫn --------------------------------------------------------
+% Kiểu có sẵn trong biblatex: numeric, numeric-comp, authoryear, alphabetic, ...
+% apa / ieee cần thêm gói biblatex-apa / biblatex-ieee (kiểm tra trong bản TeX Live của bạn).
+\newcommand{\CiteStyle}{numeric}
