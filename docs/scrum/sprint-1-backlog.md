@@ -2,7 +2,7 @@
 
 - **Thời gian:** 14/10 – 18/10/2026 (nộp 27/10/2026)
 - **Sprint Goal:** Nền tảng dự án chạy được; có dữ liệu mẫu và menu hiển thị được (Task 1, 2, 3, 4).
-- **Daily Scrum:** hằng ngày 21:00, tối đa 15 phút, qua nhóm chat.
+- **Daily Scrum:** hằng ngày 20:00, tối đa 15 phút, qua nhóm chat.
 - **Sprint Review và Retrospective:** 18/10/2026, 21:00 (xem `minutes/02-sprint1-review-retro.md`).
 - **Tổng điểm cam kết:** 11 điểm (T1 = 2, T2 = 3, T3 = 3, T4 = 3).
 

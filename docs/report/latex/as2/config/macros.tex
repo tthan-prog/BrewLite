@@ -1,0 +1,30 @@
+% =====================================================================
+% config/macros.tex  --  LỆNH TIỆN ÍCH (không chứa nội dung báo cáo)
+% =====================================================================
+
+% Ô chưa điền: chữ đỏ đậm trong ngoặc vuông, tự xuống dòng được trong ô bảng; hiện nổi bật để không bị bỏ sót khi nộp.
+\newcommand{\fillme}[1]{\textcolor{red!70!black}{\textsf{\textbf{[#1]}}}}
+
+% Đánh dấu thông tin chưa kiểm chứng được (khớp quy ước [chưa xác minh]).
+\newcommand{\chuaxm}{\textcolor{red!70!black}{\textbf{[chưa xác minh]}}}
+
+% Dòng nguồn dưới hình/bảng. Dùng ngay sau \caption hoặc trước \end{figure}.
+%   \nguon{Tác giả (năm), Hình 3 --- vẽ lại bởi nhóm}
+\newcommand{\nguon}[1]{\par\vspace{2pt}{\centering\small\itshape Nguồn: #1\par}}
+
+% Hộp hướng dẫn: hiện khi \guidetrue, biến mất hoàn toàn khi \guidefalse.
+\excludecomment{huongdan}
+
+% Hình có nguồn gọn: \hinh{tệp}{độ rộng}{chú thích}{nhãn}
+\newcommand{\hinh}[4]{%
+  \begin{figure}[htbp]\centering
+    \includegraphics[width=#2]{#1}
+    \caption{#3}\label{#4}
+  \end{figure}}
+
+% Hình cao (sơ đồ dài): giới hạn theo chiều cao trang. \hinhcao{tệp}{chú thích}{nhãn}
+\newcommand{\hinhcao}[3]{%
+  \begin{figure}[p]\centering
+    \includegraphics[width=\linewidth,height=.80\textheight,keepaspectratio]{#1}
+    \caption{#2}\label{#3}
+  \end{figure}}

@@ -1,0 +1,6 @@
+# Mặc định biên dịch bằng XeLaTeX + Biber.
+# Muốn dùng LuaLaTeX: đổi $pdf_mode = 4;  (hoặc chọn LuaLaTeX trong Overleaf: Menu > Compiler)
+$pdf_mode = 5;
+$xelatex  = 'xelatex -interaction=nonstopmode -synctex=1 %O %S';
+$lualatex = 'lualatex -interaction=nonstopmode -synctex=1 %O %S';
+$bibtex_use = 2;

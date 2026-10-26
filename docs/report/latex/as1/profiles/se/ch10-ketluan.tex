@@ -1,0 +1,15 @@
+\chapter{Kết luận}\label{ch:ketluan-se}
+\section{Kết quả đạt được}\label{sec:se-dat}
+Cả 10 Task hoàn thành ở mức mã, có kiểm thử tự động (22 unit, 32 tích hợp, 7 E2E) và chạy được từ menu đến xác nhận đơn, kể cả thanh toán thất bại và thử lại, trên bản triển khai thật. Bốn nghiệp vụ lõi của Task 10 có test chứng minh. Yêu cầu được đặc tả thành 17 FR và 11 NFR và truy vết tới thiết kế, mã và test.
+
+\section{Hạn chế}\label{sec:se-hanche}
+\begin{itemize}
+\item Sprint 1 trễ (xong 2 trên 11 điểm cam kết) do bắt đầu muộn; phân bố commit giữa thành viên chưa đều.
+\item Nghiệm thu chéo chưa có Approve hoặc bình luận trên GitHub.
+\item Thanh toán chỉ mô phỏng; chưa có giao diện nhân viên và quản trị; PWA mới ở mức manifest.
+\item NFR-01 đo thủ công một lần; NFR-03 mới dò sơ bộ; chưa đo độ phủ test.
+\item Render gói miễn phí: web ngủ khi không dùng, CSDL hết hạn 22/11/2026 và không có sao lưu.
+\end{itemize}
+
+\section{Hướng phát triển}\label{sec:se-huong}
+Giao diện barista và quản trị; cổng thanh toán thật; service worker cho PWA; lưu mức đường và đá vào đơn; tự động hóa đo hiệu năng và quét bí mật trong CI; chốt ERD sớm và chia việc song song đều hơn ở dự án sau.

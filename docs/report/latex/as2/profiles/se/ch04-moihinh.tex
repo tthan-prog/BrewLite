@@ -1,0 +1,30 @@
+\chapter{Mô hình hóa (UML)}\label{ch:mohinh}
+Nguồn PlantUML nằm ở \path{docs/diagrams}; ảnh dưới đây kết xuất từ đúng các tệp nguồn đó. Ba sơ đồ bắt buộc của đề (activity, sequence, class) cùng sơ đồ trạng thái đơn hàng được rà theo SRS và mã nguồn.
+
+\section{Sơ đồ hoạt động (Activity)}\label{sec:se-activity}
+\cref{fig:activity} biểu diễn tương tác giữa Khách hàng và Hệ thống từ lúc chọn sản phẩm đến khi nhận kết quả thanh toán, chia hai swimlane. Các nhánh bắt buộc có đủ: hết hàng, chưa đăng nhập, thanh toán thất bại. Liên quan: UC-01, FR-04 đến FR-08.
+\hinhcao{activity-order-flow.png}{Sơ đồ hoạt động luồng đặt và thanh toán}{fig:activity}
+
+\section{Sơ đồ tuần tự (Sequence)}\label{sec:se-sequence}
+\cref{fig:sequence} có năm lifeline: Customer, Next.js UI, NestJS API (Controller, OrdersService), PostgreSQL và Payment Service (PaymentsService, mô phỏng). Sơ đồ thể hiện kiểm tra JWT, validate, các nhánh 401, 400, 409 (xung đột khóa idempotency), phát lại cùng khóa, transaction trừ tồn kho và rollback khi hết hàng, khuyến mãi, thanh toán thành công và thất bại kèm thử lại. Liên quan: UC-01, FR-06 đến FR-09, FR-13 đến FR-15.
+\hinhcao{sequence-checkout.png}{Sơ đồ tuần tự của UC-01}{fig:sequence}
+
+\section{Sơ đồ lớp / mô hình miền (Class / Domain)}\label{sec:se-class}
+\cref{fig:class} gồm User, Product, Topping, Order, OrderItem, Payment, Promotion, LoyaltyTransaction và các enum Role, OrderStatus, PaymentMethod, PaymentStatus, PromotionType, LoyaltyType, kèm thuộc tính và multiplicity.
+\hinh{class-domain.png}{\linewidth}{Sơ đồ lớp miền của BrewLite}{fig:class}
+
+\section{Sơ đồ trạng thái (State machine)}\label{sec:se-state}
+Đơn hàng có vòng đời trạng thái (FR-10). \cref{tab:state} mô tả các chuyển trạng thái hợp lệ do \path{apps/api/src/orders/order-state.ts} thực thi; chuyển trạng thái khác bị từ chối với mã 400 và đơn giữ nguyên.
+
+\begin{table}[htbp]\centering
+\caption{Chuyển trạng thái hợp lệ}\label{tab:state}
+\begin{tabular}{@{}p{3.2cm}p{9.6cm}@{}}\toprule
+\textbf{Từ} & \textbf{Sang} \\ \midrule
+PENDING & PAID, PAYMENT\_FAILED, CANCELLED \\
+PAYMENT\_FAILED & PAID (thử lại), CANCELLED \\
+PAID & PREPARING, CANCELLED \\
+PREPARING & READY \\
+READY & COMPLETED \\ \bottomrule
+\end{tabular}
+\end{table}
+Khi hủy đơn, tồn kho được hoàn lại; nếu đơn đã PAID thì điểm thưởng đã cộng bị trừ lại (REVERSAL).

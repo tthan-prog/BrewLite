@@ -1,0 +1,53 @@
+% !TEX program = xelatex
+% !TEX root = main.tex
+% =====================================================================
+% KHUNG BÁO CÁO DÙNG CHUNG CHO NHIỀU MÔN
+% Trình biên dịch: XeLaTeX (mặc định) hoặc LuaLaTeX. Trích dẫn: Biber.
+% Biên dịch: latexmk main.tex   (hoặc Overleaf: chọn Compiler = XeLaTeX)
+% Chỉ sửa: config/options.tex, config/meta.tex, profiles/<tên>/..., references.bib
+% =====================================================================
+\documentclass[a4paper,12pt,oneside]{report}
+
+\input{config/options}
+\input{config/preamble}
+\input{config/macros}
+\input{config/meta}
+
+% Biên dịch riêng một số chương cho nhanh (bỏ dấu % để dùng):
+% \includeonly{profiles/general/ch01}
+
+\begin{document}
+
+% ---------- Trang đầu (số La Mã) -----------------------------------------
+\ifcover        \input{frontmatter/cover}\fi
+\pagenumbering{roman}
+\ifdeclaration  \input{frontmatter/declaration}\fi
+\ifacknowledge  \input{frontmatter/acknowledgement}\fi
+\ifabstract     \input{frontmatter/abstract}\fi
+\tableofcontents
+\iflistoffigs   \clearpage\phantomsection\addcontentsline{toc}{chapter}{\listfigurename}\listoffigures\fi
+\iflistoftabs   \clearpage\phantomsection\addcontentsline{toc}{chapter}{\listtablename}\listoftables\fi
+\iflistoflsts   \clearpage\phantomsection\addcontentsline{toc}{chapter}{\lstlistlistingname}\lstlistoflistings\fi
+\ifabbrev       \input{frontmatter/abbreviations}\fi
+
+% ---------- Nội dung chính (số Ả Rập) -------------------------------------
+\clearpage
+\pagenumbering{arabic}
+\input{profiles/\Profile/chapters}
+
+% ---------- Tài liệu tham khảo ---------------------------------------------
+\clearpage
+\chapter*{Tài liệu tham khảo}\addcontentsline{toc}{chapter}{Tài liệu tham khảo}
+\begin{thebibliography}{1}
+\bibitem{scrumguide2020} Ken Schwaber, Jeff Sutherland. \textit{The Scrum Guide}. 2020. \url{https://scrumguides.org/scrum-guide.html} (truy cập 26/10/2026).
+\end{thebibliography}
+
+% ---------- Phụ lục --------------------------------------------------------
+\appendix
+\renewcommand{\chaptername}{Phụ lục}
+\ifappmap  \include{appendices/app-doichieu}\fi
+\ifappteam \include{appendices/app-phancong}\fi
+\ifapptool \include{appendices/app-congcu}\fi
+\ifappmore \include{appendices/app-khac}\fi
+
+\end{document}

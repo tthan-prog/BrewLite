@@ -38,7 +38,7 @@ Tổng: 10/10 task xong code; nghiệm thu chéo ghi nhận Đạt theo xác nh�
 | 2 | 19–22/10 | 22 (13 mới + 9 tồn) | 8 | Còn Task 7 backend và API products |
 | 3 | 23–25/10 | 24 (16 mới + 8 tồn) | 0 | Code xong 23/10 |
 
-Tài liệu: Product Backlog, 3 Sprint Backlog, Burndown, 6 biên bản (bản nháp), quy trình DoD, README 2.0, báo cáo `.docx`.
+Tài liệu: Product Backlog, 3 Sprint Backlog, Burndown, 6 biên bản (bản nháp), quy trình DoD, README 2.0, báo cáo LaTeX (`docs/report/latex/as1`).
 
 ## 4. Việc còn lại trước khi nộp
 
@@ -47,7 +47,7 @@ Tài liệu: Product Backlog, 3 Sprint Backlog, Burndown, 6 biên bản (bản n
 | Merge PR, B, C, D, E Approve hoặc comment nghiệm thu trên GitHub | B, C, D, E | 24/10 | Cần làm |
 | Ghi tên người nghiệm thu thật vào `dod-nghiem-thu.md` và báo cáo mục 6.4 | A | 24/10 | Cần làm |
 | E có ít nhất một commit hoặc PR | E | 25/10 | Cần làm |
-| Điền MSSV, tên giảng viên; chèn ảnh vào báo cáo | A, D | 26/10 | Cần làm |
+| Điền MSSV, lớp, nhóm vào báo cáo LaTeX (ảnh đã được chèn) | A, D | 26/10 | Cần làm |
 | Cả nhóm đọc và sửa 6 biên bản họp cho đúng thực tế | Cả nhóm | 25/10 | Cần làm |
 | Họp Sprint 3 Review và Retrospective, cập nhật biên bản 06 | Cả nhóm | 25/10 | Chưa đến |
 | Đóng băng code tối 25/10; rà soát 26/10; nộp 27/10 | Cả nhóm | 25–27/10 | Chưa đến |

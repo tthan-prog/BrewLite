@@ -60,6 +60,10 @@ Ngày 23/10/2026. Từ `v0.1.2` (`sha-7b1ea96`) lùi về `v0.1.1` (`sha-e445b63
 
 Ghi chú: ở CD #12, smoke test chỉ chạy 1 giây vì API cũ vẫn trả lời `/health` trong lúc Render thay container; việc bản mới đã chạy được xác nhận bằng giao diện (ảnh 25).
 
+## Sơ đồ đi kèm
+
+Sơ đồ PlantUML (nguồn, SVG, PNG) nằm ở `docs/diagrams/`; báo cáo LaTeX dùng các bản PNG trong `docs/report/latex/*/uml/`.
+
 ## Chưa có trong thư mục này
 
 - Log chi tiết bước Unit test của run #13 trên GitHub (xem trên tab Actions).

@@ -1,0 +1,57 @@
+\chapter{Quản lý dự án (Scrum)}\label{ch:quanly}
+\section{Vai trò / trách nhiệm trong nhóm}\label{sec:se-vaitro}
+Vai trò theo \path{docs/team-agreement.md}. Đây là ``người chịu trách nhiệm chính'', không phải chỉ một người làm. Scrum Guide 2020 gọi các vai là \emph{accountabilities}; báo cáo dùng từ ``vai trò'' theo đề bài.
+\begin{table}[htbp]\centering
+\caption{Vai trò và trách nhiệm}\label{tab:vaitro}
+\begin{tabular}{@{}p{3.4cm}p{3.8cm}p{5.8cm}@{}}\toprule
+\textbf{Thành viên} & \textbf{Vai trò} & \textbf{Trách nhiệm cụ thể} \\ \midrule
+Nguyễn Lê Nhựt Thắng (A) & Scrum Master, phát triển nền tảng & Repo, CI/CD, triển khai, điều phối Scrum \\
+Hồ Thiên Ngân (B) & Backend & Dữ liệu, seed, tạo đơn, trạng thái đơn \\
+Hà Thiên Long (C) & Backend & Xác thực, thanh toán mô phỏng, máy trạng thái \\
+Giản Thiên Lực (D) & Frontend & Menu, giỏ, thanh toán, lịch sử; slide, video \\
+Lê Thuận (E) & Frontend, kiểm thử & Kiểm thử, kiểm tra yêu cầu, Product Owner tạm thời \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\section{Sự kiện và artefact}\label{sec:se-suKien}
+Sprint Planning đầu Sprint (20/10 và 24/10), Daily Scrum hằng ngày tối đa 15 phút qua nhóm chat, Sprint Review và Retrospective cuối Sprint (24/10 và 26/10). Artefact: Product Backlog, Sprint Backlog (kèm Sprint Goal) và Increment là bản chạy được trên production. Biên bản nằm ở \path{docs/scrum/minutes/a2-*}. Quy ước chung: không đẩy trực tiếp lên \texttt{main}; mỗi chức năng một nhánh; PR phải qua check \texttt{api} và \texttt{web}, cần một approval; đóng băng mã tối 25/10.
+
+\section{Kế hoạch và diễn biến từng Sprint}\label{sec:se-sprint}
+\subsection{Sprint 1 (20--23/10/2026)}
+\textbf{Sprint Goal:} tạo nền tảng kỹ thuật, tài liệu có kiểm soát phiên bản và MVP đầu tiên cho luồng xem menu. Planning họp ngày 20/10.
+\begin{longtable}{@{}p{1cm}p{6.2cm}p{3.2cm}p{2.6cm}@{}}
+\caption{Sprint 1: phạm vi và người nghiệm thu}\label{tab:sprint1}\\
+\toprule \textbf{Task} & \textbf{Nội dung} & \textbf{Làm chính} & \textbf{Nghiệm thu} \\ \midrule \endfirsthead
+\toprule \textbf{Task} & \textbf{Nội dung} & \textbf{Làm chính} & \textbf{Nghiệm thu} \\ \midrule \endhead
+\bottomrule \endlastfoot
+4.1 & Repo, cấu trúc, README, \texttt{.env.example}, branch protection, quy ước commit, DoD & A & B \\
+4.2 & Tạo phẩm Task 1--3 trong \path{docs}, tag \texttt{assign1-final}, thay đổi qua PR & A, E & D \\
+4.3 & Dữ liệu mẫu, \texttt{GET /products}, \texttt{GET /products/:id} & B (dữ liệu), C (API) & E \\
+4.3 & Màn hình menu mobile-first, loading, empty, error & D & E \\
+4.3 & Kiểm thử tối thiểu API và menu & E & C \\
+4.4 & Pipeline CI, chặn merge khi đỏ & A & C \\
+\end{longtable}
+Kết quả Review (24/10): cả bốn hạng mục demo được và đạt DoD, Sprint Goal đạt. Điểm còn lại cuối Sprint là 0 trên 4 việc; repo chưa có file burndown riêng cho Assignment 2 nên số này tính theo số việc, không phải story point.
+
+\subsection{Sprint 2 (24--26/10/2026)}
+\textbf{Sprint Goal:} hoàn thành luồng end-to-end, tự động hóa đóng gói và triển khai, có bản production truy cập được. Planning họp ngày 24/10.
+\begin{longtable}{@{}p{1cm}p{6.2cm}p{3.2cm}p{2.6cm}@{}}
+\caption{Sprint 2: phạm vi và người nghiệm thu}\label{tab:sprint2}\\
+\toprule \textbf{Task} & \textbf{Nội dung} & \textbf{Làm chính} & \textbf{Nghiệm thu} \\ \midrule \endfirsthead
+\toprule \textbf{Task} & \textbf{Nội dung} & \textbf{Làm chính} & \textbf{Nghiệm thu} \\ \midrule \endhead
+\bottomrule \endlastfoot
+5.1 & Đăng ký, đăng nhập, thanh toán mô phỏng & C & B \\
+5.1 & Tạo đơn, trạng thái đơn & B & C \\
+5.1 & Giao diện menu, giỏ, thanh toán, lịch sử & D & E \\
+5.2 & Unit, integration, E2E, Docker Compose, \texttt{/health} & E, C & C \\
+5.3 & Pipeline CD, rollback & A & B \\
+5.4 & Triển khai production, release \texttt{v0.1.x}, README & A & D \\
+5.4 & Video demo end-to-end & D & E \\
+5.4 & Sprint Review và Retrospective & A & Cả nhóm \\
+\end{longtable}
+Kết quả Review (bản nháp theo trạng thái 24/10, cập nhật tới 26/10): Task 5.1, 5.2 và 5.3 demo được và đạt DoD; Task 5.4 ``gần đạt''; video demo chưa xong tại thời điểm Review và được hoàn tất sau đó (xem \cref{sec:se-sanpham}). Điểm còn lại lúc Review là 2 việc (video), tính theo số việc.
+
+\section{Definition of Done}\label{sec:se-dod}
+Bốn mục DoD áp dụng cho mọi task (\path{docs/scrum/dod-nghiem-thu.md}): (D1) chạy được, không lỗi build; (D2) commit rõ ràng và PR có ít nhất một Approve của người khác; (D3) API validate và giao diện có loading, lỗi; (D4) README có hướng dẫn chạy. Người nghiệm thu khác người viết task.
+
+\textbf{Mức độ áp dụng trung thực:} D1, D3, D4 có bằng chứng (CI xanh, test, README). Với D2, nhóm ghi nhận nghiệm thu chéo trong tài liệu, nhưng các PR chưa có Approve hoặc bình luận nghiệm thu của người đánh giá trên GitHub (cột Reviews trống). Điểm này đã được nêu ở Retrospective của cả hai Sprint.

@@ -1,0 +1,72 @@
+\chapter{Kiến trúc hệ thống}\label{ch:kientruc}
+\section{Kiến trúc tổng thể}\label{sec:se-kientruc}
+Kiến trúc phân lớp kết hợp mức container của mô hình C4: trình duyệt/PWA $\to$ frontend Next.js $\to$ backend NestJS (modular monolith, module theo domain) $\to$ PostgreSQL; dịch vụ thanh toán mô phỏng là một module trong backend (\cref{fig:arch}). Chi tiết ở \path{docs/architecture/architecture.md}. Sơ đồ triển khai và quay lui là nội dung của Assignment 2.
+\hinh{architecture-container.png}{.9\linewidth}{Kiến trúc mức container của BrewLite}{fig:arch}
+\nguon{nhóm vẽ bằng PlantUML (\path{docs/diagrams/architecture-container.puml})}
+\begin{longtable}{@{}p{2.7cm}p{3cm}p{4.5cm}p{3.1cm}@{}}
+\caption{Thành phần (container)}\label{tab:container}\\
+\toprule \textbf{Thành phần} & \textbf{Công nghệ} & \textbf{Trách nhiệm} & \textbf{Mã nguồn} \\ \midrule \endfirsthead
+\toprule \textbf{Thành phần} & \textbf{Công nghệ} & \textbf{Trách nhiệm} & \textbf{Mã nguồn} \\ \midrule \endhead
+\bottomrule \endlastfoot
+Web & Next.js, mobile-first & Menu, chi tiết, giỏ, đăng nhập, xác nhận, lịch sử & \path{apps/web} \\
+API & NestJS, JWT, validation & Nghiệp vụ, xác thực, phân quyền, truy cập CSDL & \path{apps/api} \\
+CSDL & PostgreSQL 16, Prisma 7 & Người dùng, sản phẩm, đơn, thanh toán, điểm, bản ghi idempotency & \path{apps/api/prisma} \\
+Payment (mô phỏng) & Module NestJS & Ví/Thẻ thành công hoặc thất bại; xử lý \texttt{Idempotency-Key} & \path{apps/api/src/payments} \\
+CI/CD & GitHub Actions, GHCR & Lint, test, build, đóng gói, deploy, smoke test & \path{.github/workflows} \\
+\end{longtable}
+Các module backend: \texttt{auth}, \texttt{products}, \texttt{orders} (gồm khuyến mãi và điểm thưởng), \texttt{payments}, \texttt{prisma}, \texttt{health}. Vấn đề xuyên suốt: cấu hình bằng biến môi trường (\texttt{.env.example} chỉ có giá trị mẫu); log không ghi mật khẩu, token, secret; \texttt{GET /health} cho Docker healthcheck và smoke test; migration chạy trước khi API khởi động; bảo mật bằng bcrypt, JWT có hạn, validate đầu vào, CORS theo \texttt{FRONTEND\_ORIGIN}.
+
+\textbf{Đánh đổi.} Monorepo cho phép một PR đổi cả hai phía nhưng có hai bộ \texttt{package.json}. Modular monolith dễ triển khai và kiểm thử trong một tuần nhưng khó tách dịch vụ về sau. Payment mô phỏng cho phép dựng kịch bản thành công/thất bại nhưng không phản ánh độ trễ và lỗi mạng của dịch vụ ngoài. PostgreSQL có transaction và khóa dòng phù hợp tồn kho đồng thời nhưng cần quản lý migration và sao lưu.
+
+\section{Quyết định kiến trúc (ADR)}\label{sec:se-adr}
+Các ADR toàn văn ở \path{docs/architecture/adr}; \cref{tab:adr} tóm tắt.
+\begin{longtable}{@{}p{1cm}p{7.6cm}p{4.7cm}@{}}
+\caption{Danh sách ADR (đều ở trạng thái đã chốt; ADR-007 chọn ngày 23/10/2026)}\label{tab:adr}\\
+\toprule \textbf{ADR} & \textbf{Quyết định} & \textbf{Lý do chính} \\ \midrule \endfirsthead
+\toprule \textbf{ADR} & \textbf{Quyết định} & \textbf{Lý do chính} \\ \midrule \endhead
+\bottomrule \endlastfoot
+001 & Monorepo \path{apps/web} và \path{apps/api} & Một PR đổi cả hai phía, dùng chung CI \\
+002 & PostgreSQL 16 và Prisma 7 (đã cân nhắc TypeORM) & Transaction, khóa dòng, migration \\
+003 & JWT có hạn, bcrypt, phân quyền CUSTOMER/STAFF; \texttt{JWT\_SECRET} lấy từ biến môi trường & Đơn giản, dễ kiểm thử \\
+004 & Payment là module NestJS; \texttt{Idempotency-Key} với ràng buộc duy nhất \texttt{(userId, key)} và \texttt{requestHash} & Không trừ tiền lặp khi gửi lại \\
+005 & Trừ kho bằng \texttt{UPDATE ... WHERE stock >= n} trong transaction & Không âm kho khi đặt đồng thời \\
+006 & GitHub Actions và GHCR; secret trong GitHub Secrets; bật required checks \texttt{api}, \texttt{web} & Mã trên GitHub, CI chặn merge \\
+007 & Render: web và API chạy image từ GHCR, PostgreSQL của Render; CD gọi Deploy Hook & HTTPS sẵn, gói miễn phí \\
+\end{longtable}
+
+\section{Cơ sở dữ liệu và API}\label{sec:se-db}
+\hinh{class-domain.png}{\linewidth}{Sơ đồ lớp miền của BrewLite}{fig:class}
+
+Lược đồ Prisma gồm 10 thực thể (\cref{fig:erd}). Khuyến mãi liên kết với đơn qua mã \texttt{promoCode}, không dùng khóa ngoại.
+\hinh{erd.png}{.62\linewidth}{Sơ đồ thực thể -- quan hệ theo \texttt{schema.prisma}}{fig:erd}
+\nguon{nhóm vẽ từ \path{apps/api/prisma/schema.prisma}}
+\begin{longtable}{@{}p{1.4cm}p{4cm}p{3.4cm}p{3.9cm}@{}}
+\caption{Các endpoint chính}\label{tab:api}\\
+\toprule \textbf{Phương thức} & \textbf{Đường dẫn} & \textbf{Quyền} & \textbf{Mã lỗi thường gặp} \\ \midrule \endfirsthead
+\toprule \textbf{Phương thức} & \textbf{Đường dẫn} & \textbf{Quyền} & \textbf{Mã lỗi thường gặp} \\ \midrule \endhead
+\bottomrule \endlastfoot
+POST & \path{/auth/register} & Công khai & 400, 409 (trùng email) \\
+POST & \path{/auth/login} & Công khai & 401 (sai thông tin) \\
+GET & \path{/auth/me} & JWT & 401 \\
+GET & \path{/products}, \path{/products/:id}, \path{/toppings} & Công khai & 400 (id sai), 404 \\
+POST & \path{/orders} (kèm \texttt{Idempotency-Key}) & JWT & 400, 401, 409 \\
+GET & \path{/orders/me}, \path{/orders/:id} & JWT (chủ đơn hoặc STAFF) & 401, 404 \\
+GET & \path{/orders} & STAFF & 401, 403 \\
+PATCH & \path{/orders/:id/status} & STAFF & 400 (chuyển sai), 403, 409 \\
+POST & \path{/payments} (kèm \texttt{Idempotency-Key}) & JWT & 400, 401, 404, 409 \\
+GET & \path{/health} & Công khai & -- \\
+\end{longtable}
+
+\section{Máy trạng thái đơn hàng}\label{sec:se-state}
+Các chuyển trạng thái hợp lệ (FR-10), do \path{apps/api/src/orders/order-state.ts} thực thi (\cref{tab:state}). Chuyển trạng thái khác bị từ chối với mã 400 và đơn giữ nguyên; khi hủy đơn, tồn kho được hoàn lại và điểm thưởng đã cộng (nếu đơn đã PAID) bị trừ lại.
+\begin{table}[htbp]\centering
+\caption{Chuyển trạng thái hợp lệ của đơn hàng}\label{tab:state}
+\begin{tabular}{@{}p{3.2cm}p{9.6cm}@{}}\toprule
+\textbf{Từ} & \textbf{Sang} \\ \midrule
+PENDING & PAID, PAYMENT\_FAILED, CANCELLED \\
+PAYMENT\_FAILED & PAID (thử lại), CANCELLED \\
+PAID & PREPARING, CANCELLED \\
+PREPARING & READY \\
+READY & COMPLETED \\ \bottomrule
+\end{tabular}
+\end{table}

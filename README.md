@@ -13,7 +13,7 @@ Bài tập lớn môn **Công nghệ Phần mềm**, Trường Đại học Sài
 | Docker Compose | Chạy được 3 dịch vụ (db, backend, frontend); đã chạy thử trên Windows (Docker Desktop + WSL 2) |
 | Nghiệm thu chéo (điều kiện tính điểm) | **Đã nghiệm thu, cả 10 task đạt DoD** (xác nhận 23/10/2026, xem `docs/scrum/dod-nghiem-thu.md`) |
 | Bằng chứng Scrum | Product Backlog, 3 Sprint Backlog, Burndown, biên bản (`docs/scrum/`) |
-| Báo cáo | `docs/report/BrewLite_BaoCao.docx`; còn chèn ảnh và điền MSSV |
+| Báo cáo | Bản LaTeX tại `docs/report/latex/` (as1, as2; cách biên dịch ở `docs/report/README.md`); còn điền MSSV, lớp, nhóm |
 | Assignment 2 (Requirements to Deployment) | Đã có SRS, use-case, sơ đồ, ADR, ma trận truy vết, CI/CD; **đã triển khai production** (xem [Mục 15](#15-assignment-2-từ-yêu-cầu-đến-triển-khai)) |
 | Production (HTTPS) | Web https://brewlite-web.onrender.com/menu; API https://brewlite-api.onrender.com/health; bản hiện tại **v0.1.2** ([Release](https://github.com/tthan-prog/BrewLite/releases/tag/v0.1.2)) |
 | Sprint 3 Review và Retrospective | Dự kiến 25/10/2026; đã soạn bản nháp biên bản |
@@ -136,7 +136,7 @@ brewlite/
 │   ├── scrum/                     # backlog, burndown, biên bản, quy trình DoD
 │   ├── progress/                  # bảng tiến độ
 │   ├── design/                    # ERD
-│   ├── report/                    # báo cáo (BrewLite_BaoCao.docx)
+│   ├── report/                    # báo cáo LaTeX (latex/as1, latex/as2)
 │   ├── team-agreement.md
 │   └── message-to-lecturer.md
 ├── tests/                         # (Assignment 2) integration/E2E bổ sung nếu có
@@ -413,8 +413,9 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 | Biên bản Planning, Review, Retrospective | `docs/scrum/minutes/` |
 | Mẫu biên bản | `docs/scrum/meeting-minutes-template.md`, `retrospective-template.md` |
 | Thỏa thuận nhóm | `docs/team-agreement.md` |
-| ERD | `docs/design/ERD_MemberB/` |
-| Báo cáo | `docs/report/BrewLite_BaoCao.docx` |
+| ERD | `docs/design/ERD_MemberB/`; sơ đồ kiến trúc và ERD bản PlantUML: `docs/diagrams/architecture-container.puml`, `docs/diagrams/erd.puml` |
+| Báo cáo (LaTeX) | `docs/report/latex/as1`, `docs/report/latex/as2`; hướng dẫn: `docs/report/README.md` |
+| Video demo Assignment 2 | https://drive.google.com/file/d/1uxrJSc9OkNkD-68vCTKXsPb0DcUudtat/view?usp=sharing |
 
 **Nhịp Sprint:**
 
@@ -508,4 +509,4 @@ Hướng dẫn thiết lập lần đầu, biến môi trường, các lỗi đ�
 
 ---
 
-*README phiên bản 2.2, cập nhật ngày 24/10/2026: trạng thái production, CI/CD và rollback của Assignment 2. Cập nhật khi có thay đổi về cài đặt, cách chạy hoặc trạng thái nghiệm thu.*
+*README phiên bản 2.2, cập nhật ngày 27/10/2026: báo cáo LaTeX, video demo, sơ đồ kiến trúc và ERD; trạng thái production, CI/CD và rollback của Assignment 2. Cập nhật khi có thay đổi về cài đặt, cách chạy hoặc trạng thái nghiệm thu.*

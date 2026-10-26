@@ -2,7 +2,7 @@
 
 - **Thời gian:** 23/10 – 25/10/2026 (đóng băng code tối 25/10; hoàn thiện 26/10; nộp 27/10)
 - **Sprint Goal:** Hoàn thành đường găng Task 7 → 8 → 9 → 10, có test chứng minh nghiệp vụ, docker-compose chạy end-to-end.
-- **Daily Scrum:** hằng ngày 21:00 qua nhóm chat.
+- **Daily Scrum:** hằng ngày 20:00 qua nhóm chat.
 - **Sprint Review và Retrospective:** 25/10/2026 (nội bộ), xem `minutes/06-sprint3-review-retro.md`.
 - **Tổng điểm:** 24 điểm = 16 điểm mới (T8 = 5, T9 = 3, T10 = 8) + 8 điểm tồn từ Sprint 2 (T2 API, T7).
 

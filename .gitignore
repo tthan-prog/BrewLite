@@ -17,6 +17,21 @@ dist/
 coverage/
 *.tsbuildinfo
 
+# Tệp sinh ra khi biên dịch LaTeX
+docs/report/latex/**/*.aux
+docs/report/latex/**/*.bbl
+docs/report/latex/**/*.bcf
+docs/report/latex/**/*.blg
+docs/report/latex/**/*.fdb_latexmk
+docs/report/latex/**/*.fls
+docs/report/latex/**/*.out
+docs/report/latex/**/*.run.xml
+docs/report/latex/**/*.synctex.gz
+docs/report/latex/**/*.toc
+docs/report/latex/**/*.lof
+docs/report/latex/**/*.lot
+docs/report/latex/**/*.xdv
+
 # Nhật ký
 *.log
 npm-debug.log*

@@ -22,12 +22,12 @@
 | 5.2 Tích hợp và kiểm thử | Có | Có | Hà Thiên Long | CI 4 job (api, api-e2e, web, e2e-browser); 7 test E2E Playwright | `/health` trả `{"status":"ok","service":"brewlite-backend"}` |
 | 5.3 CD và rollback | Có | Có | Hồ Thiên Ngân  | `.github/workflows/cd.yml`; ảnh 12–14 và 20–25 | CD từ tag `v0.1.1`, `v0.1.2`; rollback về `sha-e445b63` (CD #11) và triển khai lại `sha-7b1ea96` (CD #12) |
 | 5.4 Production, release, README | Có | Gần đạt | Giản Thiên Lực  | Release `v0.1.2`; `docs/deployment.md`; README 2.2 | – |
-| 5.4 Video demo | Chưa | Chưa | Lê Thuận | – | Giản Thiên Lực  quay; hạn 26/10 |
+| 5.4 Video demo | Có | Chờ nghiệm thu | Lê Thuận | https://drive.google.com/file/d/1uxrJSc9OkNkD-68vCTKXsPb0DcUudtat/view?usp=sharing | Giản Thiên Lực quay; Lê Thuận xác nhận sau khi xem |
 | 5.4 Sprint Review/Retro | Có | Có | Cả nhóm | `docs/scrum/minutes/a2-*` | Biên bản này |
 
-- **Sprint Goal đã đạt chưa:** Phần lớn đạt: có URL production HTTPS, CI/CD chạy, rollback đã chứng minh. Một việc còn mở: video demo.
+- **Sprint Goal đã đạt chưa:** Phần lớn đạt: có URL production HTTPS, CI/CD chạy, rollback đã chứng minh. Video demo đã có liên kết, chờ Lê Thuận xác nhận.
 - **Increment demo được:** phiên bản `v0.1.2` trên production.
-- **Điều chỉnh Product Backlog sau Review:** việc còn lại chuyển sang giai đoạn hoàn thiện trước 27/10: video, rà soát lần cuối.
+- **Điều chỉnh Product Backlog sau Review:** việc còn lại chuyển sang giai đoạn hoàn thiện trước 27/10: rà soát lần cuối.
 
 ## Phần 2. Sprint Retrospective
 
@@ -42,7 +42,7 @@
 
 | Hành động | Người làm | Kiểm tra vào |
 |---|---|---|
-| Quay video demo end-to-end | Giản Thiên Lực  | 26/10 |
+| Quay video demo end-to-end (đã có liên kết, xem Phần 1) | Giản Thiên Lực  | 26/10 |
 | Mở web production một lần trước giờ chấm để tránh chờ khởi động | Nguyễn Lê Nhựt Thắng | 27/10 |
 | Ghi kết quả nghiệm thu chéo vào PR (comment hoặc Approve) | Người nghiệm thu theo bảng Review | 26/10 |
 | Sao lưu dữ liệu hoặc cập nhật DB trước 22/11 nếu còn dùng | Nguyễn Lê Nhựt Thắng | Sau khi nộp |
