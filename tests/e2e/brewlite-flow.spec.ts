@@ -128,3 +128,37 @@ test('E2E-T04: manifest PWA hợp lệ và biểu tượng tải được', asyn
     expect(r.ok()).toBe(true);
   }
 });
+
+// E2E-T05: thanh toán bằng mã QR (mô phỏng): máy tính hiện QR, "điện thoại" (trang thứ hai) mở
+// URL trong QR, chọn tài khoản test + PIN, máy tính tự chuyển sang xác nhận và hiện điểm được cộng.
+test('E2E-T05: thanh toán QR MoMo bằng tài khoản test, hiện điểm được cộng', async ({ page, browser }) => {
+  await registerAndLogin(page);
+  await page.waitForSelector('.brew-card');
+  await page.locator('.brew-card-art').first().click();
+  await page.locator('button', { hasText: /Thêm vào giỏ/ }).first().click();
+  await page.locator('.brew-nav button', { hasText: 'Giỏ hàng' }).click();
+  await page.locator('button', { hasText: /Tiến hành thanh toán/ }).click();
+
+  await page.selectOption('select', 'MOMO');
+  await page.locator('button.brew-full[type=submit]').click();
+
+  const qrDialog = page.getByRole('dialog', { name: /mã QR/i });
+  await expect(qrDialog.locator('img[alt="Mã QR thanh toán"]')).toBeVisible();
+  const payUrl = await qrDialog.locator('a[href*="/pay/"]').first().getAttribute('href');
+  expect(payUrl).toBeTruthy();
+
+  // "Điện thoại": ngữ cảnh trình duyệt riêng, màn hình nhỏ, không có phiên đăng nhập.
+  const phone = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const phonePage = await phone.newPage();
+  await phonePage.goto(payUrl!);
+  await phonePage.waitForSelector('#acc');
+  await phonePage.selectOption('#acc', '0900000001');
+  await phonePage.fill('#pin', '123456');
+  await phonePage.getByRole('button', { name: /Xác nhận thanh toán/ }).click();
+  await expect(phonePage.locator('.form-success')).toContainText(/thành công/i);
+  await phone.close();
+
+  await page.waitForURL('**/orders/confirmation', { timeout: 20_000 });
+  await expect(page.locator('.status-pill')).toContainText(/PAID/);
+  await expect(page.getByText(/\+\d+ điểm/)).toBeVisible();
+});

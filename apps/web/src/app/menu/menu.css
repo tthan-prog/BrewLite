@@ -952,3 +952,55 @@
   margin: 6px 0 0;
   font-size: 0.9rem;
 }
+
+.brew-recipe {
+  margin: 12px 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f7f1ea;
+  font-size: 0.9rem;
+}
+.brew-recipe ul {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
+.brew-qr-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 50;
+}
+.brew-qr-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  max-height: 92vh;
+  overflow: auto;
+}
+.brew-qr-card img {
+  max-width: 100%;
+  height: auto;
+}
+.brew-qr-timer {
+  font-weight: 600;
+}
+.brew-qr-hint {
+  font-size: 0.85rem;
+  color: #5b5148;
+  text-align: left;
+}
+.brew-qr-close {
+  margin-top: 8px;
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}

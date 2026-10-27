@@ -313,6 +313,10 @@ Kết quả nghiệm thu chi tiết: `docs/scrum/dod-nghiem-thu.md`.
 
 ---
 
+## 8b. Mở rộng: thanh toán QR, nguyên liệu, điểm thưởng (nhánh `feature/qr-payment-ingredients`)
+
+Xem [docs/payment-qr-ingredients.md](docs/payment-qr-ingredients.md): tài khoản test (ngân hàng/MoMo/VNPay), mã QR thanh toán, điểm cộng sau thanh toán, trang đổi quà `/rewards`, kho nguyên liệu và công thức từng ly. Sau khi pull nhánh này cần chạy lại migrate và seed.
+
 ## 9. Nghiệp vụ đơn hàng
 
 ### 9.1. Trạng thái đơn hàng
