@@ -9,7 +9,7 @@ on:
 jobs:
   api:
     name: api
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: apps/api
@@ -84,7 +84,7 @@ jobs:
 
   e2e-browser:
     name: e2e-browser
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16-alpine

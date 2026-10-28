@@ -8,7 +8,10 @@ import {
 } from '@nestjs/common';
 import bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { OrdersService } from '../orders/orders.service.js';
+import {
+  OrdersService,
+  OutOfIngredientsException,
+} from '../orders/orders.service.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import {
   IntentStatus,
@@ -274,6 +277,44 @@ export class PaymentIntentsService {
     return true;
   }
 
+  /** Phiên thất bại vì hết nguyên liệu lúc chốt: phiên → FAILED, đơn PENDING → PAYMENT_FAILED. */
+  private async failForStock(token: string) {
+    await this.prisma.$transaction(async (tx) => {
+      const intent = await tx.paymentIntent.findUnique({ where: { token } });
+      if (!intent) return;
+      await tx.paymentIntent.updateMany({
+        where: { token, status: IntentStatus.PENDING },
+        data: { status: IntentStatus.FAILED },
+      });
+      const order = await tx.order.findUnique({
+        where: { id: intent.orderId },
+      });
+      if (order?.status === OrderStatus.PENDING) {
+        await this.orders.changeStatus(
+          tx,
+          order.id,
+          OrderStatus.PAYMENT_FAILED,
+        );
+      }
+    });
+  }
+
+  /**
+   * Callback từ cổng sandbox: tiền đã bị trừ ở cổng nên không thể "từ chối" như mô phỏng. Hết nguyên
+   * liệu thì đơn thất bại và cần hoàn tiền thủ công qua cổng (chưa kiểm chứng với cổng thật).
+   */
+  private async settleOrFailForStock(
+    token: string,
+    opts: { providerRef: string; ignoreExpiry?: boolean },
+  ) {
+    try {
+      await this.prisma.$transaction((tx) => this.settle(tx, token, opts));
+    } catch (error) {
+      if (!(error instanceof OutOfIngredientsException)) throw error;
+      await this.failForStock(token);
+    }
+  }
+
   /** Mô phỏng: điện thoại quét QR, nhập tài khoản TEST + PIN rồi xác nhận. */
   async confirmSimulated(token: string, identifier: string, pin: string) {
     const intent = await this.prisma.paymentIntent.findUnique({
@@ -308,23 +349,34 @@ export class PaymentIntentsService {
       throw new BadRequestException('Tài khoản hoặc mã PIN không đúng');
     }
 
-    await this.prisma.$transaction(async (tx) => {
-      const debit = await tx.paymentAccount.updateMany({
-        where: { id: account.id, balance: { gte: intent.amount } },
-        data: { balance: { decrement: intent.amount } },
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        const debit = await tx.paymentAccount.updateMany({
+          where: { id: account.id, balance: { gte: intent.amount } },
+          data: { balance: { decrement: intent.amount } },
+        });
+        if (debit.count !== 1) {
+          throw new BadRequestException('Số dư tài khoản test không đủ');
+        }
+        const ok = await this.settle(tx, token, {
+          providerRef: `SIM-${account.provider}-${account.id}-${Date.now()}`,
+          accountId: account.id,
+        });
+        if (!ok) {
+          // Phiên vừa bị xử lý/hết hạn ở yêu cầu khác: hủy transaction để không trừ tiền.
+          throw new ConflictException('Phiên thanh toán không còn hiệu lực');
+        }
       });
-      if (debit.count !== 1) {
-        throw new BadRequestException('Số dư tài khoản test không đủ');
+    } catch (error) {
+      if (error instanceof OutOfIngredientsException) {
+        // Giao dịch đã hủy: chưa trừ tiền, chưa trừ kho.
+        await this.failForStock(token);
+        throw new BadRequestException(
+          `${error.message}. Chưa trừ tiền; đơn chuyển sang thanh toán thất bại.`,
+        );
       }
-      const ok = await this.settle(tx, token, {
-        providerRef: `SIM-${account.provider}-${account.id}-${Date.now()}`,
-        accountId: account.id,
-      });
-      if (!ok) {
-        // Phiên vừa bị xử lý/hết hạn ở yêu cầu khác: hủy transaction để không trừ tiền.
-        throw new ConflictException('Phiên thanh toán không còn hiệu lực');
-      }
-    });
+      throw error;
+    }
     return this.view(token);
   }
 
@@ -351,12 +403,10 @@ export class PaymentIntentsService {
       };
 
     if (r.success) {
-      await this.prisma.$transaction((tx) =>
-        this.settle(tx, r.txnRef, {
-          providerRef: r.providerRef,
-          ignoreExpiry: true, // tiền đã trừ ở cổng: không bỏ qua vì QR hết hạn
-        }),
-      );
+      await this.settleOrFailForStock(r.txnRef, {
+        providerRef: r.providerRef,
+        ignoreExpiry: true, // tiền đã trừ ở cổng: không bỏ qua vì QR hết hạn
+      });
     } else {
       await this.prisma.paymentIntent.updateMany({
         where: { token: r.txnRef, status: IntentStatus.PENDING },
@@ -377,12 +427,10 @@ export class PaymentIntentsService {
     });
     if (!intent || intent.amount !== body.amount) return false;
     if (v.success) {
-      await this.prisma.$transaction((tx) =>
-        this.settle(tx, body.orderId as string, {
-          providerRef: String(body.transId ?? ''),
-          ignoreExpiry: true,
-        }),
-      );
+      await this.settleOrFailForStock(body.orderId as string, {
+        providerRef: String(body.transId ?? ''),
+        ignoreExpiry: true,
+      });
     } else {
       await this.prisma.paymentIntent.updateMany({
         where: { token: body.orderId, status: IntentStatus.PENDING },

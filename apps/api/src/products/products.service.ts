@@ -4,8 +4,18 @@ import {
   addScaled,
   perCupNeed,
   scaleForSize,
+  toRecipeLines,
 } from '../orders/ingredient-need.js';
-import type { AvailabilityDto, AvailItemDto } from './availability.dto.js';
+import { SIZE_SURCHARGE } from '../orders/orders.service.js';
+import { MAX_ITEM_QUANTITY } from '../orders/dto/create-order.dto.js';
+import { evaluatePromotion, promoMessage } from '../orders/pricing.js';
+import type {
+  AvailabilityDto,
+  AvailItemDto,
+  CartCheckDto,
+  CartLineDto,
+  QuoteDto,
+} from './availability.dto.js';
 
 const withRecipe = {
   recipe: {
@@ -107,29 +117,25 @@ export class ProductsService {
     }));
   }
 
-  /**
-   * Còn đặt thêm được tối đa mấy ly `candidate` khi giỏ đã có `cart`.
-   * Chỉ trả SỐ LY (khách không thấy tồn kho nguyên liệu). Đây là con số tham khảo cho giao diện;
-   * việc chặn thật nằm ở bước tạo đơn (UPDATE có điều kiện trong transaction).
-   */
-  async availability(dto: AvailabilityDto) {
-    const lines = [...(dto.cart ?? []), { ...dto.candidate, quantity: 0 }];
+  /** Nạp công thức món/topping và tồn kho cho các dòng cần tính. */
+  private async loadContext(lines: AvailItemDto[]) {
     const productIds = [...new Set(lines.map((l) => l.productId))];
     const toppingIds = [
       ...new Set(
         lines.flatMap((l) => (l.toppings ?? []).map((t) => t.toppingId)),
       ),
     ];
+    const recipeInclude = { recipe: { include: { ingredient: true } } };
     const [products, toppings, ingredients] = await Promise.all([
       this.prisma.product.findMany({
         where: { id: { in: productIds } },
-        include: { recipe: true },
+        include: recipeInclude,
       }),
       this.prisma.topping.findMany({
         where: { id: { in: toppingIds } },
-        include: { recipe: true },
+        include: recipeInclude,
       }),
-      this.prisma.ingredient.findMany(),
+      this.prisma.ingredient.findMany({ orderBy: { id: 'asc' } }),
     ]);
     const productById = new Map(products.map((p) => [p.id, p]));
     const toppingById = new Map(toppings.map((t) => [t.id, t]));
@@ -143,39 +149,46 @@ export class ProductsService {
         }
       }
     }
+    const ingredientById = new Map(ingredients.map((i) => [i.id, i]));
+    return { productById, toppingById, ingredientById };
+  }
 
-    const cupNeed = (l: AvailItemDto) => {
-      const p = productById.get(l.productId)!;
-      return perCupNeed(
-        p.recipe,
-        l.size,
-        (l.toppings ?? []).map((t) => ({
-          quantity: t.quantity,
-          recipe: toppingById.get(t.toppingId)!.recipe,
-        })),
-      );
-    };
+  private cupNeed(ctx: Awaited<ReturnType<ProductsService['loadContext']>>, l: AvailItemDto) {
+    const p = ctx.productById.get(l.productId)!;
+    return perCupNeed(
+      toRecipeLines(p.recipe),
+      l.size,
+      (l.toppings ?? []).map((t) => ({
+        quantity: t.quantity,
+        recipe: toRecipeLines(ctx.toppingById.get(t.toppingId)!.recipe),
+      })),
+      l.sugar,
+      l.ice,
+    );
+  }
 
-    // Nguyên liệu giỏ hàng đã dùng, và số ly món-không-công-thức đã nằm trong giỏ.
+  /** Còn làm thêm được tối đa mấy ly `cand` khi các dòng `cart` đã chiếm nguyên liệu. */
+  private maxAdditional(
+    ctx: Awaited<ReturnType<ProductsService['loadContext']>>,
+    cart: CartLineDto[],
+    cand: AvailItemDto,
+  ): { max: number; per: Map<number, number> } {
     const used = new Map<number, number>();
     const legacyCups = new Map<number, number>();
-    for (const l of dto.cart ?? []) {
-      addScaled(used, cupNeed(l), l.quantity);
-      if (productById.get(l.productId)!.recipe.length === 0) {
+    for (const l of cart) {
+      addScaled(used, this.cupNeed(ctx, l), l.quantity);
+      if (ctx.productById.get(l.productId)!.recipe.length === 0) {
         legacyCups.set(
           l.productId,
           (legacyCups.get(l.productId) ?? 0) + l.quantity,
         );
       }
     }
-
-    const cand = dto.candidate;
-    const candProduct = productById.get(cand.productId)!;
-    const per = cupNeed(cand);
-    const stock = new Map(ingredients.map((i) => [i.id, i.stock]));
+    const candProduct = ctx.productById.get(cand.productId)!;
+    const per = this.cupNeed(ctx, cand);
     let max = Number.MAX_SAFE_INTEGER;
     for (const [id, q] of per) {
-      const left = (stock.get(id) ?? 0) - (used.get(id) ?? 0);
+      const left = (ctx.ingredientById.get(id)?.stock ?? 0) - (used.get(id) ?? 0);
       max = Math.min(max, Math.floor(Math.max(0, left) / Math.max(1, q)));
     }
     if (candProduct.recipe.length === 0) {
@@ -185,6 +198,71 @@ export class ProductsService {
       );
     }
     if (max === Number.MAX_SAFE_INTEGER) max = 0;
-    return { maxAdditional: Math.max(0, max) };
+    return { max: Math.max(0, max), per };
+  }
+
+  /**
+   * Còn đặt thêm được tối đa mấy ly `candidate` khi giỏ đã có `cart`, kèm nguyên liệu mỗi ly
+   * (đã tính size, topping, mức đường). Chỉ trả SỐ LY và định mức mỗi ly — khách không thấy
+   * tồn kho. Việc chặn thật nằm ở bước tạo đơn (UPDATE có điều kiện trong transaction).
+   */
+  async availability(dto: AvailabilityDto) {
+    const cart = dto.cart ?? [];
+    const ctx = await this.loadContext([...cart, dto.candidate]);
+    const { max, per } = this.maxAdditional(ctx, cart, dto.candidate);
+    return {
+      maxAdditional: max,
+      perCup: [...per]
+        .sort((a, b) => a[0] - b[0])
+        .map(([id, quantity]) => ({
+          name: ctx.ingredientById.get(id)?.name ?? String(id),
+          unit: ctx.ingredientById.get(id)?.unit ?? '',
+          quantity,
+        })),
+    };
+  }
+
+  /**
+   * Kiểm tra cả giỏ hàng: với mỗi dòng, tối đa bao nhiêu ly (tính cả các dòng còn lại và giới hạn
+   * MAX_ITEM_QUANTITY ly/dòng). ok = mọi dòng đều trong giới hạn.
+   */
+  async cartCheck(dto: CartCheckDto) {
+    const ctx = await this.loadContext(dto.cart);
+    const lines = dto.cart.map((line, index) => {
+      const others = dto.cart.filter((_, i) => i !== index);
+      const { max } = this.maxAdditional(ctx, others, line);
+      const limit = Math.min(max, MAX_ITEM_QUANTITY);
+      return { max: limit, ok: line.quantity <= limit };
+    });
+    return { ok: lines.every((l) => l.ok), lines };
+  }
+
+  /** Báo giá cho giỏ hàng + mã khuyến mãi (giống cách tính khi tạo đơn, nhưng không ghi gì). */
+  async quote(dto: QuoteDto) {
+    const ctx = await this.loadContext(dto.items);
+    let subtotal = 0;
+    for (const l of dto.items) {
+      const p = ctx.productById.get(l.productId)!;
+      const toppingTotal = (l.toppings ?? []).reduce(
+        (sum, t) => sum + ctx.toppingById.get(t.toppingId)!.price * t.quantity,
+        0,
+      );
+      subtotal += (p.price + (SIZE_SURCHARGE[l.size] ?? 0) + toppingTotal) * l.quantity;
+    }
+    let discount = 0;
+    let promoError: string | null = null;
+    let promoCode: string | null = null;
+    const code = dto.promoCode?.trim().toUpperCase();
+    if (code) {
+      const promotion = await this.prisma.promotion.findUnique({ where: { code } });
+      const result = evaluatePromotion(promotion, subtotal);
+      if (result.ok) {
+        discount = result.discount;
+        promoCode = code;
+      } else {
+        promoError = promoMessage(result.reason, promotion);
+      }
+    }
+    return { subtotal, discount, total: subtotal - discount, promoCode, promoError };
   }
 }

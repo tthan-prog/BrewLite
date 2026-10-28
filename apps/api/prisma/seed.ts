@@ -118,25 +118,30 @@ async function main() {
     "Bột thạch": ["g", 1200],
     "Bột pudding": ["g", 1500],
     "Phô mai kem": ["g", 1000],
+    "Đá viên": ["g", 60000],
   };
   const ingId: Record<string, number> = {};
   for (const [name, [unit, stock]] of Object.entries(ING)) {
-    ingId[name] = (await prisma.ingredient.create({ data: { name, unit, stock } })).id;
+    ingId[name] = (
+      await prisma.ingredient.create({ data: { name, unit, stock, sugarScaled: name === "Đường", iceScaled: name === "Đá viên" } })
+    ).id;
   }
   const RECIPES: Record<number, Record<string, number>> = {
-    1: { "Cà phê hạt": 20, "Sữa đặc": 30 },
-    2: { "Cà phê hạt": 10, "Sữa đặc": 25, "Sữa tươi": 100 },
+    1: { "Cà phê hạt": 20, "Sữa đặc": 30, "Đường": 10 },
+    2: { "Cà phê hạt": 10, "Sữa đặc": 25, "Sữa tươi": 100, "Đường": 8 },
     3: { "Cà phê hạt": 18 },
-    4: { "Cà phê hạt": 18, "Sữa tươi": 150, "Caramel": 20 },
+    4: { "Cà phê hạt": 18, "Sữa tươi": 150, "Caramel": 20, "Đường": 8 },
     5: { "Trà đen": 5, "Đào ngâm": 60, "Đường": 15 },
     6: { "Trà đen": 5, "Vải ngâm": 60, "Đường": 15 },
-    7: { "Trà đen": 5, "Chanh tươi": 1, "Mật ong": 20 },
+    7: { "Trà đen": 5, "Chanh tươi": 1, "Mật ong": 20, "Đường": 10 },
     8: { "Trà đen": 6, "Sữa tươi": 120, "Trân châu": 40, "Đường": 15 },
     9: { "Bột matcha": 8, "Sữa tươi": 150, "Đường": 15 },
-    10: { "Trà đen": 5, "Bột khoai môn": 30, "Sữa tươi": 120 },
+    10: { "Trà đen": 5, "Bột khoai môn": 30, "Sữa tươi": 120, "Đường": 15 },
     11: { "Bột matcha": 10, "Sữa tươi": 100, "Kem tươi": 30, "Đường": 15 },
     12: { "Bột cacao": 20, "Sữa tươi": 100, "Kem tươi": 30, "Đường": 15 },
   };
+  // Mọi món đều có đá (lượng cho ly size S, nhân theo mức đá khách chọn).
+  for (const id of Object.keys(RECIPES)) RECIPES[Number(id)]["Đá viên"] = id === "11" || id === "12" ? 200 : 150;
   await prisma.recipeItem.createMany({
     data: Object.entries(RECIPES).flatMap(([productId, items]) =>
       Object.entries(items).map(([name, quantity]) => ({

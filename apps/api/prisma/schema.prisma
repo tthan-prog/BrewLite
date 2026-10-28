@@ -76,6 +76,9 @@ model OrderItem {
   size      String
   // true: kho được trừ theo công thức nguyên liệu; false: trừ Product.stock (sản phẩm chưa có công thức).
   usesRecipe Boolean           @default(false)
+  // Mức đường/đá khách chọn (%, null = đơn cũ chưa ghi nhận).
+  sugar     Int?
+  ice       Int?
   order     Order              @relation(fields: [orderId], references: [id])
   product   Product            @relation(fields: [productId], references: [id])
   toppings  OrderItemTopping[]
@@ -210,6 +213,9 @@ model Ingredient {
   name    String       @unique
   unit    String
   stock   Int          @default(0)
+  // true: lượng dùng nhân theo mức đường khách chọn (100% = đúng công thức).
+  sugarScaled Boolean      @default(false)
+  iceScaled   Boolean      @default(false)
   recipes RecipeItem[]
   toppingRecipes ToppingRecipeItem[]
   uses    OrderIngredientUse[]
@@ -245,6 +251,8 @@ model OrderIngredientUse {
   orderId      Int
   ingredientId Int
   quantity     Int
+  /** true: đã trừ khỏi kho (chỉ khi thanh toán thành công). Hủy đơn chỉ hoàn các dòng đã trừ. */
+  consumed     Boolean    @default(false)
   order        Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
 

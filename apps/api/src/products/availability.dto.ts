@@ -1,11 +1,14 @@
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
+  ArrayNotEmpty,
   IsArray,
   IsIn,
   IsInt,
   IsOptional,
+  IsString,
   Max,
+  MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -28,6 +31,20 @@ export class AvailItemDto {
 
   @IsIn(['S', 'M', 'L'])
   size!: string;
+
+  /** Mức đường (%); bỏ trống = 100%. */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  sugar?: number;
+
+  /** Mức đá (%); bỏ trống = 100%. */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  ice?: number;
 
   @IsOptional()
   @IsArray()
@@ -56,4 +73,29 @@ export class AvailabilityDto {
   @ValidateNested()
   @Type(() => AvailItemDto)
   candidate!: AvailItemDto;
+}
+
+/** Kiểm tra cả giỏ hàng: mỗi dòng tối đa bao nhiêu ly. */
+export class CartCheckDto {
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(50)
+  @ValidateNested({ each: true })
+  @Type(() => CartLineDto)
+  cart!: CartLineDto[];
+}
+
+/** Báo giá: tạm tính, giảm giá và tổng tiền (chưa tạo đơn, không trừ kho). */
+export class QuoteDto {
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(50)
+  @ValidateNested({ each: true })
+  @Type(() => CartLineDto)
+  items!: CartLineDto[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(32)
+  promoCode?: string;
 }
