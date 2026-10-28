@@ -37,6 +37,19 @@ type Product = {
   recipeBySize: Record<string, RecipeLine[]>;
 };
 
+/** Giới hạn ly trên một dòng đơn — khớp MAX_ITEM_QUANTITY của API. */
+const MAX_LINE_QTY = 50;
+
+type Avail = { max: number; perCup: RecipeLine[] };
+type CartCheck = { ok: boolean; lines: { max: number; ok: boolean }[] };
+type Quote = {
+  subtotal: number;
+  discount: number;
+  total: number;
+  promoCode: string | null;
+  promoError: string | null;
+};
+
 type CartItem = {
   key: string;
   product: Product;
@@ -172,8 +185,12 @@ export default function MenuPage() {
   const [ice, setIce] = useState(50);
   const [chosenToppings, setChosenToppings] = useState<Topping[]>([]);
   const [quantity, setQuantity] = useState(1);
-  // Số ly còn đặt thêm được với lựa chọn hiện tại (server tính theo size + topping + giỏ hàng).
-  const [avail, setAvail] = useState<number | null>(null);
+  // Số ly còn đặt thêm được và nguyên liệu mỗi ly với lựa chọn hiện tại (server tính theo
+  // size + topping + mức đường + giỏ hàng).
+  const [avail, setAvail] = useState<Avail | null>(null);
+  // Kết quả kiểm tra cả giỏ hàng (mỗi dòng tối đa bao nhiêu ly) và báo giá có khuyến mãi.
+  const [cartCheck, setCartCheck] = useState<CartCheck | null>(null);
+  const [quote, setQuote] = useState<Quote | null>(null);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const router = useRouter();
@@ -189,7 +206,7 @@ export default function MenuPage() {
   const [submitting, setSubmitting] = useState(false);
   const [promo, setPromo] = useState("");
   const [simulateFail, setSimulateFail] = useState(false);
-  const [paymentFailure, setPaymentFailure] = useState<{ orderId: number; status: string } | null>(null);
+  const [paymentFailure, setPaymentFailure] = useState<{ orderId: number; status: string; reason?: string } | null>(null);
   // Khóa idempotency gắn với nội dung giỏ: bấm đặt lại / thử thanh toán lại không tạo thêm đơn.
   const orderKeyRef = useRef<{ signature: string; key: string } | null>(null);
 
@@ -234,26 +251,29 @@ export default function MenuPage() {
     let alive = true;
     const toTopping = (t: Topping) => ({ toppingId: Number(t.id), quantity: 1 });
     const timer = window.setTimeout(() => {
-      apiRequest<{ maxAdditional: number }>("/products/availability", {
+      apiRequest<{ maxAdditional: number; perCup: RecipeLine[] }>("/products/availability", {
         method: "POST",
         body: JSON.stringify({
           cart: cart.map((item) => ({
             productId: item.product.id,
             size: item.size,
+            sugar: item.sugar,
+            ice: item.ice,
             quantity: item.quantity,
             toppings: item.toppings.map(toTopping),
           })),
           candidate: {
             productId: selected.id,
             size,
+            sugar,
+            ice,
             toppings: chosenToppings.map(toTopping),
           },
         }),
       })
         .then((r) => {
           if (!alive) return;
-          setAvail(r.maxAdditional);
-          setQuantity((q) => Math.max(1, Math.min(q, r.maxAdditional)));
+          setAvail({ max: r.maxAdditional, perCup: r.perCup });
         })
         .catch(() => {
           if (alive) setAvail(null);
@@ -263,7 +283,69 @@ export default function MenuPage() {
       alive = false;
       window.clearTimeout(timer);
     };
-  }, [selected, size, chosenToppings, cart]);
+  }, [selected, size, sugar, ice, chosenToppings, cart]);
+
+  // Giỏ hàng / thanh toán: hỏi server mỗi dòng tối đa bao nhiêu ly (nguyên liệu thật, đúng size,
+  // topping, mức đường) và giới hạn ly mỗi dòng.
+  useEffect(() => {
+    if ((view !== "cart" && view !== "checkout") || cart.length === 0) return;
+    let alive = true;
+    const timer = window.setTimeout(() => {
+      apiRequest<CartCheck>("/products/cart-check", {
+        method: "POST",
+        body: JSON.stringify({
+          cart: cart.map((item) => ({
+            productId: item.product.id,
+            size: item.size,
+            sugar: item.sugar,
+            ice: item.ice,
+            quantity: item.quantity,
+            toppings: item.toppings.map((t) => ({ toppingId: Number(t.id), quantity: 1 })),
+          })),
+        }),
+      })
+        .then((r) => {
+          if (alive) setCartCheck(r);
+        })
+        .catch(() => {
+          if (alive) setCartCheck(null);
+        });
+    }, 150);
+    return () => {
+      alive = false;
+      window.clearTimeout(timer);
+    };
+  }, [cart, view]);
+
+  // Thanh toán: báo giá (tạm tính, giảm giá, tổng) do máy chủ tính — cùng quy tắc khi tạo đơn.
+  useEffect(() => {
+    if (view !== "checkout" || cart.length === 0) return;
+    let alive = true;
+    const timer = window.setTimeout(() => {
+      apiRequest<Quote>("/products/quote", {
+        method: "POST",
+        body: JSON.stringify({
+          items: cart.map((item) => ({
+            productId: item.product.id,
+            size: item.size,
+            quantity: item.quantity,
+            toppings: item.toppings.map((t) => ({ toppingId: Number(t.id), quantity: 1 })),
+          })),
+          promoCode: promo.trim() || undefined,
+        }),
+      })
+        .then((r) => {
+          if (alive) setQuote(r);
+        })
+        .catch(() => {
+          if (alive) setQuote(null);
+        });
+    }, 300);
+    return () => {
+      alive = false;
+      window.clearTimeout(timer);
+    };
+  }, [cart, view, promo]);
 
   // Làm mới tình trạng nguyên liệu mà không nhấp nháy giao diện.
   function refreshProducts() {
@@ -389,18 +471,29 @@ export default function MenuPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  /** Số ly còn có thể thêm = số ly tối đa theo nguyên liệu − số ly cùng món đã có trong giỏ. */
-  function remainingFor(product: Product) {
+  /** Khóa dòng giỏ hàng cho lựa chọn đang xem (cùng món, size, đường, đá, topping thì gộp một dòng). */
+  function lineKeyFor(product: Product) {
+    const toppingIds = chosenToppings
+      .map((topping) => topping.id)
+      .sort()
+      .join(",");
+    return `${product.id}-${size}-${sugar}-${ice}-${toppingIds}`;
+  }
+
+  /** Số ly còn có thể thêm: nhỏ hơn của (nguyên liệu server tính) và (giới hạn ly/dòng − số ly dòng này đã có). */
+  function maxAddableFor(product: Product) {
+    const inLine = cart.find((item) => item.key === lineKeyFor(product))?.quantity ?? 0;
+    const lineRoom = Math.max(0, MAX_LINE_QTY - inLine);
+    if (avail !== null) return Math.min(avail.max, lineRoom);
     const inCart = cart
       .filter((item) => item.product.id === product.id)
       .reduce((sum, item) => sum + item.quantity, 0);
-    return Math.max(0, product.maxQuantity - inCart);
+    return Math.min(Math.max(0, product.maxQuantity - inCart), lineRoom);
   }
 
-  /** Tối đa ly có thể thêm: ưu tiên số do server tính; chưa có thì dùng ước lượng theo món. */
-  function maxAddableFor(product: Product) {
-    return avail !== null ? avail : remainingFor(product);
-  }
+  const maxAddable = selected ? maxAddableFor(selected) : 0;
+  // Số lượng hiển thị luôn nằm trong [1, số ly đặt được].
+  const qty = selected ? Math.max(1, Math.min(quantity, maxAddable)) : quantity;
 
   function openProduct(product: Product) {
     setSelected(product);
@@ -417,18 +510,14 @@ export default function MenuPage() {
 
   function addToCart() {
     if (!selected) return;
-    if (quantity > maxAddableFor(selected)) {
-      setNotice(`Nguyên liệu chỉ đủ làm thêm ${maxAddableFor(selected)} ly "${selected.name}" với lựa chọn này.`);
+    if (qty > maxAddableFor(selected)) {
+      setNotice(
+        `Chỉ có thể thêm tối đa ${maxAddableFor(selected)} ly "${selected.name}" với lựa chọn này (tối đa ${MAX_LINE_QTY} ly mỗi dòng, và theo nguyên liệu còn lại).`
+      );
       return;
     }
 
-    const toppingIds = chosenToppings
-      .map((topping) => topping.id)
-      .sort()
-      .join(",");
-
-    const key =
-      `${selected.id}-${size}-${sugar}-${ice}-${toppingIds}`;
+    const key = lineKeyFor(selected);
 
     setCart((previous) => {
       const existing = previous.find((item) => item.key === key);
@@ -436,7 +525,7 @@ export default function MenuPage() {
       if (existing) {
         return previous.map((item) =>
           item.key === key
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: item.quantity + qty }
             : item
         );
       }
@@ -450,7 +539,7 @@ export default function MenuPage() {
           sugar,
           ice,
           toppings: [...chosenToppings],
-          quantity,
+          quantity: qty,
         },
       ];
     });
@@ -459,17 +548,19 @@ export default function MenuPage() {
     setNotice("Đã thêm đồ uống vào giỏ hàng!");
   }
 
+  /** Số ly tối đa của dòng giỏ hàng: theo server (nguyên liệu thật) nếu có, luôn ≤ giới hạn ly/dòng. */
+  function lineMax(index: number) {
+    return Math.min(MAX_LINE_QTY, cartCheck?.lines[index]?.max ?? MAX_LINE_QTY);
+  }
+
   function changeCartQuantity(key: string, change: number) {
     if (change > 0) {
-      const target = cart.find((item) => item.key === key);
-      if (target) {
-        const sameProduct = cart
-          .filter((item) => item.product.id === target.product.id)
-          .reduce((sum, item) => sum + item.quantity, 0);
-        if (sameProduct + change > target.product.maxQuantity) {
-          setNotice(`Nguyên liệu chỉ đủ làm tối đa ${target.product.maxQuantity} ly "${target.product.name}".`);
-          return;
-        }
+      const index = cart.findIndex((item) => item.key === key);
+      if (index >= 0 && cart[index].quantity + change > lineMax(index)) {
+        setNotice(
+          `Tối đa ${lineMax(index)} ly "${cart[index].product.name}" cho lựa chọn này (giới hạn ${MAX_LINE_QTY} ly mỗi dòng và theo nguyên liệu còn lại).`
+        );
+        return;
       }
     }
     setCart((previous) =>
@@ -481,6 +572,20 @@ export default function MenuPage() {
         )
         .filter((item) => item.quantity > 0)
     );
+  }
+
+  /** Đưa các dòng vượt giới hạn về mức tối đa (xóa dòng nếu không còn làm được). */
+  function fixCart() {
+    if (!cartCheck) return;
+    setCart((previous) =>
+      previous
+        .map((item, index) => {
+          const max = cartCheck.lines[index]?.max ?? MAX_LINE_QTY;
+          return { ...item, quantity: Math.min(item.quantity, max) };
+        })
+        .filter((item) => item.quantity > 0)
+    );
+    setCartCheck(null);
   }
 
   async function submitOrder(event: React.FormEvent<HTMLFormElement>) {
@@ -498,6 +603,8 @@ export default function MenuPage() {
       productId: item.product.id,
       quantity: item.quantity,
       size: item.size,
+      sugar: item.sugar,
+      ice: item.ice,
       toppings: item.toppings.map((t) => ({
         toppingId: Number(t.id),
         quantity: 1,
@@ -529,6 +636,7 @@ export default function MenuPage() {
       const result = await apiRequest<{
         order: ApiOrder;
         payment: { status: string };
+        failureReason?: string;
         pointsEarned?: number;
         pointsBalance?: number;
       }>("/payments", {
@@ -543,10 +651,7 @@ export default function MenuPage() {
 
       if (result.payment.status !== "SUCCESS") {
         // Thanh toán lỗi: giữ nguyên giỏ hàng để thử lại (cùng đơn, không trừ kho lần hai).
-        setNotice(
-          `Thanh toán thất bại (đơn #${result.order.id}: ${result.order.status}). Giỏ hàng được giữ nguyên, bạn có thể thử lại.`
-        );
-        setPaymentFailure({ orderId: result.order.id, status: result.order.status });
+        setPaymentFailure({ orderId: result.order.id, status: result.order.status, reason: result.failureReason });
         return;
       }
 
@@ -863,23 +968,27 @@ export default function MenuPage() {
               {(selected.recipe.length > 0 || chosenToppings.length > 0) && (
                 <div className="brew-recipe">
                   <strong>
-                    Nguyên liệu mỗi ly (size {size}
+                    Nguyên liệu mỗi ly (size {size}, đường {sugar}%, đá {ice}%
                     {chosenToppings.length > 0
                       ? ` + ${chosenToppings.map((t) => t.name).join(", ")}`
                       : ""}
                     )
                   </strong>
                   <ul>
-                    {mergeRecipe(selected.recipeBySize[size] ?? selected.recipe, chosenToppings).map((r) => (
+                    {(avail?.perCup ??
+                      mergeRecipe(selected.recipeBySize[size] ?? selected.recipe, chosenToppings)
+                    ).map((r) => (
                       <li key={r.name}>
                         {r.name}: {r.quantity} {r.unit}
                       </li>
                     ))}
                   </ul>
                   <small>
-                    {maxAddableFor(selected) > 0
-                      ? `Có thể đặt thêm tối đa ${maxAddableFor(selected)} ly với lựa chọn này.`
-                      : "Đã hết nguyên liệu cho lựa chọn này."}
+                    {maxAddable > 0
+                      ? `Có thể đặt thêm tối đa ${maxAddable} ly với lựa chọn này.`
+                      : avail && avail.max > 0
+                        ? `Dòng này đã đạt tối đa ${MAX_LINE_QTY} ly.`
+                        : "Đã hết nguyên liệu cho lựa chọn này."}
                   </small>
                 </div>
               )}
@@ -889,24 +998,16 @@ export default function MenuPage() {
 
                 <div className="brew-quantity">
                   <button
-                    onClick={() =>
-                      setQuantity((previous) =>
-                        Math.max(1, previous - 1)
-                      )
-                    }
+                    onClick={() => setQuantity(Math.max(1, qty - 1))}
                   >
                     −
                   </button>
 
-                  <span>{quantity}</span>
+                  <span>{qty}</span>
 
                   <button
-                    disabled={quantity >= maxAddableFor(selected)}
-                    onClick={() =>
-                      setQuantity((previous) =>
-                        Math.min(maxAddableFor(selected), previous + 1)
-                      )
-                    }
+                    disabled={qty >= maxAddable}
+                    onClick={() => setQuantity(Math.min(maxAddable, qty + 1))}
                   >
                     +
                   </button>
@@ -916,11 +1017,13 @@ export default function MenuPage() {
               <button
                 className="brew-primary brew-full"
                 onClick={addToCart}
-                disabled={maxAddableFor(selected) < 1}
+                disabled={maxAddable < 1}
               >
-                {maxAddableFor(selected) < 1
-                  ? "Hết nguyên liệu"
-                  : `Thêm vào giỏ · ${money(selectedPrice * quantity)}`}
+                {maxAddable < 1
+                  ? avail && avail.max > 0
+                    ? "Đã đạt tối đa mỗi dòng"
+                    : "Hết nguyên liệu"
+                  : `Thêm vào giỏ · ${money(selectedPrice * qty)}`}
               </button>
             </div>
           </div>
@@ -955,7 +1058,7 @@ export default function MenuPage() {
           ) : (
             <div className="brew-cart-layout">
               <div className="brew-cart-list">
-                {cart.map((item) => (
+                {cart.map((item, index) => (
                   <article
                     className="brew-cart-item"
                     key={item.key}
@@ -1010,12 +1113,23 @@ export default function MenuPage() {
                       <span>{item.quantity}</span>
 
                       <button
+                        disabled={item.quantity >= lineMax(index)}
+                        title={
+                          item.quantity >= lineMax(index)
+                            ? `Tối đa ${lineMax(index)} ly cho lựa chọn này`
+                            : undefined
+                        }
                         onClick={() =>
                           changeCartQuantity(item.key, 1)
                         }
                       >
                         +
                       </button>
+                      {cartCheck && !cartCheck.lines[index]?.ok && (
+                        <small className="brew-line-warn">
+                          Tối đa {lineMax(index)} ly
+                        </small>
+                      )}
                     </div>
                   </article>
                 ))}
@@ -1034,8 +1148,22 @@ export default function MenuPage() {
                   <strong>{money(subtotal)}</strong>
                 </div>
 
+                {cartCheck && !cartCheck.ok && (
+                  <div className="brew-payment-failed" role="alert">
+                    <strong>Một số đồ uống vượt số lượng làm được</strong>
+                    <p>
+                      Nguyên liệu còn lại hoặc giới hạn {MAX_LINE_QTY} ly mỗi dòng không đủ cho số
+                      lượng đã chọn (xem dòng cảnh báo bên cạnh nút +).
+                    </p>
+                    <button type="button" className="brew-primary" onClick={fixCart}>
+                      Giảm về mức tối đa
+                    </button>
+                  </div>
+                )}
+
                 <button
                   className="brew-primary brew-full"
+                  disabled={cartCheck !== null && !cartCheck.ok}
                   onClick={() => goTo("checkout")}
                 >
                   Tiến hành thanh toán →
@@ -1093,43 +1221,37 @@ export default function MenuPage() {
                   <input
                     value={promo}
                     onChange={(event) => setPromo(event.target.value)}
-                    placeholder="WELCOME10"
+                    placeholder="Nhập mã (ví dụ: WELCOME10)"
                     maxLength={32}
                   />
+                  {quote?.promoError && promo.trim() && (
+                    <small className="brew-promo-error" role="alert">{quote.promoError}</small>
+                  )}
+                  {quote?.promoCode && (
+                    <small className="brew-promo-ok">
+                      Đã áp dụng mã {quote.promoCode}: giảm {money(quote.discount)}.
+                    </small>
+                  )}
                 </label>
 
-                {QR_METHODS.includes(customer.payment) && (
-                  <p className="brew-demo-alert">
-                    Sau khi bấm đặt hàng, hệ thống hiện mã QR. Quét bằng camera điện
-                    thoại, chọn tài khoản TEST (PIN 123456) rồi xác nhận. Khi thành
-                    công, trang này tự chuyển sang màn hình xác nhận và hiện số điểm
-                    được cộng.
-                  </p>
+                {!QR_METHODS.includes(customer.payment) && (
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={simulateFail}
+                      onChange={(event) => setSimulateFail(event.target.checked)}
+                    />{" "}
+                    Giả lập thanh toán thất bại
+                  </label>
                 )}
-
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={simulateFail}
-                    onChange={(event) => setSimulateFail(event.target.checked)}
-                  />{" "}
-                  Giả lập thanh toán thất bại (chỉ để demo)
-                </label>
-
-                <p className="brew-demo-alert">
-                  Thanh toán là mô phỏng: không có giao dịch thật và không trừ
-                  tiền. Đơn được tạo trên backend; bạn cần đăng nhập để đặt hàng.
-                  Giá cuối cùng (kể cả khuyến mãi) do máy chủ tính.
-                </p>
 
                 {paymentFailure && (
                   <div className="brew-payment-failed" role="alert">
                     <strong>Thanh toán thất bại</strong>
                     <p>
-                      Đơn #{paymentFailure.orderId} chưa được thanh toán
-                      (trạng thái: {paymentFailure.status}). Giỏ hàng vẫn được
-                      giữ nguyên. Bỏ chọn &quot;Giả lập thanh toán thất bại&quot;
-                      (nếu đang bật) rồi bấm &quot;Thử thanh toán lại&quot;.
+                      Đơn #{paymentFailure.orderId} chưa được thanh toán.
+                      {paymentFailure.reason ? ` ${paymentFailure.reason}.` : ""} Giỏ
+                      hàng vẫn được giữ nguyên, bạn có thể thử lại.
                     </p>
                   </div>
                 )}
@@ -1137,13 +1259,13 @@ export default function MenuPage() {
                 <button
                   type="submit"
                   className="brew-primary brew-full"
-                  disabled={submitting}
+                  disabled={submitting || (cartCheck !== null && !cartCheck.ok)}
                 >
                   {submitting
                     ? "Đang xử lý..."
                     : paymentFailure
-                      ? `Thử thanh toán lại · ${money(subtotal)}`
-                      : `Đặt hàng và thanh toán · ${money(subtotal)}`}
+                      ? `Thử thanh toán lại · ${money(quote?.total ?? subtotal)}`
+                      : `Đặt hàng và thanh toán · ${money(quote?.total ?? subtotal)}`}
                 </button>
               </div>
 
@@ -1164,10 +1286,29 @@ export default function MenuPage() {
                   </div>
                 ))}
 
+                {quote && quote.discount > 0 && (
+                  <>
+                    <div>
+                      <span>Tạm tính</span>
+                      <strong>{money(quote.subtotal)}</strong>
+                    </div>
+                    <div>
+                      <span>Giảm giá ({quote.promoCode})</span>
+                      <strong>-{money(quote.discount)}</strong>
+                    </div>
+                  </>
+                )}
+
                 <div className="brew-total">
                   <span>Tổng cộng</span>
-                  <strong>{money(subtotal)}</strong>
+                  <strong>{money(quote?.total ?? subtotal)}</strong>
                 </div>
+
+                {cartCheck && !cartCheck.ok && (
+                  <p className="brew-promo-error" role="alert">
+                    Giỏ hàng có đồ uống vượt số lượng làm được. Quay lại giỏ hàng để điều chỉnh.
+                  </p>
+                )}
               </aside>
             </form>
           )}
@@ -1218,7 +1359,6 @@ export default function MenuPage() {
               className="brew-qr-close"
               onClick={() => {
                 setQr(null);
-                setNotice(`Đơn #${qr.orderId} đang chờ thanh toán. Bấm đặt hàng lại để lấy mã QR mới.`);
               }}
             >
               Đóng

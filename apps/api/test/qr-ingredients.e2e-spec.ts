@@ -45,6 +45,14 @@ describe('Nguyên liệu, QR, điểm thưởng (e2e, PostgreSQL)', () => {
       .set('Idempotency-Key', key())
       .send({ items: [{ productId, quantity, size: 'S' }] });
 
+  /** Thanh toán ví mô phỏng: lúc này (và chỉ lúc này) nguyên liệu mới bị trừ. */
+  const payWallet = (token: string, orderId: number) =>
+    request(http)
+      .post('/payments')
+      .set(auth(token))
+      .set('Idempotency-Key', key())
+      .send({ orderId, method: 'WALLET' });
+
   async function pendingOrder(token: string, price = 50000) {
     const { product } = await drinkWithRecipe(10_000, price);
     const res = await placeOrder(token, product.id).expect(201);
@@ -83,8 +91,11 @@ describe('Nguyên liệu, QR, điểm thưởng (e2e, PostgreSQL)', () => {
   describe('Nguyên liệu và công thức', () => {
     it('trừ nguyên liệu theo công thức; đặt vượt lượng còn lại bị chặn 400', async () => {
       const { ingredient, product } = await drinkWithRecipe(100);
-      await placeOrder(alice.token, product.id, 3).expect(201);
-      expect(await ingStock(ingredient.id)).toBe(10);
+      const o = (await placeOrder(alice.token, product.id, 3).expect(201))
+        .body as { id: number };
+      expect(await ingStock(ingredient.id)).toBe(100); // tạo đơn chưa trừ kho
+      await payWallet(alice.token, o.id).expect(200);
+      expect(await ingStock(ingredient.id)).toBe(10); // trừ khi thanh toán thành công
 
       const res = await placeOrder(alice.token, product.id, 1).expect(400);
       expect(JSON.stringify(res.body)).toContain('Không đủ nguyên liệu');
@@ -113,21 +124,70 @@ describe('Nguyên liệu, QR, điểm thưởng (e2e, PostgreSQL)', () => {
       expect(await ingStock(ingredient.id)).toBe(100);
     });
 
-    it('đồng thời: kho đủ 3 ly thì đúng 3 trong 6 yêu cầu thành công, kho không âm', async () => {
+    it('đồng thời: 6 đơn cùng tạo được, nhưng kho chỉ đủ 3 ly nên đúng 3 đơn thanh toán thành công, kho không âm', async () => {
       const { ingredient, product } = await drinkWithRecipe(100);
-      const results = await Promise.all(
+      const orders = await Promise.all(
         Array.from({ length: 6 }, () => placeOrder(alice.token, product.id, 1)),
       );
-      const ok = results.filter((r) => r.status === 201).length;
-      expect(ok).toBe(3);
-      expect(results.filter((r) => r.status === 400).length).toBe(3);
+      expect(orders.every((r) => r.status === 201)).toBe(true); // tạo đơn chỉ kiểm tra
+      expect(await ingStock(ingredient.id)).toBe(100);
+      const paid = await Promise.all(
+        orders.map((r) => payWallet(alice.token, (r.body as { id: number }).id)),
+      );
+      const ok = paid.filter((r) => r.body.payment?.status === 'SUCCESS');
+      const failed = paid.filter((r) => r.body.payment?.status === 'FAILED');
+      expect(ok.length).toBe(3);
+      expect(failed.length).toBe(3);
+      for (const r of failed) {
+        expect(r.body.order.status).toBe('PAYMENT_FAILED');
+        expect(r.body.failureReason).toContain('Không đủ nguyên liệu');
+      }
       expect(await ingStock(ingredient.id)).toBe(10);
+    });
+
+    it('thanh toán QR mà kho vừa hết: không trừ tiền, không trừ kho, đơn thất bại', async () => {
+      const { ingredient, product } = await drinkWithRecipe(40);
+      const a = (await placeOrder(alice.token, product.id, 1).expect(201)).body as { id: number };
+      const b = (await placeOrder(bob.token, product.id, 1).expect(201)).body as { id: number };
+      await payWallet(alice.token, a.id).expect(200); // 40 -> 10, đơn b không còn đủ
+      const account = await testAccount('VNPAY', 1_000_000);
+      const intent = (
+        await request(http)
+          .post('/payments/intents')
+          .set(auth(bob.token))
+          .send({ orderId: b.id, provider: 'VNPAY' })
+          .expect(201)
+      ).body as { token: string };
+      await request(http)
+        .post(`/payments/intents/${intent.token}/confirm`)
+        .send({ accountNumber: account.identifier, pin: '123456' })
+        .expect(400);
+      expect(
+        (await prisma.paymentAccount.findUniqueOrThrow({ where: { id: account.id } })).balance,
+      ).toBe(1_000_000); // chưa trừ tiền
+      expect(await ingStock(ingredient.id)).toBe(10);
+      expect(
+        (await prisma.order.findUniqueOrThrow({ where: { id: b.id } })).status,
+      ).toBe('PAYMENT_FAILED');
+    });
+
+    it('đơn chưa thanh toán không giữ nguyên liệu; hủy đơn chưa trả không hoàn thêm', async () => {
+      const { ingredient, product } = await drinkWithRecipe(100);
+      const o = (await placeOrder(alice.token, product.id, 2).expect(201)).body as { id: number };
+      expect(await ingStock(ingredient.id)).toBe(100);
+      await request(http)
+        .patch(`/orders/${o.id}/status`)
+        .set(auth(staffToken))
+        .send({ status: 'CANCELLED' })
+        .expect(200);
+      expect(await ingStock(ingredient.id)).toBe(100); // không hoàn dư
     });
 
     it('hủy đơn hoàn lại đúng lượng nguyên liệu (một lần)', async () => {
       const { ingredient, product } = await drinkWithRecipe(100);
       const order = (await placeOrder(alice.token, product.id, 2).expect(201))
         .body as { id: number };
+      await payWallet(alice.token, order.id).expect(200);
       expect(await ingStock(ingredient.id)).toBe(40);
       await request(http)
         .patch(`/orders/${order.id}/status`)
@@ -157,7 +217,8 @@ describe('Nguyên liệu, QR, điểm thưởng (e2e, PostgreSQL)', () => {
       expect(row.recipe).toEqual([
         expect.objectContaining({ quantity: 30, unit: 'g' }),
       ]);
-      await placeOrder(alice.token, product.id, 2).expect(201);
+      const o2 = (await placeOrder(alice.token, product.id, 2).expect(201)).body as { id: number };
+      await payWallet(alice.token, o2.id).expect(200);
       const after = (await request(http).get(`/products/${product.id}`))
         .body as {
         available: boolean;
@@ -219,12 +280,13 @@ describe('Nguyên liệu, QR, điểm thưởng (e2e, PostgreSQL)', () => {
         ['L', 45],
       ] as const) {
         const before = await ingStock(ingredient.id);
-        await request(http)
+        const created = await request(http)
           .post('/orders')
           .set(auth(alice.token))
           .set('Idempotency-Key', key())
           .send({ items: [{ productId: product.id, quantity: 1, size }] })
           .expect(201);
+        await payWallet(alice.token, created.body.id).expect(200);
         expect(before - (await ingStock(ingredient.id))).toBe(used);
       }
     });
@@ -262,6 +324,7 @@ describe('Nguyên liệu, QR, điểm thưởng (e2e, PostgreSQL)', () => {
           ],
         })
         .expect(201);
+      await payWallet(alice.token, res.body.id).expect(200);
       expect(await ingStock(topIng.id)).toBe(100 - 3 * 2 * 10);
       await request(http)
         .patch(`/orders/${res.body.id}/status`)
@@ -305,7 +368,10 @@ describe('Nguyên liệu, QR, điểm thưởng (e2e, PostgreSQL)', () => {
           .expect(200);
 
       const s = await ask({ productId: product.id, size: 'S' });
-      expect(s.body).toEqual({ maxAdditional: 3 }); // floor(100/30)
+      expect(s.body.maxAdditional).toBe(3); // floor(100/30)
+      // Chỉ trả định mức mỗi ly (tên, đơn vị, lượng) — không có trường tồn kho.
+      expect(Object.keys(s.body).sort()).toEqual(['maxAdditional', 'perCup']);
+      expect(Object.keys(s.body.perCup[0]).sort()).toEqual(['name', 'quantity', 'unit']);
       expect(
         (await ask({ productId: product.id, size: 'L' })).body.maxAdditional,
       ).toBe(2); // floor(100/45)

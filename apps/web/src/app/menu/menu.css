@@ -1038,3 +1038,8 @@
   cursor: pointer;
   color: #5b5148;
 }
+
+.brew-line-warn { display: block; color: #a33; font-size: 12px; margin-top: 4px; text-align: center; }
+.brew-promo-error { display: block; color: #a33; font-size: 13px; margin-top: 4px; }
+.brew-promo-ok { display: block; color: #1a6b46; font-size: 13px; margin-top: 4px; }
+.brew-quantity button:disabled { opacity: 0.4; cursor: not-allowed; }
