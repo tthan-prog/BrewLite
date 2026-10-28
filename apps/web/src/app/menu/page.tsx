@@ -5,16 +5,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { apiRequest } from "@/lib/api";
+import QRCode from "qrcode";
 import "./menu.css";
 
 type Category = "Tất cả" | "Cà phê" | "Trà" | "Trà sữa" | "Đá xay";
 type Size = "S" | "M" | "L";
 type View = "menu" | "cart" | "checkout";
 
+type RecipeLine = { name: string; unit: string; quantity: number };
+
 type Topping = {
   id: string;
   name: string;
   price: number;
+  recipe: RecipeLine[];
 };
 
 type Product = {
@@ -25,6 +29,12 @@ type Product = {
   price: number;
   emoji: string;
   popular?: boolean;
+  /** Số ly tối đa còn làm được theo nguyên liệu (hoặc tồn kho nếu chưa có công thức). */
+  maxQuantity: number;
+  available: boolean;
+  recipe: RecipeLine[];
+  /** Nguyên liệu mỗi ly theo size (size lớn dùng nhiều hơn). */
+  recipeBySize: Record<string, RecipeLine[]>;
 };
 
 type CartItem = {
@@ -45,9 +55,13 @@ type ApiProduct = {
   category: string;
   imageUrl: string | null;
   stock: number;
+  maxQuantity?: number;
+  available?: boolean;
+  recipe?: RecipeLine[];
+  recipeBySize?: Record<string, RecipeLine[]>;
 };
 
-type ApiTopping = { id: number; name: string; price: number };
+type ApiTopping = { id: number; name: string; price: number; recipe?: RecipeLine[] };
 
 type ApiOrder = {
   id: number;
@@ -56,7 +70,32 @@ type ApiOrder = {
   createdAt: string;
 };
 
-type PaymentMethod = "WALLET" | "CARD";
+type PaymentMethod = "WALLET" | "CARD" | "BANK" | "MOMO" | "VNPAY";
+const QR_METHODS: PaymentMethod[] = ["BANK", "MOMO", "VNPAY"];
+const PROVIDER_LABEL: Record<string, string> = {
+  BANK: "Ngân hàng (QR)",
+  MOMO: "Ví MoMo (QR)",
+  VNPAY: "VNPay (QR)",
+};
+
+type QrSession = {
+  orderId: number;
+  orderTotal: number;
+  token: string;
+  provider: string;
+  mode: "SIMULATED" | "SANDBOX";
+  qrContent: string;
+  statusUrl: string;
+  amount: number;
+  expiresAt: string;
+  dataUrl: string;
+};
+
+type IntentView = {
+  status: "PENDING" | "PAID" | "FAILED" | "EXPIRED";
+  pointsEarned: number;
+  pointsBalance: number | null;
+};
 
 const categories: Category[] = [
   "Tất cả",
@@ -80,7 +119,34 @@ function toProduct(p: ApiProduct): Product {
     category: (p.category as Product["category"]) ?? "Cà phê",
     price: p.price,
     emoji: p.imageUrl || "☕",
+    maxQuantity: p.maxQuantity ?? p.stock,
+    available: p.available ?? p.stock > 0,
+    recipe: p.recipe ?? [],
+    recipeBySize: p.recipeBySize ?? {},
   };
+}
+
+/**
+ * Khóa ngẫu nhiên cho Idempotency-Key. crypto.randomUUID chỉ có trên trang an toàn
+ * (HTTPS hoặc localhost); mở bằng http://<IP LAN> trên điện thoại thì nó không tồn tại.
+ */
+function newKey(): string {
+  const c = typeof crypto !== "undefined" ? crypto : undefined;
+  if (c && typeof c.randomUUID === "function") return c.randomUUID();
+  const bytes = new Uint8Array(16);
+  if (c && typeof c.getRandomValues === "function") c.getRandomValues(bytes);
+  else for (let i = 0; i < 16; i++) bytes[i] = Math.floor(Math.random() * 256);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Gộp nguyên liệu của ly (theo size) với nguyên liệu của các topping đã chọn. */
+function mergeRecipe(base: RecipeLine[], toppings: Topping[]): RecipeLine[] {
+  const merged = new Map<string, RecipeLine>();
+  for (const line of [...base, ...toppings.flatMap((t) => t.recipe)]) {
+    const current = merged.get(line.name);
+    merged.set(line.name, current ? { ...current, quantity: current.quantity + line.quantity } : { ...line });
+  }
+  return [...merged.values()];
 }
 
 function money(value: number) {
@@ -106,6 +172,8 @@ export default function MenuPage() {
   const [ice, setIce] = useState(50);
   const [chosenToppings, setChosenToppings] = useState<Topping[]>([]);
   const [quantity, setQuantity] = useState(1);
+  // Số ly còn đặt thêm được với lựa chọn hiện tại (server tính theo size + topping + giỏ hàng).
+  const [avail, setAvail] = useState<number | null>(null);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const router = useRouter();
@@ -125,6 +193,10 @@ export default function MenuPage() {
   // Khóa idempotency gắn với nội dung giỏ: bấm đặt lại / thử thanh toán lại không tạo thêm đơn.
   const orderKeyRef = useRef<{ signature: string; key: string } | null>(null);
 
+  const [qr, setQr] = useState<QrSession | null>(null);
+  const [qrState, setQrState] = useState<"PENDING" | "FAILED" | "EXPIRED">("PENDING");
+  const [secondsLeft, setSecondsLeft] = useState(0);
+
   const [customer, setCustomer] = useState<{ payment: PaymentMethod }>({
     payment: "WALLET",
   });
@@ -140,7 +212,7 @@ export default function MenuPage() {
         if (!alive) return;
         setProducts(apiProducts.map(toProduct));
         setToppings(
-          apiToppings.map((t) => ({ id: String(t.id), name: t.name, price: t.price }))
+          apiToppings.map((t) => ({ id: String(t.id), name: t.name, price: t.price, recipe: t.recipe ?? [] }))
         );
         setLoadError("");
         setLoadState("ready");
@@ -156,6 +228,121 @@ export default function MenuPage() {
       alive = false;
     };
   }, [reloadKey]);
+
+  useEffect(() => {
+    if (!selected) return;
+    let alive = true;
+    const toTopping = (t: Topping) => ({ toppingId: Number(t.id), quantity: 1 });
+    const timer = window.setTimeout(() => {
+      apiRequest<{ maxAdditional: number }>("/products/availability", {
+        method: "POST",
+        body: JSON.stringify({
+          cart: cart.map((item) => ({
+            productId: item.product.id,
+            size: item.size,
+            quantity: item.quantity,
+            toppings: item.toppings.map(toTopping),
+          })),
+          candidate: {
+            productId: selected.id,
+            size,
+            toppings: chosenToppings.map(toTopping),
+          },
+        }),
+      })
+        .then((r) => {
+          if (!alive) return;
+          setAvail(r.maxAdditional);
+          setQuantity((q) => Math.max(1, Math.min(q, r.maxAdditional)));
+        })
+        .catch(() => {
+          if (alive) setAvail(null);
+        });
+    }, 200);
+    return () => {
+      alive = false;
+      window.clearTimeout(timer);
+    };
+  }, [selected, size, chosenToppings, cart]);
+
+  // Làm mới tình trạng nguyên liệu mà không nhấp nháy giao diện.
+  function refreshProducts() {
+    apiRequest<ApiProduct[]>("/products")
+      .then((list) => setProducts(list.map(toProduct)))
+      .catch(() => undefined);
+  }
+
+  function finishQrPayment(session: QrSession, view: IntentView) {
+    sessionStorage.setItem(
+      "brewlite_last_order",
+      JSON.stringify({
+        id: session.orderId,
+        status: "PAID",
+        total: session.orderTotal,
+        createdAt: new Date().toISOString(),
+        pointsEarned: view.pointsEarned,
+        pointsBalance: view.pointsBalance,
+        method: session.provider,
+      })
+    );
+    orderKeyRef.current = null;
+    setCart([]);
+    setQr(null);
+    router.push("/orders/confirmation");
+  }
+
+  // Khi đang hiện mã QR: hỏi trạng thái phiên mỗi 2 giây; đếm ngược thời hạn.
+  useEffect(() => {
+    if (!qr || qrState !== "PENDING") return;
+    let alive = true;
+    const poll = window.setInterval(() => {
+      apiRequest<IntentView>(`/payments/intents/${qr.token}`)
+        .then((view) => {
+          if (!alive) return;
+          if (view.status === "PAID") {
+            finishQrPayment(qr, view);
+          } else if (view.status === "FAILED" || view.status === "EXPIRED") {
+            setQrState(view.status);
+          }
+        })
+        .catch(() => undefined);
+    }, 2000);
+    const tick = window.setInterval(() => {
+      setSecondsLeft(Math.max(0, Math.round((new Date(qr.expiresAt).getTime() - Date.now()) / 1000)));
+    }, 1000);
+    return () => {
+      alive = false;
+      window.clearInterval(poll);
+      window.clearInterval(tick);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qr, qrState]);
+
+  async function openQr(orderId: number, orderTotal: number, provider: PaymentMethod, auth: Record<string, string>) {
+    const intent = await apiRequest<Omit<QrSession, "dataUrl" | "orderId" | "orderTotal">>("/payments/intents", {
+      method: "POST",
+      headers: auth,
+      body: JSON.stringify({ orderId, provider }),
+    });
+    const dataUrl = await QRCode.toDataURL(intent.qrContent, { margin: 1, width: 280, errorCorrectionLevel: "M" });
+    setQrState("PENDING");
+    setSecondsLeft(Math.max(0, Math.round((new Date(intent.expiresAt).getTime() - Date.now()) / 1000)));
+    setQr({ ...intent, orderId, orderTotal, dataUrl });
+  }
+
+  async function renewQr() {
+    const token = sessionStorage.getItem("brewlite_token");
+    if (!qr || !token) return;
+    setSubmitting(true);
+    try {
+      await openQr(qr.orderId, qr.orderTotal, qr.provider as PaymentMethod, { Authorization: `Bearer ${token}` });
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Không tạo được mã QR mới.");
+      setQr(null);
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   function reloadMenu() {
     setLoadState("loading");
@@ -202,6 +389,19 @@ export default function MenuPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  /** Số ly còn có thể thêm = số ly tối đa theo nguyên liệu − số ly cùng món đã có trong giỏ. */
+  function remainingFor(product: Product) {
+    const inCart = cart
+      .filter((item) => item.product.id === product.id)
+      .reduce((sum, item) => sum + item.quantity, 0);
+    return Math.max(0, product.maxQuantity - inCart);
+  }
+
+  /** Tối đa ly có thể thêm: ưu tiên số do server tính; chưa có thì dùng ước lượng theo món. */
+  function maxAddableFor(product: Product) {
+    return avail !== null ? avail : remainingFor(product);
+  }
+
   function openProduct(product: Product) {
     setSelected(product);
     setView("menu");
@@ -210,12 +410,17 @@ export default function MenuPage() {
     setIce(50);
     setChosenToppings([]);
     setQuantity(1);
+    setAvail(null);
     setNotice("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function addToCart() {
     if (!selected) return;
+    if (quantity > maxAddableFor(selected)) {
+      setNotice(`Nguyên liệu chỉ đủ làm thêm ${maxAddableFor(selected)} ly "${selected.name}" với lựa chọn này.`);
+      return;
+    }
 
     const toppingIds = chosenToppings
       .map((topping) => topping.id)
@@ -255,6 +460,18 @@ export default function MenuPage() {
   }
 
   function changeCartQuantity(key: string, change: number) {
+    if (change > 0) {
+      const target = cart.find((item) => item.key === key);
+      if (target) {
+        const sameProduct = cart
+          .filter((item) => item.product.id === target.product.id)
+          .reduce((sum, item) => sum + item.quantity, 0);
+        if (sameProduct + change > target.product.maxQuantity) {
+          setNotice(`Nguyên liệu chỉ đủ làm tối đa ${target.product.maxQuantity} ly "${target.product.name}".`);
+          return;
+        }
+      }
+    }
     setCart((previous) =>
       previous
         .map((item) =>
@@ -289,7 +506,7 @@ export default function MenuPage() {
     const promoCode = promo.trim() || undefined;
     const signature = JSON.stringify({ items, promoCode });
     if (orderKeyRef.current?.signature !== signature) {
-      orderKeyRef.current = { signature, key: crypto.randomUUID() };
+      orderKeyRef.current = { signature, key: newKey() };
     }
 
     setSubmitting(true);
@@ -303,12 +520,20 @@ export default function MenuPage() {
         body: JSON.stringify({ items, promoCode }),
       });
 
+      if (QR_METHODS.includes(customer.payment)) {
+        // Thanh toán bằng mã QR: giữ đơn PENDING, hiện QR và chờ xác nhận.
+        await openQr(order.id, order.total, customer.payment, auth);
+        return;
+      }
+
       const result = await apiRequest<{
         order: ApiOrder;
         payment: { status: string };
+        pointsEarned?: number;
+        pointsBalance?: number;
       }>("/payments", {
         method: "POST",
-        headers: { ...auth, "Idempotency-Key": crypto.randomUUID() },
+        headers: { ...auth, "Idempotency-Key": newKey() },
         body: JSON.stringify({
           orderId: order.id,
           method: customer.payment,
@@ -332,6 +557,9 @@ export default function MenuPage() {
           status: result.order.status,
           total: result.order.total,
           createdAt: result.order.createdAt,
+          pointsEarned: result.pointsEarned ?? 0,
+          pointsBalance: result.pointsBalance ?? null,
+          method: customer.payment,
         })
       );
       orderKeyRef.current = null;
@@ -341,6 +569,7 @@ export default function MenuPage() {
       setNotice(
         error instanceof Error ? error.message : "Không thể đặt hàng lúc này."
       );
+      refreshProducts(); // nguyên liệu có thể vừa hết: cập nhật số ly còn lại
     } finally {
       setSubmitting(false);
     }
@@ -498,6 +727,9 @@ export default function MenuPage() {
                       {product.popular && (
                         <small>Bán chạy</small>
                       )}
+                      {!product.available && (
+                        <small>Hết nguyên liệu</small>
+                      )}
                     </button>
 
                     <div className="brew-card-body">
@@ -628,6 +860,30 @@ export default function MenuPage() {
                 ))}
               </div>
 
+              {(selected.recipe.length > 0 || chosenToppings.length > 0) && (
+                <div className="brew-recipe">
+                  <strong>
+                    Nguyên liệu mỗi ly (size {size}
+                    {chosenToppings.length > 0
+                      ? ` + ${chosenToppings.map((t) => t.name).join(", ")}`
+                      : ""}
+                    )
+                  </strong>
+                  <ul>
+                    {mergeRecipe(selected.recipeBySize[size] ?? selected.recipe, chosenToppings).map((r) => (
+                      <li key={r.name}>
+                        {r.name}: {r.quantity} {r.unit}
+                      </li>
+                    ))}
+                  </ul>
+                  <small>
+                    {maxAddableFor(selected) > 0
+                      ? `Có thể đặt thêm tối đa ${maxAddableFor(selected)} ly với lựa chọn này.`
+                      : "Đã hết nguyên liệu cho lựa chọn này."}
+                  </small>
+                </div>
+              )}
+
               <div className="brew-quantity-row">
                 <strong>Số lượng</strong>
 
@@ -645,8 +901,11 @@ export default function MenuPage() {
                   <span>{quantity}</span>
 
                   <button
+                    disabled={quantity >= maxAddableFor(selected)}
                     onClick={() =>
-                      setQuantity((previous) => previous + 1)
+                      setQuantity((previous) =>
+                        Math.min(maxAddableFor(selected), previous + 1)
+                      )
                     }
                   >
                     +
@@ -657,8 +916,11 @@ export default function MenuPage() {
               <button
                 className="brew-primary brew-full"
                 onClick={addToCart}
+                disabled={maxAddableFor(selected) < 1}
               >
-                Thêm vào giỏ · {money(selectedPrice * quantity)}
+                {maxAddableFor(selected) < 1
+                  ? "Hết nguyên liệu"
+                  : `Thêm vào giỏ · ${money(selectedPrice * quantity)}`}
               </button>
             </div>
           </div>
@@ -820,6 +1082,9 @@ export default function MenuPage() {
                   >
                     <option value="WALLET">Ví điện tử (mô phỏng)</option>
                     <option value="CARD">Thẻ (mô phỏng)</option>
+                    <option value="MOMO">Ví MoMo - quét mã QR</option>
+                    <option value="VNPAY">VNPay - quét mã QR</option>
+                    <option value="BANK">Chuyển khoản ngân hàng - quét mã QR</option>
                   </select>
                 </label>
 
@@ -832,6 +1097,15 @@ export default function MenuPage() {
                     maxLength={32}
                   />
                 </label>
+
+                {QR_METHODS.includes(customer.payment) && (
+                  <p className="brew-demo-alert">
+                    Sau khi bấm đặt hàng, hệ thống hiện mã QR. Quét bằng camera điện
+                    thoại, chọn tài khoản TEST (PIN 123456) rồi xác nhận. Khi thành
+                    công, trang này tự chuyển sang màn hình xác nhận và hiện số điểm
+                    được cộng.
+                  </p>
+                )}
 
                 <label>
                   <input
@@ -899,6 +1173,60 @@ export default function MenuPage() {
           )}
         </section>
       )}
+
+      {qr && (
+        <div className="brew-qr-overlay" role="dialog" aria-modal="true" aria-label="Thanh toán bằng mã QR">
+          <div className="brew-qr-card">
+            <h2 className="brew-qr-title">{PROVIDER_LABEL[qr.provider] ?? qr.provider}</h2>
+            <p className="brew-qr-sub">
+              Đơn #{qr.orderId} · <strong>{money(qr.amount)}</strong>
+            </p>
+            {qrState === "PENDING" ? (
+              <>
+                <div className="brew-qr-box">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={qr.dataUrl} alt="Mã QR thanh toán" width={240} height={240} />
+                </div>
+                <p className="brew-qr-timer">
+                  Còn {Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")} · đang chờ thanh toán...
+                </p>
+                {qr.mode === "SIMULATED" ? (
+                  <>
+                    <p className="brew-qr-hint">
+                      Quét mã bằng camera điện thoại (cùng Wi-Fi) để mở trang thanh toán thử. Đang dùng
+                      chính điện thoại này thì bấm nút bên dưới.
+                    </p>
+                    <a className="brew-qr-link" href={qr.statusUrl} target="_blank" rel="noreferrer">
+                      Mở trang thanh toán trên máy này
+                    </a>
+                  </>
+                ) : (
+                  <p className="brew-qr-hint">Chế độ sandbox của cổng thanh toán: làm theo hướng dẫn trên điện thoại.</p>
+                )}
+              </>
+            ) : (
+              <div className="brew-payment-failed" role="alert">
+                <strong>{qrState === "EXPIRED" ? "Mã QR đã hết hạn" : "Thanh toán không thành công"}</strong>
+                <p>Đơn #{qr.orderId} vẫn chưa được thanh toán. Bạn có thể tạo mã mới.</p>
+                <button type="button" className="brew-primary" onClick={renewQr} disabled={submitting}>
+                  Tạo mã QR mới
+                </button>
+              </div>
+            )}
+            <button
+              type="button"
+              className="brew-qr-close"
+              onClick={() => {
+                setQr(null);
+                setNotice(`Đơn #${qr.orderId} đang chờ thanh toán. Bấm đặt hàng lại để lấy mã QR mới.`);
+              }}
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }

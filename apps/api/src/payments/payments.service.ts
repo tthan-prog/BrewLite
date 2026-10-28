@@ -7,7 +7,12 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { OrdersService } from '../orders/orders.service.js';
-import { OrderStatus, PaymentStatus } from '../generated/prisma/enums.js';
+import {
+  LoyaltyType,
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from '../generated/prisma/enums.js';
 import type { CreatePaymentDto } from './dto.js';
 
 function isUniqueConstraintError(error: unknown): boolean {
@@ -31,6 +36,40 @@ export class PaymentsService {
    * gửi lại cùng khóa + cùng nội dung trả lại kết quả cũ, không thanh toán lần hai.
    */
   async pay(userId: number, dto: CreatePaymentDto, idempotencyKey?: string) {
+    if (
+      dto.method !== PaymentMethod.WALLET &&
+      dto.method !== PaymentMethod.CARD
+    ) {
+      throw new BadRequestException(
+        `Phương thức ${dto.method} thanh toán bằng mã QR: dùng POST /payments/intents`,
+      );
+    }
+    const result = await this.payCore(userId, dto, idempotencyKey);
+    return { ...result, ...(await this.pointsInfo(result.order.id, userId)) };
+  }
+
+  /** Điểm được cộng cho đơn này (0 nếu chưa thanh toán thành công) và số dư điểm hiện tại. */
+  private async pointsInfo(orderId: number, userId: number) {
+    const [earn, user] = await Promise.all([
+      this.prisma.loyaltyTransaction.findUnique({
+        where: { orderId_type: { orderId, type: LoyaltyType.EARN } },
+      }),
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { points: true },
+      }),
+    ]);
+    return {
+      pointsEarned: earn?.points ?? 0,
+      pointsBalance: user?.points ?? 0,
+    };
+  }
+
+  private async payCore(
+    userId: number,
+    dto: CreatePaymentDto,
+    idempotencyKey?: string,
+  ) {
     const key = idempotencyKey?.trim();
     if (!key) {
       throw new BadRequestException('Idempotency-Key header is required');

@@ -10,6 +10,7 @@ import { CreateOrderDto } from './dto/create-order.dto.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { LoyaltyType, OrderStatus } from '../generated/prisma/enums.js';
 import { assertTransition, pointsForTotal } from './order-state.js';
+import { addScaled, perCupNeed } from './ingredient-need.js';
 
 const STAFF_TARGETS: readonly OrderStatus[] = [
   OrderStatus.PREPARING,
@@ -166,6 +167,7 @@ export class OrdersService {
           quantity: number;
           unitPrice: number;
           size: string;
+          usesRecipe: boolean;
           toppings: {
             toppingId: number;
             quantity: number;
@@ -173,35 +175,38 @@ export class OrdersService {
           }[];
         }[] = [];
 
+        const ingredientNeed = new Map<number, number>();
+
         for (const item of dto.items) {
           const product = await tx.product.findUnique({
             where: { id: item.productId },
+            include: { recipe: true },
           });
 
           if (!product) {
             throw new NotFoundException(`Product ${item.productId} not found`);
           }
-          const stockUpdate = await tx.product.updateMany({
-  where: {
-    id: item.productId,
-    stock: {
-      gte: item.quantity,
-    },
-  },
-  data: {
-    stock: {
-      decrement: item.quantity,
-    },
-  },
-});
 
-if (stockUpdate.count !== 1) {
-  throw new BadRequestException(
-    `Insufficient stock for product ${item.productId}`,
-  );
-}
+          // Món có công thức: nguyên liệu được cộng dồn và trừ ở bước sau (theo size + topping).
+          const usesRecipe = product.recipe.length > 0;
+          if (!usesRecipe) {
+            // Sản phẩm chưa có công thức: dùng tồn kho theo sản phẩm (cách cũ).
+            const stockUpdate = await tx.product.updateMany({
+              where: { id: item.productId, stock: { gte: item.quantity } },
+              data: { stock: { decrement: item.quantity } },
+            });
+            if (stockUpdate.count !== 1) {
+              throw new BadRequestException(
+                `Insufficient stock for product ${item.productId}`,
+              );
+            }
+          }
 
           let toppingUnitTotal = 0;
+          const toppingRecipes: {
+            quantity: number;
+            recipe: { ingredientId: number; quantity: number }[];
+          }[] = [];
 
           const toppings: {
             toppingId: number;
@@ -212,6 +217,7 @@ if (stockUpdate.count !== 1) {
           for (const toppingInput of item.toppings ?? []) {
             const topping = await tx.topping.findUnique({
               where: { id: toppingInput.toppingId },
+              include: { recipe: true },
             });
 
             if (!topping) {
@@ -221,6 +227,10 @@ if (stockUpdate.count !== 1) {
             }
 
             toppingUnitTotal += topping.price * toppingInput.quantity;
+            toppingRecipes.push({
+              quantity: toppingInput.quantity,
+              recipe: topping.recipe,
+            });
 
             toppings.push({
               toppingId: topping.id,
@@ -228,6 +238,13 @@ if (stockUpdate.count !== 1) {
               price: topping.price,
             });
           }
+
+          // Nguyên liệu cho cả dòng: (công thức món theo size + topping) × số ly.
+          addScaled(
+            ingredientNeed,
+            perCupNeed(product.recipe, item.size.trim(), toppingRecipes),
+            item.quantity,
+          );
 
           const sizeSurcharge = SIZE_SURCHARGE[item.size.trim()] ?? 0;
           const unitPrice = product.price + sizeSurcharge;
@@ -238,9 +255,12 @@ if (stockUpdate.count !== 1) {
             quantity: item.quantity,
             unitPrice,
             size: item.size.trim(),
+            usesRecipe,
             toppings,
           });
         }
+
+        await this.consumeIngredients(tx, ingredientNeed);
 
         let discount = 0;
         let promoCode: string | null = null;
@@ -298,6 +318,7 @@ if (stockUpdate.count !== 1) {
                 quantity: item.quantity,
                 unitPrice: item.unitPrice,
                 size: item.size,
+                usesRecipe: item.usesRecipe,
                 toppings: {
                   create: item.toppings,
                 },
@@ -306,6 +327,16 @@ if (stockUpdate.count !== 1) {
           },
           include: orderInclude,
         });
+
+        if (ingredientNeed.size > 0) {
+          await tx.orderIngredientUse.createMany({
+            data: [...ingredientNeed].map(([ingredientId, quantity]) => ({
+              orderId: order.id,
+              ingredientId,
+              quantity,
+            })),
+          });
+        }
 
         // Record và order cùng transaction: nếu key bị trùng,
         // transaction tạo order thua cuộc sẽ bị rollback.
@@ -352,6 +383,33 @@ if (stockUpdate.count !== 1) {
       }
 
       return existing.order;
+    }
+  }
+
+  /**
+   * Trừ nguyên liệu bằng UPDATE có điều kiện (stock >= cần) theo thứ tự id cố định,
+   * nên hai đơn đồng thời không thể làm kho âm và không bị deadlock.
+   */
+  private async consumeIngredients(
+    tx: Prisma.TransactionClient,
+    need: Map<number, number>,
+  ) {
+    for (const [ingredientId, quantity] of [...need].sort(
+      (a, b) => a[0] - b[0],
+    )) {
+      const res = await tx.ingredient.updateMany({
+        where: { id: ingredientId, stock: { gte: quantity } },
+        data: { stock: { decrement: quantity } },
+      });
+      if (res.count !== 1) {
+        const ing = await tx.ingredient.findUnique({
+          where: { id: ingredientId },
+        });
+        const unit = ing?.unit ?? '';
+        throw new BadRequestException(
+          `Không đủ nguyên liệu "${ing?.name ?? ingredientId}": cần ${quantity} ${unit}, còn ${ing?.stock ?? 0} ${unit}`,
+        );
+      }
     }
   }
 
@@ -436,9 +494,21 @@ if (stockUpdate.count !== 1) {
 
     if (to === OrderStatus.CANCELLED) {
       for (const item of order.items) {
+        // Món dùng công thức được hoàn bằng nguyên liệu (bên dưới), không hoàn Product.stock.
+        if (item.usesRecipe) continue;
         await tx.product.update({
           where: { id: item.productId },
           data: { stock: { increment: item.quantity } },
+        });
+      }
+      const uses = await tx.orderIngredientUse.findMany({
+        where: { orderId: order.id },
+        orderBy: { ingredientId: 'asc' },
+      });
+      for (const use of uses) {
+        await tx.ingredient.update({
+          where: { id: use.ingredientId },
+          data: { stock: { increment: use.quantity } },
         });
       }
       if (order.status === OrderStatus.PAID) {
