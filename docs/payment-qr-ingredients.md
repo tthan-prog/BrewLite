@@ -4,13 +4,16 @@ Tài liệu mô tả phần mở rộng sau Assignment 1. Chưa merge vào `main
 
 ## 1. Nguyên liệu và công thức
 
-- Bảng `Ingredient` (tên, đơn vị, tồn kho), `RecipeItem` (món X dùng bao nhiêu nguyên liệu Y cho **1 ly**), `OrderIngredientUse` (lượng đã trừ cho từng đơn, để hoàn đúng khi hủy).
+- Bảng `Ingredient` (tên, đơn vị, tồn kho), `RecipeItem` (món X dùng bao nhiêu nguyên liệu Y cho **1 ly size S**), `ToppingRecipeItem` (topping X dùng bao nhiêu nguyên liệu Y cho **1 phần**), `OrderIngredientUse` (lượng đã trừ cho từng đơn, để hoàn đúng khi hủy).
 - Khi tạo đơn, hệ thống cộng dồn nhu cầu nguyên liệu của **cả đơn** (các dòng cùng món/khác size cộng lại) rồi trừ bằng `UPDATE ... WHERE stock >= cần` trong cùng transaction (cùng cách ADR-005). Không đủ → `400` "Không đủ nguyên liệu …", không trừ gì cả.
 - Hủy đơn hoàn lại đúng lượng nguyên liệu đã trừ (một lần).
 - Món **chưa có công thức** vẫn dùng `Product.stock` như cũ (để không phá dữ liệu/test cũ). Seed gán công thức cho cả 12 món.
-- `GET /products` trả thêm `recipe`, `maxQuantity` (số ly tối đa còn làm được), `available`.
-- STAFF: `GET /ingredients`, `PATCH /ingredients/:id/restock {quantity}`; giao diện `/staff/ingredients`.
-- Giới hạn hiện tại: công thức là **mỗi ly, không đổi theo size** và topping chưa trừ nguyên liệu.
+- **Theo size**: nguyên liệu của món nhân hệ số S 100%, M 125%, L 150%, làm tròn lên (`ceil`). Ví dụ món test: S=30, M=38, L=45.
+- **Theo topping**: mỗi phần topping trừ nguyên liệu riêng (không nhân theo size), nhân số phần × số ly.
+- `GET /products` trả thêm `recipe` (size S), `recipeBySize {S,M,L}`, `maxQuantity`, `available`; `GET /toppings` trả kèm công thức topping.
+- `POST /products/availability` (công khai): gửi giỏ hiện tại + lựa chọn (size, topping) → chỉ trả `{maxAdditional}` (số ly có thể đặt thêm), **không lộ tồn kho**. Trang menu dùng để hiển thị "Có thể đặt thêm tối đa N ly" và chặn nút +/Thêm vào giỏ.
+- Trang chi tiết món hiển thị nguyên liệu mỗi ly đã gộp theo size + topping đang chọn.
+- STAFF (nhân viên/quản lý; không có vai trò ADMIN riêng): `GET /ingredients` trả `usedBy` (món/topping dùng và định lượng) và `cupsRemaining` (số ly size S còn làm được theo nguyên liệu đó); `PATCH /ingredients/:id/restock {quantity}`; giao diện `/staff/ingredients` có cờ "Sắp hết" (<10 ly) / "Hết". Khách bị từ chối (403 ở API; trang hiện thông báo).
 
 ## 2. Tài khoản thanh toán TEST (seed, tiền giả, PIN chung `123456`)
 

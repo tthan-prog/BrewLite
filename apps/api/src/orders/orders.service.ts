@@ -10,6 +10,7 @@ import { CreateOrderDto } from './dto/create-order.dto.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { LoyaltyType, OrderStatus } from '../generated/prisma/enums.js';
 import { assertTransition, pointsForTotal } from './order-state.js';
+import { addScaled, perCupNeed } from './ingredient-need.js';
 
 const STAFF_TARGETS: readonly OrderStatus[] = [
   OrderStatus.PREPARING,
@@ -186,17 +187,9 @@ export class OrdersService {
             throw new NotFoundException(`Product ${item.productId} not found`);
           }
 
+          // Món có công thức: nguyên liệu được cộng dồn và trừ ở bước sau (theo size + topping).
           const usesRecipe = product.recipe.length > 0;
-          if (usesRecipe) {
-            // Có công thức: cộng dồn nhu cầu nguyên liệu, trừ kho ở bước sau.
-            for (const r of product.recipe) {
-              ingredientNeed.set(
-                r.ingredientId,
-                (ingredientNeed.get(r.ingredientId) ?? 0) +
-                  r.quantity * item.quantity,
-              );
-            }
-          } else {
+          if (!usesRecipe) {
             // Sản phẩm chưa có công thức: dùng tồn kho theo sản phẩm (cách cũ).
             const stockUpdate = await tx.product.updateMany({
               where: { id: item.productId, stock: { gte: item.quantity } },
@@ -210,6 +203,10 @@ export class OrdersService {
           }
 
           let toppingUnitTotal = 0;
+          const toppingRecipes: {
+            quantity: number;
+            recipe: { ingredientId: number; quantity: number }[];
+          }[] = [];
 
           const toppings: {
             toppingId: number;
@@ -220,6 +217,7 @@ export class OrdersService {
           for (const toppingInput of item.toppings ?? []) {
             const topping = await tx.topping.findUnique({
               where: { id: toppingInput.toppingId },
+              include: { recipe: true },
             });
 
             if (!topping) {
@@ -229,6 +227,10 @@ export class OrdersService {
             }
 
             toppingUnitTotal += topping.price * toppingInput.quantity;
+            toppingRecipes.push({
+              quantity: toppingInput.quantity,
+              recipe: topping.recipe,
+            });
 
             toppings.push({
               toppingId: topping.id,
@@ -236,6 +238,13 @@ export class OrdersService {
               price: topping.price,
             });
           }
+
+          // Nguyên liệu cho cả dòng: (công thức món theo size + topping) × số ly.
+          addScaled(
+            ingredientNeed,
+            perCupNeed(product.recipe, item.size.trim(), toppingRecipes),
+            item.quantity,
+          );
 
           const sizeSurcharge = SIZE_SURCHARGE[item.size.trim()] ?? 0;
           const unitPrice = product.price + sizeSurcharge;

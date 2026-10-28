@@ -26,6 +26,7 @@ async function main() {
   await prisma.paymentAccount.deleteMany();
   await prisma.loyaltyTransaction.deleteMany();
   await prisma.orderIngredientUse.deleteMany();
+  await prisma.toppingRecipeItem.deleteMany();
   await prisma.recipeItem.deleteMany();
   await prisma.ingredient.deleteMany();
   await prisma.payment.deleteMany();
@@ -114,6 +115,9 @@ async function main() {
     "Bột cacao": ["g", 1500],
     "Kem tươi": ["ml", 2000],
     "Caramel": ["ml", 1000],
+    "Bột thạch": ["g", 1200],
+    "Bột pudding": ["g", 1500],
+    "Phô mai kem": ["g", 1000],
   };
   const ingId: Record<string, number> = {};
   for (const [name, [unit, stock]] of Object.entries(ING)) {
@@ -137,6 +141,24 @@ async function main() {
     data: Object.entries(RECIPES).flatMap(([productId, items]) =>
       Object.entries(items).map(([name, quantity]) => ({
         productId: Number(productId),
+        ingredientId: ingId[name],
+        quantity,
+      })),
+    ),
+  });
+
+  // Topping: lượng cho MỘT phần (không đổi theo size ly).
+  const toppings = await prisma.topping.findMany();
+  const TOPPING_RECIPES: Record<string, Record<string, number>> = {
+    "Trân châu đen": { "Trân châu": 30 },
+    "Thạch cà phê": { "Bột thạch": 20 },
+    "Pudding trứng": { "Bột pudding": 25, "Sữa tươi": 30 },
+    "Kem cheese": { "Kem tươi": 40, "Phô mai kem": 15 },
+  };
+  await prisma.toppingRecipeItem.createMany({
+    data: toppings.flatMap((t) =>
+      Object.entries(TOPPING_RECIPES[t.name] ?? {}).map(([name, quantity]) => ({
+        toppingId: t.id,
         ingredientId: ingId[name],
         quantity,
       })),

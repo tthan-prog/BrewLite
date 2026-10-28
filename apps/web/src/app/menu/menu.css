@@ -978,29 +978,63 @@
 .brew-qr-card {
   background: #fff;
   border-radius: 16px;
-  padding: 24px;
-  max-width: 400px;
+  padding: 22px 20px;
   width: 100%;
-  text-align: center;
+  max-width: 340px;
   max-height: 92vh;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
 }
-.brew-qr-card img {
-  max-width: 100%;
+.brew-qr-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.brew-qr-sub {
+  margin: 0;
+}
+.brew-qr-box {
+  padding: 12px;
+  border: 1px solid #e6dccf;
+  border-radius: 12px;
+  background: #fff;
+  line-height: 0;
+}
+.brew-qr-box img {
+  display: block;
+  width: min(240px, 62vw);
   height: auto;
+  aspect-ratio: 1 / 1;
 }
 .brew-qr-timer {
+  margin: 0;
   font-weight: 600;
+  font-size: 0.95rem;
 }
 .brew-qr-hint {
+  margin: 0;
   font-size: 0.85rem;
+  line-height: 1.45;
   color: #5b5148;
-  text-align: left;
+}
+.brew-qr-link {
+  display: block;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #6a442b;
+  border-radius: 10px;
+  color: #6a442b;
+  font-weight: 600;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 .brew-qr-close {
-  margin-top: 8px;
   background: none;
   border: 0;
   text-decoration: underline;
   cursor: pointer;
+  color: #5b5148;
 }

@@ -200,6 +200,167 @@ describe('Nguyên liệu, QR, điểm thưởng (e2e, PostgreSQL)', () => {
     });
   });
 
+  describe('Nguyên liệu theo size và topping', () => {
+    async function toppingWithRecipe(ingredientId: number, perPortion: number) {
+      const t = await prisma.topping.create({
+        data: { name: `TP ${run}-${++seq}`, price: 5000 },
+      });
+      await prisma.toppingRecipeItem.create({
+        data: { toppingId: t.id, ingredientId, quantity: perPortion },
+      });
+      return t;
+    }
+
+    it('size lớn dùng nhiều nguyên liệu hơn: S=30, M=38 (làm tròn lên), L=45', async () => {
+      const { ingredient, product } = await drinkWithRecipe(1000);
+      for (const [size, used] of [
+        ['S', 30],
+        ['M', 38],
+        ['L', 45],
+      ] as const) {
+        const before = await ingStock(ingredient.id);
+        await request(http)
+          .post('/orders')
+          .set(auth(alice.token))
+          .set('Idempotency-Key', key())
+          .send({ items: [{ productId: product.id, quantity: 1, size }] })
+          .expect(201);
+        expect(before - (await ingStock(ingredient.id))).toBe(used);
+      }
+    });
+
+    it('size L không đủ nguyên liệu dù size S còn đủ', async () => {
+      const { ingredient, product } = await drinkWithRecipe(40); // S=30 đủ, L=45 thiếu
+      await request(http)
+        .post('/orders')
+        .set(auth(alice.token))
+        .set('Idempotency-Key', key())
+        .send({ items: [{ productId: product.id, quantity: 1, size: 'L' }] })
+        .expect(400);
+      expect(await ingStock(ingredient.id)).toBe(40);
+      await placeOrder(alice.token, product.id, 1).expect(201); // size S
+    });
+
+    it('topping trừ nguyên liệu riêng, nhân số phần và số ly; hủy đơn hoàn lại', async () => {
+      const { product } = await drinkWithRecipe(1000);
+      const topIng = await prisma.ingredient.create({
+        data: { name: `TPNL ${run}-${++seq}`, unit: 'g', stock: 100 },
+      });
+      const topping = await toppingWithRecipe(topIng.id, 10);
+      const res = await request(http)
+        .post('/orders')
+        .set(auth(alice.token))
+        .set('Idempotency-Key', key())
+        .send({
+          items: [
+            {
+              productId: product.id,
+              quantity: 3,
+              size: 'S',
+              toppings: [{ toppingId: topping.id, quantity: 2 }],
+            },
+          ],
+        })
+        .expect(201);
+      expect(await ingStock(topIng.id)).toBe(100 - 3 * 2 * 10);
+      await request(http)
+        .patch(`/orders/${res.body.id}/status`)
+        .set(auth(staffToken))
+        .send({ status: 'CANCELLED' })
+        .expect(200);
+      expect(await ingStock(topIng.id)).toBe(100);
+    });
+
+    it('hết nguyên liệu của topping thì không đặt được ly có topping đó', async () => {
+      const { product } = await drinkWithRecipe(1000);
+      const topIng = await prisma.ingredient.create({
+        data: { name: `TPNL ${run}-${++seq}`, unit: 'g', stock: 15 },
+      });
+      const topping = await toppingWithRecipe(topIng.id, 10);
+      const body = (qty: number) => ({
+        items: [
+          {
+            productId: product.id,
+            quantity: qty,
+            size: 'S',
+            toppings: [{ toppingId: topping.id, quantity: 1 }],
+          },
+        ],
+      });
+      const res = await request(http)
+        .post('/orders')
+        .set(auth(alice.token))
+        .set('Idempotency-Key', key())
+        .send(body(2))
+        .expect(400);
+      expect(JSON.stringify(res.body)).toContain('Không đủ nguyên liệu');
+    });
+
+    it('POST /products/availability: chỉ trả số ly, tính theo size, topping và giỏ hàng, không lộ tồn kho', async () => {
+      const { product } = await drinkWithRecipe(100);
+      const ask = (candidate: object, cart: object[] = []) =>
+        request(http)
+          .post('/products/availability')
+          .send({ cart, candidate })
+          .expect(200);
+
+      const s = await ask({ productId: product.id, size: 'S' });
+      expect(s.body).toEqual({ maxAdditional: 3 }); // floor(100/30)
+      expect(
+        (await ask({ productId: product.id, size: 'L' })).body.maxAdditional,
+      ).toBe(2); // floor(100/45)
+
+      // Giỏ đã có 2 ly size L (90) -> còn 10 nguyên liệu, không đủ cho thêm ly nào.
+      const withCart = await ask({ productId: product.id, size: 'S' }, [
+        { productId: product.id, size: 'L', quantity: 2 },
+      ]);
+      expect(withCart.body.maxAdditional).toBe(0);
+      expect(JSON.stringify(s.body)).not.toMatch(/stock|ingredient/i);
+
+      await request(http)
+        .post('/products/availability')
+        .send({ candidate: { productId: 999999999, size: 'S' } })
+        .expect(404);
+      await request(http)
+        .post('/products/availability')
+        .send({ candidate: { productId: product.id, size: 'XL' } })
+        .expect(400);
+    });
+
+    it('GET /products có recipeBySize; GET /toppings có công thức topping', async () => {
+      const { product } = await drinkWithRecipe(100);
+      const list = (await request(http).get('/products').expect(200)).body as {
+        id: number;
+        recipeBySize: Record<string, { quantity: number }[]>;
+      }[];
+      const row = list.find((p) => p.id === product.id)!;
+      expect(row.recipeBySize.S[0].quantity).toBe(30);
+      expect(row.recipeBySize.M[0].quantity).toBe(38);
+      expect(row.recipeBySize.L[0].quantity).toBe(45);
+      const tops = (await request(http).get('/toppings').expect(200)).body as {
+        recipe: unknown[];
+      }[];
+      expect(tops.some((t) => t.recipe.length > 0)).toBe(true);
+    });
+
+    it('kho cho STAFF liệt kê món/topping dùng nguyên liệu và số ly còn làm được', async () => {
+      const { ingredient } = await drinkWithRecipe(100);
+      const res = await request(http)
+        .get('/ingredients')
+        .set(auth(staffToken))
+        .expect(200);
+      const row = (
+        res.body as {
+          id: number;
+          cupsRemaining: number;
+          usedBy: { kind: string }[];
+        }[]
+      ).find((i) => i.id === ingredient.id)!;
+      expect(row.cupsRemaining).toBe(3);
+      expect(row.usedBy[0].kind).toBe('DRINK');
+    });
+  });
+
   describe('Thanh toán QR (mô phỏng)', () => {
     const createIntent = (token: string, orderId: number, provider = 'BANK') =>
       request(http)

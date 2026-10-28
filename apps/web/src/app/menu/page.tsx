@@ -12,10 +12,13 @@ type Category = "Tất cả" | "Cà phê" | "Trà" | "Trà sữa" | "Đá xay";
 type Size = "S" | "M" | "L";
 type View = "menu" | "cart" | "checkout";
 
+type RecipeLine = { name: string; unit: string; quantity: number };
+
 type Topping = {
   id: string;
   name: string;
   price: number;
+  recipe: RecipeLine[];
 };
 
 type Product = {
@@ -29,7 +32,9 @@ type Product = {
   /** Số ly tối đa còn làm được theo nguyên liệu (hoặc tồn kho nếu chưa có công thức). */
   maxQuantity: number;
   available: boolean;
-  recipe: { name: string; unit: string; quantity: number }[];
+  recipe: RecipeLine[];
+  /** Nguyên liệu mỗi ly theo size (size lớn dùng nhiều hơn). */
+  recipeBySize: Record<string, RecipeLine[]>;
 };
 
 type CartItem = {
@@ -52,10 +57,11 @@ type ApiProduct = {
   stock: number;
   maxQuantity?: number;
   available?: boolean;
-  recipe?: { name: string; unit: string; quantity: number }[];
+  recipe?: RecipeLine[];
+  recipeBySize?: Record<string, RecipeLine[]>;
 };
 
-type ApiTopping = { id: number; name: string; price: number };
+type ApiTopping = { id: number; name: string; price: number; recipe?: RecipeLine[] };
 
 type ApiOrder = {
   id: number;
@@ -116,7 +122,31 @@ function toProduct(p: ApiProduct): Product {
     maxQuantity: p.maxQuantity ?? p.stock,
     available: p.available ?? p.stock > 0,
     recipe: p.recipe ?? [],
+    recipeBySize: p.recipeBySize ?? {},
   };
+}
+
+/**
+ * Khóa ngẫu nhiên cho Idempotency-Key. crypto.randomUUID chỉ có trên trang an toàn
+ * (HTTPS hoặc localhost); mở bằng http://<IP LAN> trên điện thoại thì nó không tồn tại.
+ */
+function newKey(): string {
+  const c = typeof crypto !== "undefined" ? crypto : undefined;
+  if (c && typeof c.randomUUID === "function") return c.randomUUID();
+  const bytes = new Uint8Array(16);
+  if (c && typeof c.getRandomValues === "function") c.getRandomValues(bytes);
+  else for (let i = 0; i < 16; i++) bytes[i] = Math.floor(Math.random() * 256);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Gộp nguyên liệu của ly (theo size) với nguyên liệu của các topping đã chọn. */
+function mergeRecipe(base: RecipeLine[], toppings: Topping[]): RecipeLine[] {
+  const merged = new Map<string, RecipeLine>();
+  for (const line of [...base, ...toppings.flatMap((t) => t.recipe)]) {
+    const current = merged.get(line.name);
+    merged.set(line.name, current ? { ...current, quantity: current.quantity + line.quantity } : { ...line });
+  }
+  return [...merged.values()];
 }
 
 function money(value: number) {
@@ -142,6 +172,8 @@ export default function MenuPage() {
   const [ice, setIce] = useState(50);
   const [chosenToppings, setChosenToppings] = useState<Topping[]>([]);
   const [quantity, setQuantity] = useState(1);
+  // Số ly còn đặt thêm được với lựa chọn hiện tại (server tính theo size + topping + giỏ hàng).
+  const [avail, setAvail] = useState<number | null>(null);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const router = useRouter();
@@ -180,7 +212,7 @@ export default function MenuPage() {
         if (!alive) return;
         setProducts(apiProducts.map(toProduct));
         setToppings(
-          apiToppings.map((t) => ({ id: String(t.id), name: t.name, price: t.price }))
+          apiToppings.map((t) => ({ id: String(t.id), name: t.name, price: t.price, recipe: t.recipe ?? [] }))
         );
         setLoadError("");
         setLoadState("ready");
@@ -196,6 +228,42 @@ export default function MenuPage() {
       alive = false;
     };
   }, [reloadKey]);
+
+  useEffect(() => {
+    if (!selected) return;
+    let alive = true;
+    const toTopping = (t: Topping) => ({ toppingId: Number(t.id), quantity: 1 });
+    const timer = window.setTimeout(() => {
+      apiRequest<{ maxAdditional: number }>("/products/availability", {
+        method: "POST",
+        body: JSON.stringify({
+          cart: cart.map((item) => ({
+            productId: item.product.id,
+            size: item.size,
+            quantity: item.quantity,
+            toppings: item.toppings.map(toTopping),
+          })),
+          candidate: {
+            productId: selected.id,
+            size,
+            toppings: chosenToppings.map(toTopping),
+          },
+        }),
+      })
+        .then((r) => {
+          if (!alive) return;
+          setAvail(r.maxAdditional);
+          setQuantity((q) => Math.max(1, Math.min(q, r.maxAdditional)));
+        })
+        .catch(() => {
+          if (alive) setAvail(null);
+        });
+    }, 200);
+    return () => {
+      alive = false;
+      window.clearTimeout(timer);
+    };
+  }, [selected, size, chosenToppings, cart]);
 
   // Làm mới tình trạng nguyên liệu mà không nhấp nháy giao diện.
   function refreshProducts() {
@@ -329,6 +397,11 @@ export default function MenuPage() {
     return Math.max(0, product.maxQuantity - inCart);
   }
 
+  /** Tối đa ly có thể thêm: ưu tiên số do server tính; chưa có thì dùng ước lượng theo món. */
+  function maxAddableFor(product: Product) {
+    return avail !== null ? avail : remainingFor(product);
+  }
+
   function openProduct(product: Product) {
     setSelected(product);
     setView("menu");
@@ -337,14 +410,15 @@ export default function MenuPage() {
     setIce(50);
     setChosenToppings([]);
     setQuantity(1);
+    setAvail(null);
     setNotice("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function addToCart() {
     if (!selected) return;
-    if (quantity > remainingFor(selected)) {
-      setNotice(`Nguyên liệu chỉ đủ làm thêm ${remainingFor(selected)} ly "${selected.name}".`);
+    if (quantity > maxAddableFor(selected)) {
+      setNotice(`Nguyên liệu chỉ đủ làm thêm ${maxAddableFor(selected)} ly "${selected.name}" với lựa chọn này.`);
       return;
     }
 
@@ -432,7 +506,7 @@ export default function MenuPage() {
     const promoCode = promo.trim() || undefined;
     const signature = JSON.stringify({ items, promoCode });
     if (orderKeyRef.current?.signature !== signature) {
-      orderKeyRef.current = { signature, key: crypto.randomUUID() };
+      orderKeyRef.current = { signature, key: newKey() };
     }
 
     setSubmitting(true);
@@ -459,7 +533,7 @@ export default function MenuPage() {
         pointsBalance?: number;
       }>("/payments", {
         method: "POST",
-        headers: { ...auth, "Idempotency-Key": crypto.randomUUID() },
+        headers: { ...auth, "Idempotency-Key": newKey() },
         body: JSON.stringify({
           orderId: order.id,
           method: customer.payment,
@@ -786,20 +860,26 @@ export default function MenuPage() {
                 ))}
               </div>
 
-              {selected.recipe.length > 0 && (
+              {(selected.recipe.length > 0 || chosenToppings.length > 0) && (
                 <div className="brew-recipe">
-                  <strong>Nguyên liệu mỗi ly</strong>
+                  <strong>
+                    Nguyên liệu mỗi ly (size {size}
+                    {chosenToppings.length > 0
+                      ? ` + ${chosenToppings.map((t) => t.name).join(", ")}`
+                      : ""}
+                    )
+                  </strong>
                   <ul>
-                    {selected.recipe.map((r) => (
+                    {mergeRecipe(selected.recipeBySize[size] ?? selected.recipe, chosenToppings).map((r) => (
                       <li key={r.name}>
                         {r.name}: {r.quantity} {r.unit}
                       </li>
                     ))}
                   </ul>
                   <small>
-                    {remainingFor(selected) > 0
-                      ? `Nguyên liệu còn đủ cho ${remainingFor(selected)} ly.`
-                      : "Đã hết nguyên liệu cho món này."}
+                    {maxAddableFor(selected) > 0
+                      ? `Có thể đặt thêm tối đa ${maxAddableFor(selected)} ly với lựa chọn này.`
+                      : "Đã hết nguyên liệu cho lựa chọn này."}
                   </small>
                 </div>
               )}
@@ -821,10 +901,10 @@ export default function MenuPage() {
                   <span>{quantity}</span>
 
                   <button
-                    disabled={quantity >= remainingFor(selected)}
+                    disabled={quantity >= maxAddableFor(selected)}
                     onClick={() =>
                       setQuantity((previous) =>
-                        Math.min(remainingFor(selected), previous + 1)
+                        Math.min(maxAddableFor(selected), previous + 1)
                       )
                     }
                   >
@@ -836,9 +916,9 @@ export default function MenuPage() {
               <button
                 className="brew-primary brew-full"
                 onClick={addToCart}
-                disabled={remainingFor(selected) < 1}
+                disabled={maxAddableFor(selected) < 1}
               >
-                {remainingFor(selected) < 1
+                {maxAddableFor(selected) < 1
                   ? "Hết nguyên liệu"
                   : `Thêm vào giỏ · ${money(selectedPrice * quantity)}`}
               </button>
@@ -1097,24 +1177,29 @@ export default function MenuPage() {
       {qr && (
         <div className="brew-qr-overlay" role="dialog" aria-modal="true" aria-label="Thanh toán bằng mã QR">
           <div className="brew-qr-card">
-            <h2>{PROVIDER_LABEL[qr.provider] ?? qr.provider}</h2>
-            <p>
+            <h2 className="brew-qr-title">{PROVIDER_LABEL[qr.provider] ?? qr.provider}</h2>
+            <p className="brew-qr-sub">
               Đơn #{qr.orderId} · <strong>{money(qr.amount)}</strong>
             </p>
             {qrState === "PENDING" ? (
               <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={qr.dataUrl} alt="Mã QR thanh toán" width={280} height={280} />
+                <div className="brew-qr-box">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={qr.dataUrl} alt="Mã QR thanh toán" width={240} height={240} />
+                </div>
                 <p className="brew-qr-timer">
-                  Mã hết hạn sau {Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")} · đang chờ thanh toán...
+                  Còn {Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")} · đang chờ thanh toán...
                 </p>
                 {qr.mode === "SIMULATED" ? (
-                  <p className="brew-qr-hint">
-                    Chế độ mô phỏng: quét bằng camera điện thoại để mở trang thanh toán thử.
-                    Nếu đang chạy trên máy tính của bạn, điện thoại phải cùng Wi-Fi và biến{" "}
-                    <code>PUBLIC_WEB_URL</code> của API phải là địa chỉ LAN của máy.{" "}
-                    <a href={qr.statusUrl} target="_blank" rel="noreferrer">Mở trang thanh toán trên máy này</a>
-                  </p>
+                  <>
+                    <p className="brew-qr-hint">
+                      Quét mã bằng camera điện thoại (cùng Wi-Fi) để mở trang thanh toán thử. Đang dùng
+                      chính điện thoại này thì bấm nút bên dưới.
+                    </p>
+                    <a className="brew-qr-link" href={qr.statusUrl} target="_blank" rel="noreferrer">
+                      Mở trang thanh toán trên máy này
+                    </a>
+                  </>
                 ) : (
                   <p className="brew-qr-hint">Chế độ sandbox của cổng thanh toán: làm theo hướng dẫn trên điện thoại.</p>
                 )}
