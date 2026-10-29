@@ -1,53 +1,302 @@
-% !TEX program = xelatex
-% !TEX root = main.tex
-% =====================================================================
-% KHUNG BÁO CÁO DÙNG CHUNG CHO NHIỀU MÔN
-% Trình biên dịch: XeLaTeX (mặc định) hoặc LuaLaTeX. Trích dẫn: Biber.
-% Biên dịch: latexmk main.tex   (hoặc Overleaf: chọn Compiler = XeLaTeX)
-% Chỉ sửa: config/options.tex, config/meta.tex, profiles/<tên>/..., references.bib
-% =====================================================================
-\documentclass[a4paper,12pt,oneside]{report}
+\documentclass[a4paper]{article}
+\usepackage{vntex}
+%\usepackage[english,vietnam]{babel}
+%\usepackage[utf8]{inputenc}
 
-\input{config/options}
-\input{config/preamble}
-\input{config/macros}
-\input{config/meta}
+%\usepackage[utf8]{inputenc}
+%\usepackage[francais]{babel}
+\usepackage{a4wide,amssymb,epsfig,latexsym,multicol,array,hhline,fancyhdr}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{lastpage}
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{color}
+\usepackage{graphicx}							% Standard graphics package
+\usepackage{array}
+\usepackage{tabularx, caption}
+\usepackage{multirow}
+\usepackage[framemethod=tikz]{mdframed}% For highlighting paragraph backgrounds
+\usepackage{multicol}
+\usepackage{rotating}
+\usepackage{graphics}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{epsfig}
+\usepackage{tikz}
+\usepackage{listings}
+\usetikzlibrary{arrows,snakes,backgrounds}
+\usepackage{hyperref}
+\hypersetup{urlcolor=blue,linkcolor=black,citecolor=black,colorlinks=true} 
+%\usepackage{pstcol} 								% PSTricks with the standard color package
 
-% Biên dịch riêng một số chương cho nhanh (bỏ dấu % để dùng):
-% \includeonly{profiles/general/ch01}
+\newtheorem{theorem}{{\bf Định lý}}
+\newtheorem{property}{{\bf Tính chất}}
+\newtheorem{proposition}{{\bf Mệnh đề}}
+\newtheorem{corollary}[proposition]{{\bf Hệ quả}}
+\newtheorem{lemma}[proposition]{{\bf Bổ đề}}
 
+\everymath{\color{blue}}
+%\usepackage{fancyhdr}
+\setlength{\headheight}{40pt}
+\pagestyle{fancy}
+\fancyhead{} % clear all header fields
+\fancyhead[L]{
+ \begin{tabular}{rl}
+    \begin{picture}(25,15)(0,0)
+    \put(0,-8){\includegraphics[width=8mm, height=8mm]{logoITSGUsmall.png}}
+    %\put(0,-8){\epsfig{width=10mm,figure=hcmut.eps}}
+   \end{picture}&
+	%\includegraphics[width=8mm, height=8mm]{hcmut.png} & %
+	\begin{tabular}{l}
+		\textbf{\bf \ttfamily Trường Đại học Sài Gòn}\\
+		\textbf{\bf \ttfamily Khoa Công Nghệ Thông Tin}
+	\end{tabular} 	
+ \end{tabular}
+}
+\fancyhead[R]{
+	\begin{tabular}{l}
+		\tiny \bf \\
+		\tiny \bf 
+	\end{tabular}  }
+\fancyfoot{} % clear all footer fields
+\fancyfoot[L]{\scriptsize \ttfamily Bài tập lớn 1 (giữa kì) môn Công nghệ phần mềm - Năm học 2026-2027}
+\fancyfoot[R]{\scriptsize \ttfamily Trang {\thepage}/\pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+
+%%%
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{3}
+\makeatletter
+\newcounter {subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection .\@alph\c@subsubsubsection}
+\newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\normalfont\normalsize\bfseries}}
+\newcommand*\l@subsubsubsection{\@dottedtocline{3}{10.0em}{4.1em}}
+\newcommand*{\subsubsubsectionmark}[1]{}
+\makeatother
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+	language=Matlab,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3,
+	numbers=left,
+	stepnumber=1,
+	numbersep=1pt,    
+	firstnumber=1,
+	numberfirstline=true
+}
+
+\newcommand{\fillme}[1]{{\color{red}[#1]}}
 \begin{document}
 
-% ---------- Trang đầu (số La Mã) -----------------------------------------
-\ifcover        \input{frontmatter/cover}\fi
-\pagenumbering{roman}
-\ifdeclaration  \input{frontmatter/declaration}\fi
-\ifacknowledge  \input{frontmatter/acknowledgement}\fi
-\ifabstract     \input{frontmatter/abstract}\fi
+\begin{titlepage}
+\begin{center}
+TRƯỜNG ĐẠI HỌC SÀI GÒN \\
+KHOA CÔNG NGHỆ THÔNG TIN
+\end{center}
+\vspace{1cm}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=3cm]{logoITSGU.png}
+\end{center}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{center}
+\begin{tabular}{c}
+	\multicolumn{1}{l}{\textbf{{\Large CÔNG NGHỆ PHẦN MỀM}}}\\
+	~~\\
+	\hline
+	\\
+	\multicolumn{1}{l}{\textbf{{\Large Bài tập lớn 1 (giữa kì): xây dựng ứng dụng theo Agile Scrum}}}\\
+	\\
+	\textbf{{\Huge BrewLite -- Ứng dụng đặt đồ uống}}\\
+	\\
+	\hline
+\end{tabular}
+\end{center}
+
+\vspace{3cm}
+
+\begin{table}[h]
+\begin{tabular}{rrl}
+\hspace{5 cm} & GVHD: &Từ Lăng Phiêu\\
+& SV: & Nguyễn Lê Nhựt Thắng - \fillme{MSSV}\\
+& & Hồ Thiên Ngân - \fillme{MSSV} \\
+& & Hà Thiên Long - \fillme{MSSV} \\
+& & Giản Thiên Lực - \fillme{MSSV}\\
+\end{tabular}
+\vspace{1.5 cm}
+\end{table}
+
+\begin{center}
+{\footnotesize TP. HỒ CHÍ MINH, THÁNG 10/2026}
+\end{center}
+\end{titlepage}
+
+\thispagestyle{empty}
+
+\newpage
 \tableofcontents
-\iflistoffigs   \clearpage\phantomsection\addcontentsline{toc}{chapter}{\listfigurename}\listoffigures\fi
-\iflistoftabs   \clearpage\phantomsection\addcontentsline{toc}{chapter}{\listtablename}\listoftables\fi
-\iflistoflsts   \clearpage\phantomsection\addcontentsline{toc}{chapter}{\lstlistlistingname}\lstlistoflistings\fi
-\ifabbrev       \input{frontmatter/abbreviations}\fi
+\newpage
 
-% ---------- Nội dung chính (số Ả Rập) -------------------------------------
-\clearpage
-\pagenumbering{arabic}
-\input{profiles/\Profile/chapters}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Phần giới thiệu}
+\subsection{Bối cảnh và mục tiêu}
+BrewLite là ứng dụng web mobile-first giúp khách đặt đồ uống và thanh toán không dùng tiền mặt: xem menu, chọn size/topping, thêm vào giỏ, đăng nhập, đặt đơn, thanh toán mô phỏng (Ví/Thẻ) và xem lịch sử đơn. Bài tập lớn gồm 10 task theo Agile Scrum (mỗi task 1 điểm), kèm bốn nghiệp vụ backend nâng cao ở Task 10. Hạn nộp: 02/11/2026.
 
-% ---------- Tài liệu tham khảo ---------------------------------------------
-\clearpage
-\chapter*{Tài liệu tham khảo}\addcontentsline{toc}{chapter}{Tài liệu tham khảo}
-\begin{thebibliography}{1}
-\bibitem{scrumguide2020} Ken Schwaber, Jeff Sutherland. \textit{The Scrum Guide}. 2020. \url{https://scrumguides.org/scrum-guide.html} (truy cập 26/10/2026).
+\subsection{Công nghệ và sản phẩm bàn giao}
+\begin{center}
+\small\everymath{}
+\begin{tabular}{@{}p{2.8cm}p{11.2cm}@{}}
+\toprule
+\textbf{Lớp} & \textbf{Công nghệ / liên kết} \\ \midrule
+Frontend & Next.js (mobile-first), giỏ hàng, đăng nhập, thanh toán, lịch sử đơn \\
+Backend & NestJS, class-validator, JWT, bcrypt \\
+Cơ sở dữ liệu & PostgreSQL 16, Prisma 7 (migration, seed) \\
+Kiểm thử, vận hành & Vitest, Supertest, Playwright; Docker Compose, GitHub Actions \\
+Mã nguồn & \url{https://github.com/tthan-prog/BrewLite} (tag \texttt{assign1-final}, \texttt{v0.1.2}) \\
+Bản chạy & \url{https://brewlite-web.onrender.com}; \url{https://brewlite-api.onrender.com/health} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Quy trình Scrum và phân công}
+\subsection{Vai trò và phân công thành viên}
+Nhóm gồm 4 thành viên; vai trò là người chịu trách nhiệm chính của từng task (theo \texttt{docs/team-agreement.md}). Daily Scrum 20:00, tối đa 15 phút; mỗi chức năng một nhánh và gộp qua Pull Request.
+\begin{center}
+\small\everymath{}
+\begin{tabular}{@{}p{3.6cm}p{4.4cm}p{5.5cm}@{}}
+\toprule
+\textbf{Thành viên} & \textbf{Vai trò} & \textbf{Task phụ trách} \\ \midrule
+Nguyễn Lê Nhựt Thắng (A) & Scrum Master, nền tảng, kiểm thử, Product Owner tạm & 1 (khởi tạo), 9 (xác nhận, lịch sử, bàn giao); Product Vision, FR/NFR \\
+Hồ Thiên Ngân (B) & Backend: dữ liệu, đơn hàng & 2 (schema, seed), 6, 10 \\
+Hà Thiên Long (C) & Backend: xác thực, thanh toán & 2 (API), 7, 8, 10 \\
+Giản Thiên Lực (D) & Frontend; slide & 3, 4, 5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Ba Sprint}
+\begin{center}
+\small\everymath{}
+\begin{tabular}{@{}p{1.4cm}p{2.0cm}p{3.0cm}p{1.2cm}p{1.5cm}p{3.2cm}@{}}
+\toprule
+\textbf{Sprint} & \textbf{Thời gian} & \textbf{Cam kết (điểm)} & \textbf{Xong} & \textbf{Còn lại} & \textbf{Ghi chú} \\ \midrule
+1 & 14--18/10 & 11 & 2 & 9 & Trễ, chỉ xong Task 1 \\
+2 & 19--22/10 & 22 (13 mới + 9 tồn) & 14 & 8 & Còn Task 7 backend \\
+3 & 23--25/10 & 24 (16 mới + 8 tồn) & 24 & 0 & Mã hoàn tất 23/10 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Mỗi task chỉ tính hoàn thành khi đạt Definition of Done: chạy được và không lỗi build; commit rõ ràng, PR được người khác xem; API validate và giao diện có loading, lỗi; README có hướng dẫn chạy.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Kết quả thực hiện 10 task}
+\subsection{Tổng hợp theo task}
+\begin{center}
+\small\everymath{}
+\begin{tabular}{@{}p{0.8cm}p{3.0cm}p{2.0cm}p{1.7cm}p{5.0cm}@{}}
+\toprule
+\textbf{Task} & \textbf{Nội dung} & \textbf{Phụ trách} & \textbf{Nghiệm thu} & \textbf{Kết quả} \\ \midrule
+1 & Khởi tạo dự án & A & B & Monorepo, README, \texttt{.env.example}, \texttt{/health} \\
+2 & API sản phẩm & C (B: schema, seed) & D & \texttt{GET /products}, 12 sản phẩm mẫu \\
+3 & Trang Menu & D & A & Gọi API, loading, rỗng, lỗi \\
+4 & Chi tiết, size, topping & D & C & Size S/M/L (+0/+5.000/+10.000 đồng), giá do server tính \\
+5 & Giỏ hàng & D & B & Thêm, sửa, xóa, tổng tiền, badge số lượng \\
+6 & API tạo đơn & B & D & \texttt{POST /orders}: JWT, validate, trạng thái PENDING \\
+7 & Đăng ký, đăng nhập & C & B & bcrypt, JWT, guard, trang đăng nhập/đăng ký \\
+8 & Thanh toán & C & B & \texttt{POST /payments}: PAID hoặc PAYMENT\_FAILED, thử lại \\
+9 & Xác nhận, lịch sử, bàn giao & A & C & \texttt{/orders/me}, trang xác nhận, Docker Compose \\
+10 & Nghiệp vụ backend & B, C & D & Bốn nghiệp vụ và ba test bắt buộc (mục 3.2) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Task 10 -- nghiệp vụ backend}
+Bốn nghiệp vụ: (1) máy trạng thái đơn (PENDING, PAID, PREPARING, READY, COMPLETED, thêm PAYMENT\_FAILED và CANCELLED), mọi chuyển trạng thái đi qua một hàm kiểm tra duy nhất; (2) thanh toán idempotent bằng \texttt{Idempotency-Key}, ràng buộc duy nhất theo \texttt{(userId, key)}; (3) kiểm soát tồn kho đồng thời bằng cập nhật có điều kiện trong transaction (không bán quá số lượng; nguyên liệu chỉ trừ khi thanh toán thành công, hủy đơn hoàn lại phần đã trừ); (4) mã khuyến mãi (\texttt{WELCOME10} giảm 10\%) và điểm thưởng (1 điểm cho mỗi 10.000 đồng, cộng khi đơn PAID).
+
+\begin{mdframed}[hidealllines=true,backgroundcolor=magenta!10]
+\begin{lstlisting}[language=Java]
+export const ORDER_TRANSITIONS = {
+  PENDING:        ['PAID', 'PAYMENT_FAILED', 'CANCELLED'],
+  PAYMENT_FAILED: ['PENDING', 'CANCELLED'],
+  PAID:           ['PREPARING', 'CANCELLED'],
+  PREPARING:      ['READY'],
+  READY:          ['COMPLETED'],
+  COMPLETED: [], CANCELLED: [],
+};
+export function assertTransition(from, to): void {
+  if (!ORDER_TRANSITIONS[from].includes(to))
+    throw new BadRequestException(/* invalid transition */);
+}
+\end{lstlisting}
+\end{mdframed}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Kết quả kiểm thử}
+\subsection{Số lượng và kết quả test}
+\begin{center}
+\small\everymath{}
+\begin{tabular}{@{}p{3.3cm}p{2.2cm}p{1.8cm}p{5.4cm}@{}}
+\toprule
+\textbf{Mức} & \textbf{Công cụ} & \textbf{Số test} & \textbf{Kết quả} \\ \midrule
+Unit & Vitest & 36 & Đạt \\
+Tích hợp (PostgreSQL thật) & Supertest & 81 & Đạt \\
+E2E trình duyệt & Playwright & 10 & Đạt \\
+\bottomrule
+\end{tabular}
+\end{center}
+Số liệu từ lần chạy gần nhất trên nhánh \texttt{main} (commit \texttt{2cae795}); lint và build của backend, frontend sạch; CI xanh.
+
+\subsection{Ba test bắt buộc của Task 10}
+\begin{itemize}
+    \item (a) Chặn chuyển trạng thái sai: đơn PAID không nhảy thẳng sang COMPLETED, trả HTTP 400 -- \textbf{đạt}.
+    \item (b) Gửi hai lần cùng \texttt{Idempotency-Key} chỉ tạo một đơn và không thanh toán lần hai -- \textbf{đạt}.
+    \item (c) 20 yêu cầu đặt đồng thời khi kho còn 5: đúng 5 đơn thành công, không âm kho -- \textbf{đạt}.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Bàn giao và nhìn lại}
+\textbf{Bàn giao:} mã nguồn trên Git; \texttt{docker compose up --build} chạy đủ db, backend, frontend; README hướng dẫn cài đặt, chạy, kiểm thử; demo luồng menu, giỏ hàng, đăng nhập, thanh toán, xác nhận, lịch sử.
+
+\textbf{Retrospective.} Làm tốt: theo đường găng và có test chứng minh nghiệp vụ Task 10; README và Docker giúp chạy lại dễ. Cần cải thiện: bắt đầu muộn (Sprint 1 trễ 9 điểm); phân bố commit giữa các thành viên chưa đều; nghiệm thu chéo mới ghi trong tài liệu nhóm, chưa có Approve trên từng Pull Request.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{thebibliography}{80}
+
+\bibitem{scrum}
+Ken Schwaber, Jeff Sutherland,
+``\textbf{The Scrum Guide}'',
+\textit{link: https://scrumguides.org/scrum-guide.html}, 2020, lần truy cập cuối: 26/10/2026.
+
+\bibitem{de}
+Khoa Công nghệ thông tin, Trường Đại học Sài Gòn,
+``\textbf{Bài tập lớn BrewLite (VER 1.0)}'',
+\textit{môn Công nghệ phần mềm, học kỳ I năm học 2026--2027}.
+
 \end{thebibliography}
-
-% ---------- Phụ lục --------------------------------------------------------
-\appendix
-\renewcommand{\chaptername}{Phụ lục}
-\ifappmap  \include{appendices/app-doichieu}\fi
-\ifappteam \include{appendices/app-phancong}\fi
-\ifapptool \include{appendices/app-congcu}\fi
-\ifappmore \include{appendices/app-khac}\fi
-
 \end{document}

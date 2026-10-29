@@ -59,7 +59,7 @@ Quán cà phê quy mô nhỏ cần để khách đặt món và thanh toán khô
 | R1 | Bắt buộc Next.js (frontend), NestJS (backend), PostgreSQL; được bổ sung công nghệ khác |
 | R2 | Frontend theo hướng mobile-first/PWA |
 | R3 | Hạn nộp 27/10/2026 |
-| R4 | Nhóm 5 người, làm theo Scrum |
+| R4 | Nhóm 4 người, làm theo Scrum |
 | R5 | Production phải truy cập được qua HTTPS; DB production không public; secret không nằm trong repo |
 | R6 | Task làm tuần tự và có lịch sử commit rõ ràng |
 

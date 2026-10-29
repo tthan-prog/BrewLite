@@ -304,7 +304,7 @@ Mọi route (trừ `/`, `/health`, `/products*`, `/toppings`, `/auth/register`, 
 | 6 | API tạo đơn | 2 | B | Xong (JWT, validate, PENDING) | Đạt |
 | 7 | Đăng ký, đăng nhập | 2 | C | Xong (bcrypt, JWT, guard, trang `/login`, `/register`) | Đạt |
 | 8 | Thanh toán không tiền mặt | 3 | C | Xong (Ví/Thẻ mô phỏng, PAID/PAYMENT_FAILED, thử lại) | Đạt |
-| 9 | Xác nhận, lịch sử đơn, bàn giao | 3 | E | Xong (`/orders/me`, trang xác nhận, Docker, README) | Đạt |
+| 9 | Xác nhận, lịch sử đơn, bàn giao | 3 | A | Xong (`/orders/me`, trang xác nhận, Docker, README) | Đạt |
 | 10 | Nghiệp vụ nâng cao | 3 | B, C | Xong (state machine, idempotency, tồn kho, khuyến mãi, điểm; test a, b, c) | Đạt |
 
 **Giới hạn đã biết:** thanh toán chỉ mô phỏng; không có giao diện barista; trường đường/đá trong giỏ chỉ hiển thị, chưa lưu vào đơn; migration của các bảng bổ sung viết tay, cần đối chiếu với Prisma khi đổi môi trường.
@@ -455,11 +455,10 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 
 | Ký hiệu | Họ tên | MSSV | Vai trò |
 |---|---|---|---|
-| A | Nguyễn Lê Nhựt Thắng | | Scrum Master, Dev nền tảng |
+| A | Nguyễn Lê Nhựt Thắng | | Scrum Master, Dev nền tảng, kiểm thử, Product Owner tạm |
 | B | Hồ Thiên Ngân | | Dev backend (dữ liệu, đơn hàng, nghiệp vụ lõi) |
 | C | Hà Thiên Long | | Dev backend (xác thực, thanh toán, state machine) |
 | D | Giản Thiên Lực | | Dev frontend, slide |
-| E | Lê Thuận | | Dev frontend, kiểm thử, Product Owner tạm |
 
 **Giảng viên hướng dẫn:** Từ Lăng Phiêu
 
@@ -472,7 +471,7 @@ Dùng chung mã nguồn với Assignment 1. Hạn nộp 27/10/2026. Năm task, m
 
 | Task | Nội dung | Tạo phẩm | Trạng thái |
 |---|---|---|---|
-| 1 | Khai thác và đặc tả yêu cầu | `docs/requirements/` (context-and-scope, srs, use-case-checkout) | Có bản đầy đủ, cần E rà |
+| 1 | Khai thác và đặc tả yêu cầu | `docs/requirements/` (context-and-scope, srs, use-case-checkout) | Có bản đầy đủ, cần A rà |
 | 2 | Mô hình hóa | `docs/diagrams/` (activity, sequence, class, use-case; `.puml` và `.svg`) | Đã vẽ lại khớp code |
 | 3 | Kiến trúc | `docs/architecture/` (architecture.md, 7 ADR, deployment diagram) | Đã chốt Prisma và Render |
 | 4 | Sprint 1 | Cấu trúc `apps/api`, `apps/web`; MVP menu; CI (`ci.yml`) | Đã có; CI chặn merge khi lỗi, có một lần đỏ (run #13) và một lần xanh (run #14), xem `docs/evidence/` |

@@ -14,8 +14,8 @@
 | 2 | Prisma schema, migration, seed (sản phẩm, topping, user, mã khuyến mãi) | 2 | B (A) | 3 | Một phần | Schema và seed xong 21/10 (B); chuyển sang Sprint 2 |
 | 3 | `GET /products`, `GET /products/:id` | 2 | C | 3 (gộp Task 2) | Chưa làm | Chuyển sang Sprint 2, phụ thuộc seed |
 | 4 | Trang Menu: lưới, loading, trạng thái rỗng | 3 | D | 3 | Chưa làm | Chuyển sang Sprint 2 |
-| 5 | Trang chi tiết: size, topping, tính giá | 4 | D (C, E) | 3 | Chưa làm | Chuyển sang Sprint 2 |
-| 6 | Báo cáo: Product Vision, FR/NFR, user story | – | E | – | Đang làm | Bản nháp chương 1 và 3 |
+| 5 | Trang chi tiết: size, topping, tính giá | 4 | D (C, A) | 3 | Chưa làm | Chuyển sang Sprint 2 |
+| 6 | Báo cáo: Product Vision, FR/NFR, user story | – | A | – | Đang làm | Bản nháp chương 1 và 3 |
 | 7 | Cập nhật Burndown, ghi biên bản | – | A | – | Đang làm | Hằng ngày |
 
 ## Rủi ro và vướng mắc

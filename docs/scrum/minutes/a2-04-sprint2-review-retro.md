@@ -11,21 +11,20 @@
 | B | Hồ Thiên Ngân | 
 | C | Hà Thiên Long | 
 | D | Giản Thiên Lực | 
-| E | Lê Thuận | 
 
 
 ## Phần 1. Sprint Review
 
 | Task | Demo được? | Đạt DoD? | Người nghiệm thu | Bằng chứng | Ghi chú |
 |---|---|---|---|---|---|
-| 5.1 Hoàn thiện MVP | Có | Có | Hồ Thiên Ngân , Hà Thiên Long, Lê Thuận (theo phân công) | `docs/evidence/` ảnh 01–11; production `https://brewlite-web.onrender.com/menu` | Luồng menu → size → giỏ → thanh toán → xác nhận → lịch sử; có thanh toán thất bại và thử lại |
+| 5.1 Hoàn thiện MVP | Có | Có | Hồ Thiên Ngân , Hà Thiên Long, Nguyễn Lê Nhựt Thắng (theo phân công) | `docs/evidence/` ảnh 01–11; production `https://brewlite-web.onrender.com/menu` | Luồng menu → size → giỏ → thanh toán → xác nhận → lịch sử; có thanh toán thất bại và thử lại |
 | 5.2 Tích hợp và kiểm thử | Có | Có | Hà Thiên Long | CI 4 job (api, api-e2e, web, e2e-browser); 7 test E2E Playwright | `/health` trả `{"status":"ok","service":"brewlite-backend"}` |
 | 5.3 CD và rollback | Có | Có | Hồ Thiên Ngân  | `.github/workflows/cd.yml`; ảnh 12–14 và 20–25 | CD từ tag `v0.1.1`, `v0.1.2`; rollback về `sha-e445b63` (CD #11) và triển khai lại `sha-7b1ea96` (CD #12) |
 | 5.4 Production, release, README | Có | Gần đạt | Giản Thiên Lực  | Release `v0.1.2`; `docs/deployment.md`; README 2.2 | – |
-| 5.4 Video demo | Có | Chờ nghiệm thu | Lê Thuận | https://drive.google.com/file/d/1uxrJSc9OkNkD-68vCTKXsPb0DcUudtat/view?usp=sharing | Giản Thiên Lực quay; Lê Thuận xác nhận sau khi xem |
+| 5.4 Video demo | Có | Chờ nghiệm thu | Nguyễn Lê Nhựt Thắng | https://drive.google.com/file/d/1uxrJSc9OkNkD-68vCTKXsPb0DcUudtat/view?usp=sharing | Giản Thiên Lực quay; Nguyễn Lê Nhựt Thắng xác nhận sau khi xem |
 | 5.4 Sprint Review/Retro | Có | Có | Cả nhóm | `docs/scrum/minutes/a2-*` | Biên bản này |
 
-- **Sprint Goal đã đạt chưa:** Phần lớn đạt: có URL production HTTPS, CI/CD chạy, rollback đã chứng minh. Video demo đã có liên kết, chờ Lê Thuận xác nhận.
+- **Sprint Goal đã đạt chưa:** Phần lớn đạt: có URL production HTTPS, CI/CD chạy, rollback đã chứng minh. Video demo đã có liên kết, chờ Nguyễn Lê Nhựt Thắng xác nhận.
 - **Increment demo được:** phiên bản `v0.1.2` trên production.
 - **Điều chỉnh Product Backlog sau Review:** việc còn lại chuyển sang giai đoạn hoàn thiện trước 27/10: rà soát lần cuối.
 

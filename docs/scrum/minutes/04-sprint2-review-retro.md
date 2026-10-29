@@ -4,7 +4,7 @@
 
 - **Thời gian:** 22/10/2026, 21:30 – 22:30
 - **Người ghi biên bản:** A
-- **Có mặt:** A, B, C, D, E
+- **Có mặt:** A, B, C, D
 - **Hình thức:** họp nhóm trực tuyến
 
 ## 1. Nội dung và quyết định
@@ -22,8 +22,8 @@
 | Việc | Người làm | Hạn | Trạng thái |
 |---|---|---|---|
 | Auth, products, payments, state machine | C, B | 23/10 | Hoàn thành code |
-| Nghiệm thu chéo Task 2–10 | B, C, D, E | 24/10 | Chưa làm |
-| Báo cáo và chụp ảnh minh họa | D, E | 25/10 | Đang làm |
+| Nghiệm thu chéo Task 2–10 | B, C, D | 24/10 | Chưa làm |
+| Báo cáo và chụp ảnh minh họa | D, A | 25/10 | Đang làm |
 
 ## 3. Vướng mắc cần hỗ trợ
 
