@@ -2,11 +2,11 @@
 
 - **Trạng thái:** Đã chốt
 - **Ngày:** 20/10/2026
-- **Người quyết định:** Cả nhóm (đề xuất bởi A)
+- **Người quyết định:** Cả nhóm 
 
 ## Bối cảnh
 
-Đề Assignment 2 yêu cầu cấu trúc `apps/web`, `apps/api`, `docs`, `tests`, `.github/workflows`. Nhóm 5 người, hạn nộp ngắn, cần chung một lịch sử commit để truy vết.
+Đề Assignment 2 yêu cầu cấu trúc `apps/web`, `apps/api`, `docs`, `tests`, `.github/workflows`. Nhóm 4 người, hạn nộp ngắn, cần chung một lịch sử commit để truy vết.
 
 ## Quyết định
 

@@ -1,7 +1,5 @@
 # Đặc tả yêu cầu phần mềm rút gọn – SRS (Assignment 2 – Task 1.2)
 
-> **Trạng thái: bản nháp để E hoàn thiện.** Mã yêu cầu dùng cho `traceability-matrix.md`. Mức ưu tiên theo MoSCoW. Cột "Tiêu chí chấp nhận" phải kiểm chứng được và là cơ sở viết test.
-
 ## 1. Yêu cầu chức năng
 
 | Mã | Nhóm | Yêu cầu | Ưu tiên | Tiêu chí chấp nhận |
@@ -28,7 +26,7 @@
 
 | Mã | Nhóm | Yêu cầu | Ưu tiên | Tiêu chí chấp nhận |
 |---|---|---|---|---|
-| NFR-01 | Hiệu năng | `GET /products` phản hồi nhanh với dữ liệu seed | Should | [điền ngưỡng sau khi đo, ví dụ p95 dưới 500 ms trên môi trường production] |
+| NFR-01 | Hiệu năng | `GET /products` phản hồi nhanh với dữ liệu seed | Should | Lần chậm thứ 19 trong 20 yêu cầu `GET /products` dưới 500 ms với dữ liệu mẫu (12 sản phẩm), đo cục bộ bằng Docker Compose. Kết quả ngày 24/10/2026: 19,7 ms. Ghi chú production (Render Singapore, gói Free, đo từ Việt Nam, 30 yêu cầu): byte đầu tiên về sau 0,43 đến 0,47 giây ở 24 yêu cầu và 0,74 đến 0,78 giây ở 6 yêu cầu, trong đó khoảng 0,25 giây là độ trễ mạng một vòng |
 | NFR-02 | Bảo mật | Mật khẩu băm; JWT có hạn; kiểm tra phân quyền theo vai trò | Must | Test xác thực và phân quyền; không có mật khẩu thô trong DB hoặc log |
 | NFR-03 | Bảo mật | Secret không nằm trong repository hoặc log CI | Must | Quét repo/log không thấy secret; `.env` nằm trong `.gitignore` |
 | NFR-04 | Bảo mật | Validate dữ liệu đầu vào ở cả frontend và backend | Must | Dữ liệu sai trả lỗi 4xx rõ ràng |
@@ -42,6 +40,5 @@
 
 ## 3. Use-case tổng quát
 
-Xem sơ đồ `docs/diagrams/usecase-overview.puml` (cần vẽ). Actor: Customer, Staff, Payment Service (mô phỏng). Use-case: Xem menu, Xem chi tiết, Quản lý giỏ hàng, Đăng ký/Đăng nhập, **Đặt và thanh toán đơn hàng**, Xem lịch sử đơn, Cập nhật trạng thái đơn.
+Xem sơ đồ `docs/diagrams/usecase-overview.puml` (đã có, kèm bản kết xuất `usecase-overview.svg`). Actor: Customer, Staff, Payment Service (mô phỏng). Use-case: Xem menu, Xem chi tiết, Quản lý giỏ hàng, Đăng ký/Đăng nhập, **Đặt và thanh toán đơn hàng**, Xem lịch sử đơn, Cập nhật trạng thái đơn.
 
-> [Điền] Nhóm thêm hoặc bớt yêu cầu theo quyết định thực tế và cập nhật `traceability-matrix.md`.

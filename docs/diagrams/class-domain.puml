@@ -32,11 +32,7 @@ enum LoyaltyType {
   EARN
   REVERSAL
 }
-enum Size {
-  S
-  M
-  L
-}
+
 
 class User {
   id : int
@@ -71,8 +67,14 @@ class Order {
 class OrderItem {
   id : int
   quantity : int
-  size : Size
+  size : string
   unitPrice : int
+}
+class OrderItemTopping {
+  orderItemId : int
+  toppingId : int
+  quantity : int
+  price : int
 }
 class Payment {
   id : int
@@ -106,7 +108,8 @@ class IdempotencyRecord {
 User "1" -- "0..*" Order : đặt
 Order "1" *-- "1..*" OrderItem : gồm
 OrderItem "0..*" -- "1" Product : tham chiếu
-OrderItem "0..*" -- "0..*" Topping : topping đã chọn
+OrderItem "1" -- "0..*" OrderItemTopping
+Topping "1" -- "0..*" OrderItemTopping
 Order "1" -- "0..*" Payment : thanh toán
 Order "0..*" ..> "0..1" Promotion : áp dụng theo promoCode
 User "1" -- "0..*" Payment : thực hiện
@@ -120,7 +123,6 @@ Payment ..> PaymentStatus
 Payment ..> PaymentMethod
 Promotion ..> PromotionType
 LoyaltyTransaction ..> LoyaltyType
-OrderItem ..> Size
 note right of User
   Mỗi lần đổi điểm ghi một LoyaltyTransaction
   (1 điểm / 10.000đ, EARN khi PAID,

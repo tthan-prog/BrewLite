@@ -33,8 +33,39 @@ Sản phẩm triển khai: tag `v0.1.2` (commit `7b1ea96`, image `sha-7b1ea96`).
 | 13-cd-v0.1.2-xanh.png | CD chạy từ tag `v0.1.2` (commit `7b1ea96`) xanh |
 | 14-render-events-deploy-sha-7b1ea96.png | Render Events: "Deploy started ... Triggered via Deploy Hook" rồi "Deploy live" cho image `sha-7b1ea96` |
 
+## CI chặn merge khi test sai (Task 4.4)
+
+PR thử nghiệm #30 (đóng, không merge): cố ý đổi kỳ vọng một test trong `apps/api/src/orders/order-state.spec.ts`
+(đơn `PAID` không được nhảy thẳng sang `COMPLETED`), rồi sửa lại.
+
+| Ảnh | Nội dung |
+|---|---|
+| 19-test-loi-chay-o-may.png | Chạy test ở máy: `expected false to be true`, 1 test lỗi |
+| 16-ci-do-run13-job-api-loi.png | CI run #13 **đỏ**: job `api` lỗi, các job còn lại xanh |
+| 17-pr30-merge-bi-chan.png | PR #30: check `api` (Required) đỏ, "Merging is blocked", nút Merge bị làm mờ, thêm yêu cầu Review |
+| 18-ci-xanh-run14-sau-khi-sua.png | Sau commit khôi phục test, CI run #14 **xanh** cả 4 job |
+
+## Rollback và deploy lại (Task 5.3)
+
+Ngày 23/10/2026. Từ `v0.1.2` (`sha-7b1ea96`) lùi về `v0.1.1` (`sha-e445b63`) bằng workflow CD chạy thủ công (`workflow_dispatch`, nhập `image_tag`), rồi triển khai lại `v0.1.2`.
+
+| Ảnh | Nội dung |
+|---|---|
+| 20-rollback-cd11-bo-qua-build.png | CD #11 chạy thủ công: `quality` và `build-and-push` bị bỏ qua, chỉ chạy `deploy-and-smoke-test` (xanh) |
+| 21-rollback-cd11-log-deploy-sha-e445b63.png | Log bước deploy: api và web nhận image `sha-e445b63`, HTTP 200; smoke test chạy 1 phút 4 giây |
+| 22-rollback-render-events-sha-e445b63.png | Render Events của `brewlite-web`: "Triggered via Deploy Hook" rồi "Deploy live" với `sha-e445b63` |
+| 23-rollback-giao-dien-ban-cu-khong-co-khung-do.png | Sau rollback: thanh toán lỗi chỉ hiện thông báo ở dải trên cùng, không có khung đỏ và nút vẫn ghi "Đặt hàng và thanh toán" (đúng hành vi `v0.1.1`) |
+| 24-deploy-lai-cd12-log-sha-7b1ea96.png | CD #12 triển khai lại: api và web nhận image `sha-7b1ea96`, HTTP 200 |
+| 25-giao-dien-ban-moi-co-khung-do.png | Sau khi triển khai lại: khung đỏ "Thanh toán thất bại" trở lại (đúng hành vi `v0.1.2`) |
+
+Ghi chú: ở CD #12, smoke test chỉ chạy 1 giây vì API cũ vẫn trả lời `/health` trong lúc Render thay container; việc bản mới đã chạy được xác nhận bằng giao diện (ảnh 25).
+
+## Sơ đồ đi kèm
+
+Sơ đồ PlantUML (nguồn, SVG, PNG) nằm ở `docs/diagrams/`; báo cáo LaTeX dùng các bản PNG trong `docs/report/latex/*/uml/`.
+
 ## Chưa có trong thư mục này
 
-- CI đỏ rồi xanh (Task 4.4): sẽ bổ sung bằng một PR thử nghiệm.
+- Log chi tiết bước Unit test của run #13 trên GitHub (xem trên tab Actions).
 - CD đỏ lần đầu (tag `v0.1.0`, thiếu cấu hình URL và hook): lưu trên tab Actions của GitHub.
 - Ảnh cấu hình database chặn truy cập từ Internet (inbound IP rules trống): bổ sung từ trang Render, che các giá trị nhạy cảm.

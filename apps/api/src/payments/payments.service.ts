@@ -6,8 +6,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { OrdersService } from '../orders/orders.service.js';
-import { OrderStatus, PaymentStatus } from '../generated/prisma/enums.js';
+import {
+  OrdersService,
+  OutOfIngredientsException,
+} from '../orders/orders.service.js';
+import {
+  LoyaltyType,
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from '../generated/prisma/enums.js';
 import type { CreatePaymentDto } from './dto.js';
 
 function isUniqueConstraintError(error: unknown): boolean {
@@ -31,6 +39,40 @@ export class PaymentsService {
    * gửi lại cùng khóa + cùng nội dung trả lại kết quả cũ, không thanh toán lần hai.
    */
   async pay(userId: number, dto: CreatePaymentDto, idempotencyKey?: string) {
+    if (
+      dto.method !== PaymentMethod.WALLET &&
+      dto.method !== PaymentMethod.CARD
+    ) {
+      throw new BadRequestException(
+        `Phương thức ${dto.method} thanh toán bằng mã QR: dùng POST /payments/intents`,
+      );
+    }
+    const result = await this.payCore(userId, dto, idempotencyKey);
+    return { ...result, ...(await this.pointsInfo(result.order.id, userId)) };
+  }
+
+  /** Điểm được cộng cho đơn này (0 nếu chưa thanh toán thành công) và số dư điểm hiện tại. */
+  private async pointsInfo(orderId: number, userId: number) {
+    const [earn, user] = await Promise.all([
+      this.prisma.loyaltyTransaction.findUnique({
+        where: { orderId_type: { orderId, type: LoyaltyType.EARN } },
+      }),
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { points: true },
+      }),
+    ]);
+    return {
+      pointsEarned: earn?.points ?? 0,
+      pointsBalance: user?.points ?? 0,
+    };
+  }
+
+  private async payCore(
+    userId: number,
+    dto: CreatePaymentDto,
+    idempotencyKey?: string,
+  ) {
     const key = idempotencyKey?.trim();
     if (!key) {
       throw new BadRequestException('Idempotency-Key header is required');
@@ -105,11 +147,63 @@ export class PaymentsService {
         return { payment, order: updatedOrder, replayed: false };
       });
     } catch (error: unknown) {
+      if (error instanceof OutOfIngredientsException) {
+        return this.recordOutOfStock(
+          userId,
+          dto,
+          key,
+          requestHash,
+          error.message,
+        );
+      }
       if (!isUniqueConstraintError(error)) throw error;
       // Hai yêu cầu cùng khóa chạy song song: bên thua đọc lại kết quả của bên thắng.
       const again = await replay();
       if (again) return again;
       throw error;
     }
+  }
+
+  /**
+   * Chốt thanh toán thất bại vì kho vừa hết nguyên liệu (giao dịch thành công đã bị hủy nên không
+   * trừ tiền, không trừ kho): ghi Payment FAILED, đơn → PAYMENT_FAILED để khách thử lại khi có hàng.
+   */
+  private async recordOutOfStock(
+    userId: number,
+    dto: CreatePaymentDto,
+    key: string,
+    requestHash: string,
+    reason: string,
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUniqueOrThrow({
+        where: { id: dto.orderId },
+      });
+      const payment = await tx.payment.create({
+        data: {
+          orderId: order.id,
+          userId,
+          method: dto.method,
+          status: PaymentStatus.FAILED,
+          amount: order.total,
+          idempotencyKey: key,
+          requestHash,
+        },
+      });
+      const updated =
+        order.status === OrderStatus.PENDING
+          ? await this.orders.changeStatus(
+              tx,
+              order.id,
+              OrderStatus.PAYMENT_FAILED,
+            )
+          : order;
+      return {
+        payment,
+        order: updated,
+        replayed: false,
+        failureReason: reason,
+      };
+    });
   }
 }

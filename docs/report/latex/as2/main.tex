@@ -1,0 +1,406 @@
+\documentclass[a4paper]{article}
+\usepackage{vntex}
+%\usepackage[english,vietnam]{babel}
+%\usepackage[utf8]{inputenc}
+
+%\usepackage[utf8]{inputenc}
+%\usepackage[francais]{babel}
+\usepackage{a4wide,amssymb,epsfig,latexsym,multicol,array,hhline,fancyhdr}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{lastpage}
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{color}
+\usepackage{graphicx}							% Standard graphics package
+\usepackage{array}
+\usepackage{tabularx, caption}
+\usepackage{multirow}
+\usepackage[framemethod=tikz]{mdframed}% For highlighting paragraph backgrounds
+\usepackage{multicol}
+\usepackage{rotating}
+\usepackage{graphics}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{epsfig}
+\usepackage{tikz}
+\usepackage{listings}
+\usetikzlibrary{arrows,snakes,backgrounds}
+\usepackage{hyperref}
+\hypersetup{urlcolor=blue,linkcolor=black,citecolor=black,colorlinks=true} 
+%\usepackage{pstcol} 								% PSTricks with the standard color package
+
+\newtheorem{theorem}{{\bf Định lý}}
+\newtheorem{property}{{\bf Tính chất}}
+\newtheorem{proposition}{{\bf Mệnh đề}}
+\newtheorem{corollary}[proposition]{{\bf Hệ quả}}
+\newtheorem{lemma}[proposition]{{\bf Bổ đề}}
+
+\everymath{\color{blue}}
+%\usepackage{fancyhdr}
+\setlength{\headheight}{40pt}
+\pagestyle{fancy}
+\fancyhead{} % clear all header fields
+\fancyhead[L]{
+ \begin{tabular}{rl}
+    \begin{picture}(25,15)(0,0)
+    \put(0,-8){\includegraphics[width=8mm, height=8mm]{logoITSGUsmall.png}}
+    %\put(0,-8){\epsfig{width=10mm,figure=hcmut.eps}}
+   \end{picture}&
+	%\includegraphics[width=8mm, height=8mm]{hcmut.png} & %
+	\begin{tabular}{l}
+		\textbf{\bf \ttfamily Trường Đại học Sài Gòn}\\
+		\textbf{\bf \ttfamily Khoa Công Nghệ Thông Tin}
+	\end{tabular} 	
+ \end{tabular}
+}
+\fancyhead[R]{
+	\begin{tabular}{l}
+		\tiny \bf \\
+		\tiny \bf 
+	\end{tabular}  }
+\fancyfoot{} % clear all footer fields
+\fancyfoot[L]{\scriptsize \ttfamily Bài tập lớn 2 (cuối kì) môn Công nghệ phần mềm - Năm học 2026-2027}
+\fancyfoot[R]{\scriptsize \ttfamily Trang {\thepage}/\pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+
+%%%
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{3}
+\makeatletter
+\newcounter {subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection .\@alph\c@subsubsubsection}
+\newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\normalfont\normalsize\bfseries}}
+\newcommand*\l@subsubsubsection{\@dottedtocline{3}{10.0em}{4.1em}}
+\newcommand*{\subsubsubsectionmark}[1]{}
+\makeatother
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+	language=Matlab,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3,
+	numbers=left,
+	stepnumber=1,
+	numbersep=1pt,    
+	firstnumber=1,
+	numberfirstline=true
+}
+
+\newcommand{\fillme}[1]{{\color{red}[#1]}}
+\newcommand{\hinhx}[3]{\begin{center}\includegraphics[width=#2,height=0.66\textheight,keepaspectratio]{#1}\\[2pt]{\small\textit{#3}}\end{center}}
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+TRƯỜNG ĐẠI HỌC SÀI GÒN \\
+KHOA CÔNG NGHỆ THÔNG TIN
+\end{center}
+\vspace{1cm}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=3cm]{logoITSGU.png}
+\end{center}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{center}
+\begin{tabular}{c}
+	\multicolumn{1}{l}{\textbf{{\Large CÔNG NGHỆ PHẦN MỀM}}}\\
+	~~\\
+	\hline
+	\\
+	\multicolumn{1}{l}{\textbf{{\Large Bài tập lớn 2 (cuối kì): từ yêu cầu đến triển khai}}}\\
+	\\
+	\textbf{{\Huge BrewLite -- Ứng dụng đặt đồ uống}}\\
+	\\
+	\hline
+\end{tabular}
+\end{center}
+
+\vspace{3cm}
+
+\begin{table}[h]
+\begin{tabular}{rrl}
+\hspace{5 cm} & GVHD: &Từ Lăng Phiêu\\
+& SV: & Nguyễn Lê Nhựt Thắng - \fillme{MSSV}\\
+& & Hồ Thiên Ngân - \fillme{MSSV} \\
+& & Hà Thiên Long - \fillme{MSSV} \\
+& & Giản Thiên Lực - \fillme{MSSV}\\
+\end{tabular}
+\vspace{1.5 cm}
+\end{table}
+
+\begin{center}
+{\footnotesize TP. HỒ CHÍ MINH, THÁNG 10/2026}
+\end{center}
+\end{titlepage}
+
+\thispagestyle{empty}
+
+\newpage
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Phần giới thiệu}
+\subsection{Bối cảnh, mục tiêu và phạm vi}
+Quán cà phê quy mô nhỏ cần để khách đặt món và thanh toán không dùng tiền mặt ngay trên điện thoại, tránh xếp hàng và nhầm đơn. BrewLite là ứng dụng web mobile-first: xem menu, chọn size và topping, giỏ hàng, đăng nhập, đặt đơn, thanh toán mô phỏng (Ví/Thẻ), theo dõi trạng thái và lịch sử đơn. Assignment 2 tiếp nối Assignment 1 trên cùng mã nguồn và đi tuần tự qua năm task: đặc tả yêu cầu, mô hình hóa, kiến trúc, Sprint 1, Sprint 2 cùng CI/CD và triển khai production. Báo cáo này tập trung vào đặc tả, thiết kế, quy trình và vận hành.
+
+\subsection{Công nghệ và sản phẩm bàn giao}
+\begin{center}
+\small\everymath{}
+\begin{tabular}{@{}p{2.8cm}p{11.2cm}@{}}
+\toprule
+\textbf{Lớp} & \textbf{Công nghệ / liên kết} \\ \midrule
+Frontend & Next.js (App Router), mobile-first, manifest PWA cơ bản \\
+Backend & NestJS, class-validator, JWT, bcrypt \\
+Cơ sở dữ liệu & PostgreSQL 16, Prisma 7 (migration, seed) \\
+Kiểm thử & Vitest, Supertest (PostgreSQL thật), Playwright \\
+Vận hành & Docker Compose, GitHub Actions, GHCR, Render \\
+Mã nguồn & \url{https://github.com/tthan-prog/BrewLite} \\
+Production & \url{https://brewlite-web.onrender.com}; \url{https://brewlite-api.onrender.com/health}; tag \texttt{v0.1.2} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Phân công và các Sprint}
+Nhóm gồm 4 thành viên, làm theo Agile Scrum~\cite{scrum}; Daily Scrum 20:00. Assignment 2 chia hai Sprint theo đề: Sprint 1 (Task 4) tạo nền tảng và MVP menu; Sprint 2 (Task 5) hoàn thiện end-to-end, CI/CD và production.
+\begin{center}
+\small\everymath{}
+\begin{tabular}{@{}p{3.7cm}p{4.2cm}p{5.6cm}@{}}
+\toprule
+\textbf{Thành viên} & \textbf{Vai trò} & \textbf{Phụ trách trong Assignment 2} \\ \midrule
+Nguyễn Lê Nhựt Thắng (A) & Scrum Master, nền tảng, kiểm thử & Repo, tài liệu yêu cầu, CI/CD, triển khai, kiểm thử, Review/Retro \\
+Hồ Thiên Ngân (B) & Backend & Dữ liệu, seed, tạo đơn, trạng thái đơn \\
+Hà Thiên Long (C) & Backend & API sản phẩm, xác thực, thanh toán mô phỏng, kiểm thử \\
+Giản Thiên Lực (D) & Frontend & Menu, giỏ, thanh toán, lịch sử; video demo \\
+\bottomrule
+\end{tabular}
+\end{center}
+Biên bản Sprint nằm ở \texttt{docs/scrum/minutes/a2-*}. Mỗi hạng mục có người nghiệm thu khác người làm; mọi thay đổi vào \texttt{main} đi qua Pull Request.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Task 1 -- Khai thác và đặc tả yêu cầu}
+\subsection{Stakeholder, phạm vi, giả định và ràng buộc}
+\begin{center}
+\small\everymath{}
+\begin{tabular}{@{}p{2.7cm}p{5.2cm}p{5.8cm}@{}}
+\toprule
+\textbf{Stakeholder} & \textbf{Mục tiêu và kỳ vọng} & \textbf{Ảnh hưởng đến yêu cầu} \\ \midrule
+Khách hàng & Đặt nhanh, giá rõ, theo dõi đơn & Menu, giỏ, thanh toán, lịch sử \\
+Nhân viên quầy & Nhận đúng đơn đã thanh toán & Cập nhật trạng thái đơn \\
+Quản lý cửa hàng & Kiểm soát tồn kho, khuyến mãi & Tồn kho, khuyến mãi (quản trị ngoài MVP) \\
+Giảng viên & Chạy được, có tài liệu và bằng chứng & Toàn bộ sản phẩm bàn giao \\
+Nhóm phát triển & Đúng hạn, dễ bảo trì & Công nghệ, CI/CD \\
+Đơn vị thanh toán (mô phỏng) & Nhận yêu cầu hợp lệ, không trừ tiền lặp & Idempotency, trạng thái thanh toán \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Trong phạm vi MVP:} menu, chi tiết (size S/M/L, topping), giỏ hàng, đăng ký/đăng nhập (JWT, phân quyền CUSTOMER/STAFF), tạo đơn, thanh toán Ví/Thẻ mô phỏng, trạng thái và lịch sử đơn, máy trạng thái, thanh toán idempotent, kiểm soát tồn kho đồng thời, khuyến mãi và điểm thưởng. \textbf{Mở rộng:} PWA đầy đủ, giao diện quản trị và nhân viên. \textbf{Không thực hiện:} cổng thanh toán thật, ứng dụng native, giao hàng, nhiều chi nhánh.
+
+\textbf{Giả định:} thanh toán mô phỏng (thành công hoặc thất bại theo kịch bản); một cửa hàng, tiền VND; phụ phí size S +0, M +5.000, L +10.000 đồng; 1 điểm cho mỗi 10.000 đồng. \textbf{Ràng buộc:} bắt buộc Next.js, NestJS, PostgreSQL; frontend mobile-first; nhóm 4 người làm theo Scrum; hạn nộp theo thông báo của giảng viên; production qua HTTPS, CSDL không public, secret không nằm trong repo.
+
+\subsection{Yêu cầu chức năng và phi chức năng}
+Đặc tả đầy đủ (kèm tiêu chí chấp nhận) ở \texttt{docs/requirements/srs.md}: 17 yêu cầu chức năng (FR) và 11 yêu cầu phi chức năng (NFR) theo MoSCoW. Bảng dưới đây tóm tắt FR; NFR gồm hiệu năng (NFR-01), bảo mật (NFR-02, 03), validate (NFR-04), mobile-first (NFR-05), thông báo lỗi (NFR-06), chạy bằng Docker (NFR-07), CI/CD (NFR-08, 11), health check (NFR-09) và migration/seed (NFR-10).
+\begin{center}
+\small\everymath{}
+\captionof{table}{Yêu cầu chức năng}\label{tab:fr}
+\begin{longtable}{@{}p{1.2cm}p{10.2cm}p{1.8cm}@{}}
+\toprule \textbf{Mã} & \textbf{Yêu cầu} & \textbf{Ưu tiên} \\ \midrule \endhead
+FR-01, 02 & Danh sách sản phẩm (tên, giá, ảnh); trạng thái loading, rỗng, lỗi & Must \\
+FR-03 & Chi tiết sản phẩm; chọn size và topping, giá cập nhật & Must \\
+FR-04 & Giỏ hàng: thêm, sửa số lượng, xóa; tổng tiền & Must \\
+FR-05, 06 & Đăng ký/đăng nhập (JWT, bcrypt); chặn đặt đơn khi chưa đăng nhập & Must \\
+FR-07 & Tạo đơn từ giỏ hàng (PENDING), kiểm soát tồn kho trong transaction & Must \\
+FR-08, 09 & Thanh toán Ví/Thẻ mô phỏng (PAID/PAYMENT\_FAILED, thử lại); idempotent & Must \\
+FR-10 & Máy trạng thái đơn, chặn chuyển sai & Must \\
+FR-11 & Nhân viên cập nhật trạng thái đơn & Should \\
+FR-12 & Khách xem lịch sử và chi tiết đơn của mình & Must \\
+FR-13 & Đặt đồng thời không làm tồn kho âm; hủy đơn hoàn kho & Must \\
+FR-14, 15 & Khuyến mãi; điểm thưởng (cộng khi PAID, trừ lại khi hủy) & Should \\
+FR-16, 17 & Giao diện quản trị; cổng thanh toán thật & Could, Won't \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\subsection{Use-case trọng tâm UC-01: đặt và thanh toán đơn hàng}
+Actor chính: Khách hàng; actor phụ: Payment Service (mô phỏng). Trigger: khách bấm ``Đặt đơn'' trong giỏ. Tiền điều kiện: đã đăng nhập, giỏ có ít nhất một món. Hậu điều kiện: thành công thì đơn PAID và có bản ghi thanh toán; thanh toán thất bại thì đơn PAYMENT\_FAILED, giữ giỏ hàng và cho thử lại; hết hàng hoặc lỗi thì không tạo đơn. Mã yêu cầu liên quan: FR-04 đến FR-10, FR-13 đến FR-15, NFR-02, NFR-04.
+
+\textbf{Luồng chính:} mở giỏ và đặt đơn, gửi \texttt{POST /orders} kèm JWT, API kiểm tra JWT và validate, tạo đơn PENDING và trả mã đơn; khách chọn Ví/Thẻ, giao diện gửi \texttt{POST /payments} kèm \texttt{Idempotency-Key}; Payment Service trả thành công, đơn chuyển PAID và hiển thị xác nhận. \textbf{Luồng thay thế:} mã khuyến mãi hợp lệ (A1); gửi lại thanh toán cùng khóa, trả kết quả cũ (A2); nhân viên hủy đơn, hoàn kho và trừ lại điểm (A3). \textbf{Ngoại lệ:} chưa đăng nhập, 401 (E1); dữ liệu sai, 400 (E2); hết hàng, không tạo đơn (E3); mã khuyến mãi sai (E4); thanh toán thất bại, PAYMENT\_FAILED (E5); chuyển trạng thái sai, 400 (E6).
+\hinhx{uml/usecase-overview.png}{.7\linewidth}{Hình 1: Sơ đồ use-case tổng quát}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Task 2 -- Mô hình hóa hệ thống}
+\subsection{Activity diagram}
+Luồng đặt và thanh toán chia hai swimlane (Khách hàng, Hệ thống), có điểm bắt đầu/kết thúc, decision/merge và đủ ba nhánh: hết hàng, chưa đăng nhập, thanh toán thất bại.
+\hinhx{uml/activity-order-flow.png}{.78\linewidth}{Hình 2: Activity diagram luồng đặt và thanh toán}
+
+\subsection{Sequence diagram}
+Năm lifeline: Customer, Next.js UI, NestJS API, PostgreSQL, Payment Service. Sơ đồ có kiểm tra JWT, validate, transaction, nhánh \texttt{alt} thanh toán thành công/thất bại, phát lại cùng \texttt{Idempotency-Key} và thông báo kết quả. Nguồn: \texttt{docs/diagrams/sequence-checkout.puml}.
+\hinhx{uml/sequence-checkout.png}{.86\linewidth}{Hình 3: Sequence diagram của UC-01}
+
+\subsection{Class diagram}
+Mức domain gồm User, Product, Topping, Order, OrderItem, Payment, Promotion, LoyaltyTransaction và các enum trạng thái, kèm thuộc tính và multiplicity.
+\hinhx{uml/class-domain.png}{.9\linewidth}{Hình 4: Class diagram miền}
+
+\subsection{Máy trạng thái đơn hàng}
+Chuyển trạng thái hợp lệ do \texttt{order-state.ts} thực thi; chuyển khác bị từ chối (HTTP 400) và đơn giữ nguyên.
+\begin{center}
+\small\everymath{}
+\begin{tabular}{@{}p{3.2cm}p{10.4cm}@{}}
+\toprule \textbf{Từ} & \textbf{Sang} \\ \midrule
+PENDING & PAID, PAYMENT\_FAILED, CANCELLED \\
+PAYMENT\_FAILED & PENDING (thử lại), CANCELLED \\
+PAID & PREPARING, CANCELLED \\
+PREPARING & READY \\
+READY & COMPLETED \\
+COMPLETED, CANCELLED & (trạng thái cuối, không chuyển tiếp) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Task 3 -- Thiết kế kiến trúc}
+\subsection{Kiến trúc và quyết định kiến trúc (ADR)}
+Kiến trúc phân lớp kết hợp mức container của C4: trình duyệt/PWA, frontend Next.js, backend NestJS (modular monolith theo domain: \texttt{auth}, \texttt{products}, \texttt{orders}, \texttt{payments}, \texttt{health}), PostgreSQL; dịch vụ thanh toán mô phỏng là một module của backend. Đánh đổi: monorepo cho phép một PR đổi cả hai phía nhưng có hai bộ \texttt{package.json}; modular monolith dễ triển khai nhưng khó tách dịch vụ về sau.
+\hinhx{uml/architecture-container.png}{.78\linewidth}{Hình 5: Kiến trúc mức container}
+\begin{center}
+\small\everymath{}
+\begin{tabular}{@{}p{1cm}p{7.4cm}p{5cm}@{}}
+\toprule \textbf{ADR} & \textbf{Quyết định} & \textbf{Lý do chính} \\ \midrule
+001 & Monorepo \texttt{apps/web}, \texttt{apps/api} & Một PR đổi cả hai phía \\
+002 & PostgreSQL 16, Prisma 7 & Transaction, khóa dòng, migration \\
+003 & JWT có hạn, bcrypt, CUSTOMER/STAFF & Đơn giản, dễ kiểm thử \\
+004 & Payment là module; \texttt{Idempotency-Key} duy nhất \texttt{(userId, key)} & Không trừ tiền lặp \\
+005 & Cập nhật tồn kho có điều kiện trong transaction & Không âm kho khi đặt đồng thời \\
+006 & GitHub Actions, GHCR, secret trong GitHub Secrets & CI chặn merge \\
+007 & Render chạy image từ GHCR; CD gọi Deploy Hook & HTTPS sẵn, gói miễn phí \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Deployment diagram}
+Sơ đồ phân biệt trình duyệt người dùng, web, API, PostgreSQL (kết nối nội bộ, không public), container registry (GHCR), nền tảng Render, HTTPS, secret, health check và ranh giới local/CI/production. Giới hạn gói miễn phí: web ngủ khi không dùng (yêu cầu đầu có thể chậm khoảng 50 giây); CSDL hết hạn 22/11/2026 và không có sao lưu.
+\hinhx{uml/deployment-diagram.png}{.9\linewidth}{Hình 6: Deployment diagram production}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Task 4 -- Triển khai Sprint 1}
+\subsection{Repository, tài liệu và MVP}
+\textbf{Task 4.1.} Kho \texttt{tthan-prog/BrewLite} theo cấu trúc \texttt{apps/web}, \texttt{apps/api}, \texttt{tests/e2e}, \texttt{docs}, \texttt{.github/workflows}; có README, \texttt{.gitignore}, \texttt{.env.example}, Product Backlog, quy ước commit và Definition of Done; \texttt{main} được bảo vệ, thay đổi đi qua Pull Request. \textbf{Task 4.2.} Toàn bộ tạo phẩm Task 1--3 nằm trong \texttt{docs} (yêu cầu, sơ đồ nguồn và ảnh kết xuất, ADR); thay đổi đi qua commit/PR. \textbf{Task 4.3.} MVP Sprint 1: \texttt{GET /products}, \texttt{GET /products/:id}, màn hình menu mobile-first có loading/rỗng/lỗi, dữ liệu seed 12 sản phẩm, kiểm thử tối thiểu API và luồng menu.
+
+\subsection{Task 4.4 -- Continuous Integration}
+Pipeline \texttt{ci.yml} chạy cho mọi PR: cài đặt, lint, unit test, build; ngoài ra có job tích hợp trên PostgreSQL thật và E2E trình duyệt (tổng 4 job: \texttt{api}, \texttt{api-e2e}, \texttt{web}, \texttt{e2e-browser}). Minh chứng chặn merge: PR \#30 cố ý đổi kỳ vọng một test, CI run \#13 đỏ ở job \texttt{api}, PR bị chặn merge; sửa lại thì run \#14 xanh.
+\hinhx{figures/ev16-ci-do-run13-job-api-loi.jpg}{.8\linewidth}{Hình 7: CI run \#13 đỏ ở job api}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Task 5 -- Triển khai Sprint 2, CI/CD và Delivery}
+\subsection{Task 5.1 và 5.2 -- Hoàn thiện MVP, tích hợp và kiểm thử}
+Đã hiện thực chi tiết, size, topping, giỏ hàng, đăng ký/đăng nhập (JWT), tạo đơn, thanh toán Ví/Thẻ mô phỏng (có thất bại và thử lại), xác nhận, lịch sử đơn, validate ở frontend và backend; có \texttt{docker-compose.yml} chạy web, API, database và \texttt{GET /health}.
+\begin{center}
+\small\everymath{}
+\begin{tabular}{@{}p{4cm}p{2.4cm}p{1.8cm}p{5.2cm}@{}}
+\toprule \textbf{Mức} & \textbf{Công cụ} & \textbf{Số test} & \textbf{Phạm vi} \\ \midrule
+Unit & Vitest & 36 & Máy trạng thái, điểm thưởng, dịch vụ \\
+Tích hợp (PostgreSQL thật) & Supertest & 81 & Xác thực, đơn, thanh toán, idempotency, tồn kho \\
+E2E trình duyệt & Playwright & 10 & Menu, giỏ, thanh toán, viewport di động \\
+\bottomrule
+\end{tabular}
+\end{center}
+Số liệu từ lần chạy gần nhất trên \texttt{main} (commit \texttt{2cae795}), đều đạt. Hiệu năng NFR-01: đo thủ công ngày 24/10/2026, lần chậm thứ 19 trong 20 yêu cầu \texttt{GET /products} mất 19,7 ms (ngưỡng 500 ms), chưa có test tự động.
+
+\subsection{Task 5.3 -- Continuous Delivery và quay lui}
+Pipeline \texttt{cd.yml} chạy khi gắn tag \texttt{v*} hoặc chạy tay: kiểm tra chất lượng (lint, test), dựng image Docker và đẩy lên GHCR (tag theo commit SHA), triển khai qua Deploy Hook của Render, rồi smoke test \texttt{/health}; lỗi thì dừng pipeline. Quay lui bằng cách chạy lại CD với \texttt{image\_tag} cũ: đã chứng minh với \texttt{sha-e445b63} (CD \#11, bỏ qua build, giao diện quay về bản cũ) rồi triển khai lại \texttt{sha-7b1ea96} (CD \#12).
+\hinhx{figures/ev13-cd-v0.1.2-xanh.jpg}{.8\linewidth}{Hình 8: CD từ tag v0.1.2 xanh}
+
+\subsection{Task 5.4 -- Triển khai và bàn giao}
+\begin{center}
+\small\everymath{}
+\begin{tabular}{@{}p{3.8cm}p{9.8cm}@{}}
+\toprule \textbf{Sản phẩm} & \textbf{Vị trí / liên kết} \\ \midrule
+Frontend production (HTTPS) & \url{https://brewlite-web.onrender.com} \\
+API và health & \url{https://brewlite-api.onrender.com/health} \\
+Bản phát hành & Tag \texttt{v0.1.2}; ghi chú trong \texttt{docs/release-notes} \\
+Tài liệu & \texttt{docs/requirements}, \texttt{docs/diagrams}, \texttt{docs/architecture}, \texttt{docs/traceability-matrix.md} \\
+Hướng dẫn & README: chạy local, test, build, deploy, rollback \\
+Bằng chứng & \texttt{docs/evidence} (ảnh 01--25) \\
+Video demo & \url{https://drive.google.com/file/d/1uxrJSc9OkNkD-68vCTKXsPb0DcUudtat/view?usp=sharing} \\
+Sprint Review/Retro & \texttt{docs/scrum/minutes/a2-*} \\
+\bottomrule
+\end{tabular}
+\end{center}
+CSDL production không public (kết nối nội bộ); secret nằm trong GitHub Secrets và Render, không có trong repository.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Truy vết và kết quả kiểm thử}
+Ma trận đầy đủ ở \texttt{docs/traceability-matrix.md}. Mã test: API-Txx là unit, INT-Txx là tích hợp, E2E-Txx là Playwright.
+\begin{center}
+\footnotesize\everymath{}
+\begin{longtable}{@{}p{1.5cm}p{2.7cm}p{4.2cm}p{2.7cm}p{2.1cm}@{}}
+\toprule \textbf{Yêu cầu} & \textbf{Use case / thiết kế} & \textbf{Mã nguồn} & \textbf{Test} & \textbf{Kết quả} \\ \midrule \endhead
+FR-01, 02 & US-01; Activity & \texttt{GET /products}; trang menu & INT-T01, E2E-T03 & Đạt \\
+FR-03 & US-02; Class & \texttt{GET /products/:id} & INT-T02 & Đạt \\
+FR-04 & US-03; Activity & Giỏ hàng (web) & E2E-T01 & Đạt \\
+FR-05, 06 & US-04; UC-01 (E1) & \texttt{POST /auth/*}, JwtAuthGuard & INT-T03, T04 & Đạt \\
+FR-07 & UC-01; Sequence & \texttt{POST /orders} & INT-T05 & Đạt \\
+FR-08, 09 & UC-01 (A2); ADR-004 & \texttt{POST /payments}, Idempotency-Key & INT-T06, T07 & Đạt \\
+FR-10, 11 & UC-01, UC-02; Class & \texttt{order-state.ts}; PATCH status & API-T01, INT-T08, T09 & Đạt \\
+FR-12 & US-05 & \texttt{GET /orders/me} & INT-T10 & Đạt \\
+FR-13 & UC-01 (E3); ADR-005 & Cập nhật tồn kho có điều kiện & INT-T11 & Đạt \\
+FR-14, 15 & UC-01 (A1); Class & \texttt{promoCode}; \texttt{pointsForTotal} & INT-T12, T13, API-T02 & Đạt \\
+NFR-01 & Architecture & \texttt{GET /products} & Đo thủ công & Đạt, chưa tự động \\
+NFR-02, 04 & ADR-003 & bcrypt, JwtAuthGuard, class-validator & INT-T03, T05, T09 & Đạt \\
+NFR-03 & ADR-006 & \texttt{.gitignore}, GitHub Secrets & Dò sơ bộ & Chưa rà đủ \\
+NFR-05, 06 & Kiến trúc web & CSS, manifest, thông báo lỗi & E2E-T02, T03, T04 & Đạt (06: một phần) \\
+NFR-07 & Deployment & \texttt{docker-compose.yml} & Chạy 24/10 & Chưa có người ngoài nhóm thử \\
+NFR-08, 11 & ADR-006 & \texttt{ci.yml}, \texttt{cd.yml} & CI \#13/\#14, CD & Đạt \\
+NFR-09, 10 & Deployment, ADR-002 & \texttt{/health}; migration, seed & Smoke test, \texttt{api-e2e} & Đạt \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Nhìn lại và kết luận}
+\textbf{Kết quả:} luồng end-to-end từ menu đến lịch sử đơn chạy trên production qua HTTPS, gồm thanh toán thất bại và thử lại không tạo đơn trùng; CI/CD, quay lui và smoke test có minh chứng.
+
+\textbf{Điều làm tốt:} quay lui bằng \texttt{image\_tag} chạy được; \texttt{/health} và smoke test bắt lỗi sau triển khai; mọi thay đổi vào \texttt{main} đi qua PR và CI.
+
+\textbf{Hạn chế và cải thiện:} nghiệm thu chéo chưa ghi bằng Approve trên PR; NFR-01 chỉ đo thủ công, NFR-03 mới dò sơ bộ; Render gói miễn phí làm web ngủ và CSDL hết hạn 22/11/2026, không sao lưu; thanh toán chỉ mô phỏng, PWA ở mức manifest, chưa có giao diện nhân viên/quản trị; phân bố commit giữa các thành viên chưa đều. Hướng phát triển: service worker cho PWA, giao diện barista và quản trị, cổng thanh toán thật, tự động hóa đo hiệu năng và quét secret trong CI.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{thebibliography}{80}
+
+\bibitem{scrum}
+Ken Schwaber, Jeff Sutherland,
+``\textbf{The Scrum Guide}'',
+\textit{link: https://scrumguides.org/scrum-guide.html}, 2020, lần truy cập cuối: 26/10/2026.
+
+\bibitem{de2}
+Khoa Công nghệ thông tin, Trường Đại học Sài Gòn,
+``\textbf{BrewLite -- Assignment 2: Requirements to Deployment (VER 1.0)}'',
+\textit{môn Công nghệ phần mềm, học kỳ I năm học 2026--2027}.
+
+\end{thebibliography}
+\end{document}

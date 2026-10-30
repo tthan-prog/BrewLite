@@ -20,6 +20,8 @@ model User {
   idempotencyRecords IdempotencyRecord[]
   payments  Payment[]
   loyaltyTransactions LoyaltyTransaction[]
+  paymentIntents PaymentIntent[]
+  redemptions Redemption[]
 }
 
 model Product {
@@ -33,6 +35,7 @@ model Product {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   orderItems  OrderItem[]
+  recipe      RecipeItem[]
 }
 
 model Topping {
@@ -40,6 +43,7 @@ model Topping {
   name              String
   price             Int
   orderItemToppings OrderItemTopping[]
+  recipe            ToppingRecipeItem[]
 }
 
 model Order {
@@ -57,6 +61,8 @@ model Order {
   idempotencyRecord IdempotencyRecord?
   payments  Payment[]
   loyaltyTransactions LoyaltyTransaction[]
+  paymentIntents PaymentIntent[]
+  ingredientUses OrderIngredientUse[]
 
   @@index([userId])
 }
@@ -68,6 +74,11 @@ model OrderItem {
   quantity  Int
   unitPrice Int
   size      String
+  // true: kho được trừ theo công thức nguyên liệu; false: trừ Product.stock (sản phẩm chưa có công thức).
+  usesRecipe Boolean           @default(false)
+  // Mức đường/đá khách chọn (%, null = đơn cũ chưa ghi nhận).
+  sugar     Int?
+  ice       Int?
   order     Order              @relation(fields: [orderId], references: [id])
   product   Product            @relation(fields: [productId], references: [id])
   toppings  OrderItemTopping[]
@@ -134,6 +145,22 @@ enum OrderStatus {
 enum PaymentMethod {
   WALLET
   CARD
+  BANK
+  MOMO
+  VNPAY
+}
+
+enum PaymentProvider {
+  BANK
+  MOMO
+  VNPAY
+}
+
+enum IntentStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
 }
 
 enum PaymentStatus {
@@ -169,6 +196,7 @@ model Payment {
   amount         Int
   idempotencyKey String
   requestHash    String
+  providerRef    String?
   createdAt      DateTime      @default(now())
 
   order Order @relation(fields: [orderId], references: [id])
@@ -176,4 +204,116 @@ model Payment {
 
   @@unique([userId, idempotencyKey])
   @@index([orderId])
+}
+
+// ---- Nguyên liệu và công thức đồ uống ----
+
+model Ingredient {
+  id      Int          @id @default(autoincrement())
+  name    String       @unique
+  unit    String
+  stock   Int          @default(0)
+  // true: lượng dùng nhân theo mức đường khách chọn (100% = đúng công thức).
+  sugarScaled Boolean      @default(false)
+  iceScaled   Boolean      @default(false)
+  recipes RecipeItem[]
+  toppingRecipes ToppingRecipeItem[]
+  uses    OrderIngredientUse[]
+}
+
+model RecipeItem {
+  id           Int        @id @default(autoincrement())
+  productId    Int
+  ingredientId Int
+  quantity     Int // lượng nguyên liệu cho 1 ly
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, ingredientId])
+  @@index([ingredientId])
+}
+
+// Nguyên liệu mỗi phần topping (không đổi theo size ly).
+model ToppingRecipeItem {
+  id           Int        @id @default(autoincrement())
+  toppingId    Int
+  ingredientId Int
+  quantity     Int
+  topping      Topping    @relation(fields: [toppingId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([toppingId, ingredientId])
+  @@index([ingredientId])
+}
+
+// Lượng nguyên liệu đã trừ cho một đơn, để hoàn lại chính xác khi hủy.
+model OrderIngredientUse {
+  orderId      Int
+  ingredientId Int
+  quantity     Int
+  /** true: đã trừ khỏi kho (chỉ khi thanh toán thành công). Hủy đơn chỉ hoàn các dòng đã trừ. */
+  consumed     Boolean    @default(false)
+  order        Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+
+  @@id([orderId, ingredientId])
+}
+
+// ---- Tài khoản thanh toán TEST và phiên thanh toán QR ----
+
+model PaymentAccount {
+  id         Int             @id @default(autoincrement())
+  provider   PaymentProvider
+  identifier String // số tài khoản / số điện thoại ví / số thẻ test
+  holderName String
+  pinHash    String
+  balance    Int
+  intents    PaymentIntent[]
+
+  @@unique([provider, identifier])
+}
+
+model PaymentIntent {
+  id          Int             @id @default(autoincrement())
+  token       String          @unique
+  orderId     Int
+  userId      Int
+  provider    PaymentProvider
+  amount      Int
+  status      IntentStatus    @default(PENDING)
+  mode        String // SIMULATED | SANDBOX
+  expiresAt   DateTime
+  providerRef String?
+  accountId   Int?
+  paidAt      DateTime?
+  createdAt   DateTime        @default(now())
+  order       Order           @relation(fields: [orderId], references: [id])
+  user        User            @relation(fields: [userId], references: [id])
+  account     PaymentAccount? @relation(fields: [accountId], references: [id])
+
+  @@index([orderId])
+}
+
+// ---- Quà đổi điểm ----
+
+model Reward {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String       @default("")
+  pointsCost  Int
+  active      Boolean      @default(true)
+  redemptions Redemption[]
+}
+
+model Redemption {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  rewardId    Int
+  pointsSpent Int
+  code        String   @unique
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  reward      Reward   @relation(fields: [rewardId], references: [id])
+
+  @@index([userId])
 }

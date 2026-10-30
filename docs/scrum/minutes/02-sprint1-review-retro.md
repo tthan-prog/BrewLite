@@ -4,7 +4,7 @@
 
 - **Thời gian:** 18/10/2026, 21:00 – 22:00
 - **Người ghi biên bản:** A
-- **Có mặt:** A, B, C, D, E
+- **Có mặt:** A, B, C, D
 - **Hình thức:** họp nhóm trực tuyến
 
 ## 1. Nội dung và quyết định

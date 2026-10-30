@@ -30,6 +30,14 @@ function displayName(raw: string): string {
   }
 }
 
+function isStaff(raw: string): boolean {
+  try {
+    return (JSON.parse(raw) as { role?: string }).role === "STAFF";
+  } catch {
+    return false;
+  }
+}
+
 export default function SiteHeader() {
   const rawUser = useAuthState();
 
@@ -50,6 +58,8 @@ export default function SiteHeader() {
           <Link href="/menu">Thực đơn</Link>
           <Link href="/#features">Giới thiệu</Link>
           <Link href="/orders/history">Đơn hàng của tôi</Link>
+          <Link href="/rewards">Điểm thưởng</Link>
+          {isStaff(rawUser) && <Link href="/staff/ingredients">Kho nguyên liệu</Link>}
         </nav>
         <div className="nav-actions">
           {rawUser ? (

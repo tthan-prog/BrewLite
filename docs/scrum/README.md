@@ -6,7 +6,7 @@ Thư mục này lưu **bằng chứng làm theo Scrum** (đề yêu cầu quy tr
 
 | File | Nội dung | Người giữ |
 |---|---|---|
-| `product-backlog.md` | 10 task của đề dưới dạng user story, tiêu chí chấp nhận, ước lượng điểm | E (PO tạm) |
+| `product-backlog.md` | 10 task của đề dưới dạng user story, tiêu chí chấp nhận, ước lượng điểm | A (PO tạm) |
 | `sprint-1-backlog.md` | Mục tiêu và việc của Sprint 1 (tạo thêm file cho Sprint 2, 3 bằng cách sao chép) | A |
 | `burndown-sprint-1.csv` | Số điểm còn lại mỗi ngày của Sprint 1 | A |
 | `meeting-minutes-template.md` | Mẫu biên bản họp (Planning, Daily khi cần, Review) | A |
@@ -31,7 +31,7 @@ Thư mục này lưu **bằng chứng làm theo Scrum** (đề yêu cầu quy tr
 
 ## Cách cập nhật Burndown
 
-1. Sau khi E ước lượng điểm (story points) cho các task, tổng điểm của Sprint là số điểm ở ngày bắt đầu.
+1. Sau khi A ước lượng điểm (story points) cho các task, tổng điểm của Sprint là số điểm ở ngày bắt đầu.
 2. Đường lý tưởng giảm đều đến 0 vào ngày cuối Sprint. Điền cột `ly_tuong` ngay khi lập Sprint Backlog.
 3. Cuối mỗi ngày, A ghi số điểm còn lại vào cột `thuc_te`. Chỉ trừ điểm khi task đạt Definition of Done.
 4. Thực tế nằm trên đường lý tưởng là đang chậm; nằm dưới là vượt tiến độ.

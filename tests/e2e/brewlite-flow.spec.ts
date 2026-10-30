@@ -43,7 +43,7 @@ test('E2E-T01b: đăng ký, đăng nhập, đặt đơn, thanh toán lỗi rồi
   // Thanh toán lỗi (giả lập): hiện thông báo, giỏ hàng được giữ, đơn ở PAYMENT_FAILED.
   await page.check('input[type=checkbox]');
   await page.locator('button.brew-full[type=submit]').click();
-  await expect(page.locator('.brew-notice')).toBeVisible();
+  await expect(page.locator('.brew-payment-failed')).toBeVisible();
 
   // Thử lại thành công: PAYMENT_FAILED -> PENDING -> PAID, chuyển sang trang xác nhận.
   await page.uncheck('input[type=checkbox]');
@@ -127,4 +127,80 @@ test('E2E-T04: manifest PWA hợp lệ và biểu tượng tải được', asyn
     const r = await request.get(new URL(icon.src, baseURL).toString());
     expect(r.ok()).toBe(true);
   }
+});
+
+// E2E-T05: thanh toán bằng mã QR (mô phỏng): máy tính hiện QR, "điện thoại" (trang thứ hai) mở
+// URL trong QR, chọn tài khoản test + PIN, máy tính tự chuyển sang xác nhận và hiện điểm được cộng.
+test('E2E-T05: thanh toán QR MoMo bằng tài khoản test, hiện điểm được cộng', async ({ page, browser }) => {
+  await registerAndLogin(page);
+  await page.waitForSelector('.brew-card');
+  await page.locator('.brew-card-art').first().click();
+  await page.locator('button', { hasText: /Thêm vào giỏ/ }).first().click();
+  await page.locator('.brew-nav button', { hasText: 'Giỏ hàng' }).click();
+  await page.locator('button', { hasText: /Tiến hành thanh toán/ }).click();
+
+  await page.selectOption('select', 'MOMO');
+  await page.locator('button.brew-full[type=submit]').click();
+
+  const qrDialog = page.getByRole('dialog', { name: /mã QR/i });
+  await expect(qrDialog.locator('img[alt="Mã QR thanh toán"]')).toBeVisible();
+  const payUrl = await qrDialog.locator('a[href*="/pay/"]').first().getAttribute('href');
+  expect(payUrl).toBeTruthy();
+
+  // "Điện thoại": ngữ cảnh trình duyệt riêng, màn hình nhỏ, không có phiên đăng nhập.
+  const phone = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const phonePage = await phone.newPage();
+  await phonePage.goto(payUrl!);
+  await phonePage.waitForSelector('#acc');
+  await phonePage.selectOption('#acc', '0900000001');
+  await phonePage.fill('#pin', '123456');
+  await phonePage.getByRole('button', { name: /Xác nhận thanh toán/ }).click();
+  await expect(phonePage.locator('.form-success')).toContainText(/thành công/i);
+  await phone.close();
+
+  await page.waitForURL('**/orders/confirmation', { timeout: 20_000 });
+  await expect(page.locator('.status-pill')).toContainText(/PAID/);
+  await expect(page.getByText(/\+\d+ điểm/)).toBeVisible();
+});
+
+// E2E-T06: nút + trong giỏ hàng dừng ở giới hạn 50 ly mỗi dòng (khớp giới hạn của API), không cho tăng quá.
+test('E2E-T06: giỏ hàng không tăng quá giới hạn 50 ly mỗi dòng', async ({ page }) => {
+  await registerAndLogin(page);
+  await page.waitForSelector('.brew-card');
+  await page.locator('.brew-card-art').first().click();
+  await page.locator('button', { hasText: /Thêm vào giỏ/ }).first().click();
+  await page.locator('.brew-nav button', { hasText: 'Giỏ hàng' }).click();
+
+  const plus = page.locator('.brew-cart-item .brew-quantity button').nth(1);
+  const qty = page.locator('.brew-cart-item .brew-quantity span');
+  await expect(plus).toBeEnabled();
+  for (let i = 0; i < 49; i++) {
+    await plus.click();
+    await expect(qty).toHaveText(String(i + 2));
+  }
+  await expect(qty).toHaveText('50');
+  await expect(plus).toBeDisabled();
+  // Giỏ 50 ly vẫn hợp lệ, nút thanh toán dùng được.
+  await expect(page.locator('button', { hasText: /Tiến hành thanh toán/ })).toBeEnabled();
+});
+
+// E2E-T07: "Giả lập thanh toán thất bại" chỉ có với Ví/Thẻ; với QR thì ẩn; bật rồi đặt hàng báo thất bại.
+test('E2E-T07: ô giả lập thất bại chỉ hiện với Ví/Thẻ và gây thanh toán thất bại', async ({ page }) => {
+  await registerAndLogin(page);
+  await page.waitForSelector('.brew-card');
+  await page.locator('.brew-card-art').first().click();
+  await page.locator('button', { hasText: /Thêm vào giỏ/ }).first().click();
+  await page.locator('.brew-nav button', { hasText: 'Giỏ hàng' }).click();
+  await page.locator('button', { hasText: /Tiến hành thanh toán/ }).click();
+
+  const failBox = page.getByLabel(/Giả lập thanh toán thất bại/);
+  await expect(failBox).toBeVisible(); // mặc định: Ví điện tử
+  await page.selectOption('select', 'MOMO');
+  await expect(failBox).toHaveCount(0); // QR: ẩn
+  await page.selectOption('select', 'WALLET');
+  await failBox.check();
+  await page.locator('button.brew-full[type=submit]').click();
+  await expect(page.getByText(/Thanh toán thất bại/).first()).toBeVisible();
+  // Không hiện mã QR trong luồng Ví.
+  await expect(page.getByRole('dialog', { name: /mã QR/i })).toHaveCount(0);
 });

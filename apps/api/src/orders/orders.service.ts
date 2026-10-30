@@ -3,13 +3,21 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
+import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import type { Prisma } from '../generated/prisma/client.js';
-import { LoyaltyType, OrderStatus } from '../generated/prisma/enums.js';
+import {
+  IntentStatus,
+  LoyaltyType,
+  OrderStatus,
+} from '../generated/prisma/enums.js';
 import { assertTransition, pointsForTotal } from './order-state.js';
+import { addScaled, perCupNeed, toRecipeLines } from './ingredient-need.js';
+import { evaluatePromotion } from './pricing.js';
 
 const STAFF_TARGETS: readonly OrderStatus[] = [
   OrderStatus.PREPARING,
@@ -42,9 +50,72 @@ function isUniqueConstraintError(error: unknown): boolean {
   );
 }
 
+/** Đơn chưa thanh toán quá thời hạn này (phút) sẽ tự hủy để nhả nguyên liệu. */
+function unpaidTtlMinutes(): number {
+  const n = Number(process.env.UNPAID_ORDER_TTL_MINUTES);
+  return Number.isFinite(n) && n > 0 ? n : 15;
+}
+
+/** Hết nguyên liệu tại thời điểm chốt thanh toán (khác với kiểm tra lúc tạo đơn). */
+export class OutOfIngredientsException extends BadRequestException {}
+
 @Injectable()
-export class OrdersService {
+export class OrdersService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(OrdersService.name);
+  private sweeper?: NodeJS.Timeout;
+
   constructor(private readonly prisma: PrismaService) {}
+
+  onModuleInit() {
+    // Không chạy nền khi test (test gọi cancelStaleUnpaid trực tiếp).
+    if (process.env.NODE_ENV === 'test') return;
+    this.sweeper = setInterval(() => {
+      this.cancelStaleUnpaid().catch((e: unknown) =>
+        this.logger.warn(`Dọn đơn chưa thanh toán lỗi: ${String(e)}`),
+      );
+    }, 60_000);
+    this.sweeper.unref();
+  }
+
+  onModuleDestroy() {
+    if (this.sweeper) clearInterval(this.sweeper);
+  }
+
+  /**
+   * Hủy các đơn PENDING / PAYMENT_FAILED quá hạn mà không còn mã QR nào đang chờ, để dọn đơn
+   * bỏ dở và trả lượt dùng mã khuyến mãi (nguyên liệu không bị giữ khi chưa thanh toán). Trả về số đơn đã hủy.
+   */
+  async cancelStaleUnpaid(ttlMinutes: number = unpaidTtlMinutes()) {
+    const now = new Date();
+    const stale = await this.prisma.order.findMany({
+      where: {
+        status: { in: [OrderStatus.PENDING, OrderStatus.PAYMENT_FAILED] },
+        createdAt: { lt: new Date(now.getTime() - ttlMinutes * 60_000) },
+        NOT: {
+          paymentIntents: {
+            some: { status: IntentStatus.PENDING, expiresAt: { gt: now } },
+          },
+        },
+      },
+      select: { id: true },
+    });
+    let cancelled = 0;
+    for (const { id } of stale) {
+      try {
+        await this.prisma.$transaction(async (tx) => {
+          await tx.paymentIntent.updateMany({
+            where: { orderId: id, status: IntentStatus.PENDING },
+            data: { status: IntentStatus.EXPIRED },
+          });
+          await this.changeStatus(tx, id, OrderStatus.CANCELLED);
+        });
+        cancelled += 1;
+      } catch {
+        // Đơn vừa được thanh toán/đổi trạng thái ở yêu cầu khác: bỏ qua.
+      }
+    }
+    return cancelled;
+  }
 
   async findAll() {
     return this.prisma.order.findMany({
@@ -166,6 +237,9 @@ export class OrdersService {
           quantity: number;
           unitPrice: number;
           size: string;
+          usesRecipe: boolean;
+          sugar: number | null;
+          ice: number | null;
           toppings: {
             toppingId: number;
             quantity: number;
@@ -173,35 +247,38 @@ export class OrdersService {
           }[];
         }[] = [];
 
+        const ingredientNeed = new Map<number, number>();
+
         for (const item of dto.items) {
           const product = await tx.product.findUnique({
             where: { id: item.productId },
+            include: { recipe: { include: { ingredient: true } } },
           });
 
           if (!product) {
             throw new NotFoundException(`Product ${item.productId} not found`);
           }
-          const stockUpdate = await tx.product.updateMany({
-  where: {
-    id: item.productId,
-    stock: {
-      gte: item.quantity,
-    },
-  },
-  data: {
-    stock: {
-      decrement: item.quantity,
-    },
-  },
-});
 
-if (stockUpdate.count !== 1) {
-  throw new BadRequestException(
-    `Insufficient stock for product ${item.productId}`,
-  );
-}
+          // Món có công thức: nguyên liệu được cộng dồn và trừ ở bước sau (theo size + topping).
+          const usesRecipe = product.recipe.length > 0;
+          if (!usesRecipe) {
+            // Sản phẩm chưa có công thức: dùng tồn kho theo sản phẩm (cách cũ).
+            const stockUpdate = await tx.product.updateMany({
+              where: { id: item.productId, stock: { gte: item.quantity } },
+              data: { stock: { decrement: item.quantity } },
+            });
+            if (stockUpdate.count !== 1) {
+              throw new BadRequestException(
+                `Insufficient stock for product ${item.productId}`,
+              );
+            }
+          }
 
           let toppingUnitTotal = 0;
+          const toppingRecipes: {
+            quantity: number;
+            recipe: { ingredientId: number; quantity: number }[];
+          }[] = [];
 
           const toppings: {
             toppingId: number;
@@ -212,6 +289,7 @@ if (stockUpdate.count !== 1) {
           for (const toppingInput of item.toppings ?? []) {
             const topping = await tx.topping.findUnique({
               where: { id: toppingInput.toppingId },
+              include: { recipe: { include: { ingredient: true } } },
             });
 
             if (!topping) {
@@ -221,6 +299,10 @@ if (stockUpdate.count !== 1) {
             }
 
             toppingUnitTotal += topping.price * toppingInput.quantity;
+            toppingRecipes.push({
+              quantity: toppingInput.quantity,
+              recipe: toRecipeLines(topping.recipe),
+            });
 
             toppings.push({
               toppingId: topping.id,
@@ -228,6 +310,19 @@ if (stockUpdate.count !== 1) {
               price: topping.price,
             });
           }
+
+          // Nguyên liệu cho cả dòng: (công thức món theo size + topping) × số ly.
+          addScaled(
+            ingredientNeed,
+            perCupNeed(
+              toRecipeLines(product.recipe),
+              item.size.trim(),
+              toppingRecipes,
+              item.sugar,
+              item.ice,
+            ),
+            item.quantity,
+          );
 
           const sizeSurcharge = SIZE_SURCHARGE[item.size.trim()] ?? 0;
           const unitPrice = product.price + sizeSurcharge;
@@ -238,9 +333,15 @@ if (stockUpdate.count !== 1) {
             quantity: item.quantity,
             unitPrice,
             size: item.size.trim(),
+            usesRecipe,
+            sugar: item.sugar ?? null,
+            ice: item.ice ?? null,
             toppings,
           });
         }
+
+        // Chỉ KIỂM TRA đủ nguyên liệu; việc trừ kho xảy ra khi thanh toán thành công (changeStatus → PAID).
+        await this.assertIngredientsAvailable(tx, ingredientNeed);
 
         let discount = 0;
         let promoCode: string | null = null;
@@ -252,33 +353,22 @@ if (stockUpdate.count !== 1) {
             where: { code },
           });
 
-          if (!promotion) {
-            throw new BadRequestException('Promotion code is invalid');
-          }
-
-          if (
-            promotion.expiresAt &&
-            promotion.expiresAt.getTime() < Date.now()
-          ) {
-            throw new BadRequestException('Promotion has expired');
-          }
-
-          if (subtotal < promotion.minOrder) {
+          const result = evaluatePromotion(promotion, subtotal);
+          if (!result.ok) {
             throw new BadRequestException(
-              'Order does not meet promotion minimum',
+              result.reason === 'INVALID'
+                ? 'Promotion code is invalid'
+                : result.reason === 'EXPIRED'
+                  ? 'Promotion has expired'
+                  : 'Order does not meet promotion minimum',
             );
           }
 
-          discount =
-            promotion.type === 'PERCENT'
-              ? Math.floor((subtotal * promotion.value) / 100)
-              : promotion.value;
-
-          discount = Math.min(subtotal, Math.max(0, discount));
-          promoCode = promotion.code;
+          discount = result.discount;
+          promoCode = code;
 
           await tx.promotion.update({
-            where: { id: promotion.id },
+            where: { id: promotion!.id },
             data: { usageCount: { increment: 1 } },
           });
         }
@@ -298,6 +388,9 @@ if (stockUpdate.count !== 1) {
                 quantity: item.quantity,
                 unitPrice: item.unitPrice,
                 size: item.size,
+                usesRecipe: item.usesRecipe,
+                sugar: item.sugar,
+                ice: item.ice,
                 toppings: {
                   create: item.toppings,
                 },
@@ -306,6 +399,16 @@ if (stockUpdate.count !== 1) {
           },
           include: orderInclude,
         });
+
+        if (ingredientNeed.size > 0) {
+          await tx.orderIngredientUse.createMany({
+            data: [...ingredientNeed].map(([ingredientId, quantity]) => ({
+              orderId: order.id,
+              ingredientId,
+              quantity,
+            })),
+          });
+        }
 
         // Record và order cùng transaction: nếu key bị trùng,
         // transaction tạo order thua cuộc sẽ bị rollback.
@@ -355,6 +458,61 @@ if (stockUpdate.count !== 1) {
     }
   }
 
+  /** Chỉ đọc: kho hiện tại có đủ cho đơn này không (không giữ chỗ, không trừ). */
+  private async assertIngredientsAvailable(
+    tx: Prisma.TransactionClient,
+    need: Map<number, number>,
+  ) {
+    if (need.size === 0) return;
+    const rows = await tx.ingredient.findMany({
+      where: { id: { in: [...need.keys()] } },
+    });
+    for (const ing of rows) {
+      const q = need.get(ing.id) ?? 0;
+      if (ing.stock < q) {
+        throw new BadRequestException(
+          `Không đủ nguyên liệu "${ing.name}": cần ${q} ${ing.unit}, còn ${ing.stock} ${ing.unit}`,
+        );
+      }
+    }
+  }
+
+  /**
+   * Trừ nguyên liệu khi đơn được thanh toán thành công, bằng UPDATE có điều kiện (stock >= cần)
+   * theo thứ tự id cố định: hai đơn thanh toán đồng thời không làm kho âm và không deadlock.
+   * Hết nguyên liệu → OutOfIngredientsException (transaction của người gọi bị hủy, không trừ tiền).
+   */
+  private async consumeOrderIngredients(
+    tx: Prisma.TransactionClient,
+    orderId: number,
+  ) {
+    const uses = await tx.orderIngredientUse.findMany({
+      where: { orderId, consumed: false },
+      orderBy: { ingredientId: 'asc' },
+    });
+    for (const use of uses) {
+      const res = await tx.ingredient.updateMany({
+        where: { id: use.ingredientId, stock: { gte: use.quantity } },
+        data: { stock: { decrement: use.quantity } },
+      });
+      if (res.count !== 1) {
+        const ing = await tx.ingredient.findUnique({
+          where: { id: use.ingredientId },
+        });
+        const unit = ing?.unit ?? '';
+        throw new OutOfIngredientsException(
+          `Không đủ nguyên liệu "${ing?.name ?? use.ingredientId}": cần ${use.quantity} ${unit}, còn ${ing?.stock ?? 0} ${unit}`,
+        );
+      }
+      await tx.orderIngredientUse.update({
+        where: {
+          orderId_ingredientId: { orderId, ingredientId: use.ingredientId },
+        },
+        data: { consumed: true },
+      });
+    }
+  }
+
   /** Đơn của người dùng hiện tại (Task 9). */
   findByUser(userId: number) {
     return this.prisma.order.findMany({
@@ -391,7 +549,7 @@ if (stockUpdate.count !== 1) {
    * Chuyển trạng thái trong một transaction đã mở.
    * - Chặn chuyển sai bằng assertTransition.
    * - Cập nhật có điều kiện theo trạng thái cũ để hai yêu cầu đồng thời không cùng thắng.
-   * - PAID: cộng điểm thưởng; CANCELLED: hoàn kho (và trừ điểm nếu đã PAID).
+   * - PAID: trừ nguyên liệu (nếu hết → OutOfIngredientsException) và cộng điểm thưởng; CANCELLED: hoàn kho đã trừ (và trừ điểm nếu đã PAID).
    */
   async changeStatus(
     tx: Prisma.TransactionClient,
@@ -417,6 +575,7 @@ if (stockUpdate.count !== 1) {
     }
 
     if (to === OrderStatus.PAID) {
+      await this.consumeOrderIngredients(tx, id);
       const points = pointsForTotal(order.total);
       if (points > 0) {
         await tx.user.update({
@@ -436,12 +595,51 @@ if (stockUpdate.count !== 1) {
 
     if (to === OrderStatus.CANCELLED) {
       for (const item of order.items) {
+        // Món dùng công thức được hoàn bằng nguyên liệu (bên dưới), không hoàn Product.stock.
+        if (item.usesRecipe) continue;
         await tx.product.update({
           where: { id: item.productId },
           data: { stock: { increment: item.quantity } },
         });
       }
+      // Chỉ hoàn nguyên liệu đã thật sự bị trừ (đơn từng thanh toán thành công).
+      const uses = await tx.orderIngredientUse.findMany({
+        where: { orderId: order.id, consumed: true },
+        orderBy: { ingredientId: 'asc' },
+      });
+      for (const use of uses) {
+        await tx.ingredient.update({
+          where: { id: use.ingredientId },
+          data: { stock: { increment: use.quantity } },
+        });
+        await tx.orderIngredientUse.update({
+          where: {
+            orderId_ingredientId: {
+              orderId: order.id,
+              ingredientId: use.ingredientId,
+            },
+          },
+          data: { consumed: false },
+        });
+      }
+      // Đơn hủy thì lượt dùng mã khuyến mãi không còn được tính.
+      if (order.promoCode) {
+        await tx.promotion.updateMany({
+          where: { code: order.promoCode, usageCount: { gt: 0 } },
+          data: { usageCount: { decrement: 1 } },
+        });
+      }
       if (order.status === OrderStatus.PAID) {
+        // Hoàn tiền về tài khoản test đã dùng để trả (thanh toán QR mô phỏng).
+        const paid = await tx.paymentIntent.findFirst({
+          where: { orderId: order.id, status: IntentStatus.PAID },
+        });
+        if (paid?.accountId) {
+          await tx.paymentAccount.update({
+            where: { id: paid.accountId },
+            data: { balance: { increment: paid.amount } },
+          });
+        }
         const points = pointsForTotal(order.total);
         if (points > 0) {
           await tx.user.update({

@@ -15,6 +15,9 @@ import {
 
 export const ORDER_SIZES = ['S', 'M', 'L'] as const;
 
+/** Tối đa số ly trên MỘT dòng đơn (giỏ hàng và API dùng chung giới hạn này). */
+export const MAX_ITEM_QUANTITY = 50;
+
 export class OrderToppingDto {
   @IsInt()
   @Min(1)
@@ -33,11 +36,25 @@ export class OrderItemDto {
 
   @IsInt()
   @Min(1)
-  @Max(50)
+  @Max(MAX_ITEM_QUANTITY)
   quantity!: number;
 
   @IsIn(ORDER_SIZES)
   size!: string;
+
+  /** Mức đường (%); bỏ trống = 100% (đúng công thức). */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  sugar?: number;
+
+  /** Mức đá (%), chỉ để ghi nhận cho pha chế. */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  ice?: number;
 
   @IsOptional()
   @IsArray()

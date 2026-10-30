@@ -1,16 +1,26 @@
 erDiagram
     USER ||--o{ ORDER : places
+    USER ||--o{ PAYMENT : makes
+    USER ||--o{ LOYALTY_TRANSACTION : earns_or_reverses
+    USER ||--o{ IDEMPOTENCY_RECORD : creates
+
     ORDER ||--|{ ORDER_ITEM : contains
+    ORDER ||--o{ PAYMENT : has
+    ORDER ||--o{ LOYALTY_TRANSACTION : records
+    ORDER ||--o| IDEMPOTENCY_RECORD : protects
+
     PRODUCT ||--o{ ORDER_ITEM : included_in
+
     ORDER_ITEM ||--o{ ORDER_ITEM_TOPPING : has
     TOPPING ||--o{ ORDER_ITEM_TOPPING : selected_in
-    PROMOTION ||--o{ ORDER : applied_to
 
     USER {
         int id PK
-        string email
+        string email UK
+        string name
         string password
         string role
+        int points
         datetime createdAt
         datetime updatedAt
     }
@@ -21,6 +31,8 @@ erDiagram
         string description
         int price
         int stock
+        string category
+        string imageUrl
         datetime createdAt
         datetime updatedAt
     }
@@ -59,12 +71,42 @@ erDiagram
         int price
     }
 
+    PAYMENT {
+        int id PK
+        int orderId FK
+        int userId FK
+        string method
+        string status
+        int amount
+        string idempotencyKey
+        string requestHash
+        datetime createdAt
+    }
+
     PROMOTION {
         int id PK
-        string code
+        string code UK
         string type
         int value
         int minOrder
         datetime expiresAt
         int usageCount
+    }
+
+    LOYALTY_TRANSACTION {
+        int id PK
+        int userId FK
+        int orderId FK
+        string type
+        int points
+        datetime createdAt
+    }
+
+    IDEMPOTENCY_RECORD {
+        int id PK
+        int userId FK
+        string key
+        string requestHash
+        int orderId FK, UK
+        datetime createdAt
     }

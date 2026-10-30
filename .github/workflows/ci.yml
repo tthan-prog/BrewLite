@@ -1,10 +1,5 @@
 name: CI
 
-# Chạy khi mở hoặc cập nhật pull request vào main (Assignment 2 – Task 4.4):
-# Install -> Lint -> Unit Test -> Build.
-# Để chặn merge khi CI lỗi: GitHub -> Settings -> Branches -> rule cho main ->
-# "Require status checks to pass" -> chọn "api" và "web".
-
 on:
   pull_request:
     branches: [main]
@@ -14,7 +9,7 @@ on:
 jobs:
   api:
     name: api
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: apps/api
@@ -25,23 +20,17 @@ jobs:
           node-version: 24
           cache: npm
           cache-dependency-path: apps/api/package-lock.json
-      - name: Install
-        run: npm ci
+      - run: npm ci
       - name: Generate Prisma client
-        # src/generated nằm trong .gitignore nên phải sinh lại; không kết nối CSDL.
         run: npx prisma generate --config prisma7.config.ts
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
-      - name: Lint
-        run: npm run lint
-      - name: Unit test
-        run: npm test
-      - name: Build
-        run: npm run build
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
 
   api-e2e:
     name: api-e2e
-    # Integration test trên PostgreSQL thật (cùng bộ test Task 10: a, b, c). Không bắt buộc để merge.
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -68,14 +57,12 @@ jobs:
           cache: npm
           cache-dependency-path: apps/api/package-lock.json
       - run: npm ci
-      - name: Generate Prisma client
-        run: npx prisma generate --config prisma7.config.ts
+      - run: npx prisma generate --config prisma7.config.ts
       - name: Migrate and seed
         run: |
           npx prisma migrate deploy --config prisma7.config.ts
           npx prisma db seed --config prisma7.config.ts
-      - name: Integration test
-        run: npm run test:e2e
+      - run: npm run test:e2e
 
   web:
     name: web
@@ -90,19 +77,14 @@ jobs:
           node-version: 24
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
-      - name: Install
-        run: npm ci
-      - name: Lint
-        run: npm run lint
-      - name: Unit test
-        run: npm test --if-present
-      - name: Build
-        run: npm run build
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test --if-present
+      - run: npm run build
 
   e2e-browser:
     name: e2e-browser
-    # Test E2E bằng trình duyệt thật (Playwright): menu -> đăng ký/đăng nhập -> giỏ hàng -> thanh toán -> xác nhận.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16-alpine

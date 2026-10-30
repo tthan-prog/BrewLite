@@ -1,7 +1,5 @@
 # Thỏa thuận nhóm – BrewLite
 
-> Bản đề xuất của thành viên A. Cả nhóm đọc, sửa các chỗ `[…]` rồi cùng xác nhận ở cuối. Mục đích: thống nhất cách làm việc ngay từ đầu để khi có sự cố (trễ việc, bất đồng) đã có quy tắc chung.
-
 ## 1. Mục tiêu
 
 - Hoàn thành BrewLite đạt Definition of Done cho càng nhiều task càng tốt, theo thứ tự ưu tiên: Task 1–9 trước, Task 10 sau.
@@ -12,20 +10,19 @@
 
 | Ký hiệu | Họ tên | Vai trò |
 |---|---|---|
-| A | Nguyễn Lê Nhựt Thắng | Scrum Master + Dev nền tảng |
+| A | Nguyễn Lê Nhựt Thắng | Scrum Master + Dev nền tảng, kiểm thử, PO tạm |
 | B | Hồ Thiên Ngân | Dev backend (dữ liệu, nghiệp vụ lõi) |
 | C | Hà Thiên Long | Dev backend (xác thực, thanh toán, state machine) |
 | D | Giản Thiên Lực | Dev frontend, slide |
-| E | Lê Thuận | Dev frontend, kiểm thử, PO tạm |
 
 Vai trò là "người chịu trách nhiệm chính", không phải "chỉ một mình làm".
 
 ## 3. Họp và liên lạc
 
-- Daily Scrum: mỗi ngày lúc […], tối đa 15 phút (có thể qua chat nếu không họp trực tiếp được).
-- Họp cuối Sprint (Review và Retrospective): 18/10, 22/10, 25/10 (dự kiến).
-- Kênh liên lạc chính: […] (nhóm chat). Quyết định quan trọng phải được ghi lại bằng văn bản trong nhóm chat hoặc biên bản.
-- Phản hồi tin nhắn liên quan đến công việc trong vòng […] giờ (đề xuất: 12 giờ trong ban ngày).
+- Daily Scrum: mỗi ngày lúc 20h, tối đa 15 phút (có thể qua chat nếu không họp trực tiếp được).
+- Họp cuối Sprint (Review và Retrospective): 18/10, 22/10, 25/10.
+- Kênh liên lạc chính:  Zalo (nhóm chat). Quyết định quan trọng phải được ghi lại bằng văn bản trong nhóm chat hoặc biên bản.
+- Phản hồi tin nhắn liên quan đến công việc trong vòng 1 giờ (đề xuất: 12 giờ trong ban ngày).
 - Vắng họp hoặc không kịp việc: báo trước cho A càng sớm càng tốt.
 
 ## 4. Quy tắc làm việc
@@ -57,8 +54,7 @@ Mỗi thành viên ghi họ tên và ngày để xác nhận đã đọc và đ�
 
 | Ký hiệu | Họ tên | Ngày xác nhận |
 |---|---|---|
-| A | | |
-| B | | |
-| C | | |
-| D | | |
-| E | | |
+| A | Nguyễn Lê Nhựt Thắng | 20/10 |
+| B | Hồ Thiên Ngân | 20/10 |
+| C | Hà Thiên Long | 20/10 |
+| D | Giản Thiên Lực | 20/10 |

@@ -1,6 +1,6 @@
 # ADR-006: CI/CD bằng GitHub Actions và registry GHCR
 
-- **Trạng thái:** Đã chốt; workflow đã viết, **chưa chạy thật trên GitHub**
+- **Trạng thái:** Đã chốt
 - **Ngày:** 20/10/2026
 
 ## Bối cảnh
@@ -14,9 +14,9 @@
 - Secret triển khai lưu ở GitHub Secrets; không in ra log.
 - CI chặn merge khi lint, test hoặc build lỗi (bật required status checks `api`, `web`).
 
-## Việc cần kiểm chứng
+## Kết quả kiểm chứng
 
-[Chưa kiểm chứng] Với repo Private ở gói miễn phí, tùy chọn bắt buộc status check trước khi merge có thể bị giới hạn. Kiểm tra trong Settings → Branches ngay khi push repo. Nếu bị giới hạn, đặt repo Public hoặc ghi rõ quy ước nhóm và dùng log CI làm bằng chứng.
+Repo đang ở trạng thái Public và branch protection trên `main` hoạt động: PR thử nghiệm #30 có check `api` đỏ nên bị chặn merge (ảnh 16–19 trong `docs/evidence/`). Tùy chọn "Do not allow bypassing" đang tắt nên chủ repo vẫn có thể bỏ qua quy tắc; nhóm quy ước vẫn gộp qua PR.
 
 ## Hệ quả
 

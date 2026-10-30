@@ -30,6 +30,6 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ## Tích hợp backend
 
-Các trang và giao diện có thể chạy độc lập. Các chức năng gửi/đọc dữ liệu thật cần backend triển khai đúng API, schema request/response và JWT. Hiện backend scaffold ban đầu chỉ cung cấp `GET /health` và `GET /`; phối hợp với thành viên C để hoàn thiện API nghiệp vụ trước khi nghiệm thu.
+Frontend gọi API NestJS ở `apps/api` qua biến `NEXT_PUBLIC_API_URL` (gắn vào lúc build). Chạy cùng backend để dùng đầy đủ chức năng: đăng nhập bằng JWT, tạo đơn, thanh toán, lịch sử đơn. Hướng dẫn chạy toàn bộ hệ thống nằm ở `README.md` gốc.
 
 Không đưa `.env.local`, token hoặc thông tin bí mật vào Git.
