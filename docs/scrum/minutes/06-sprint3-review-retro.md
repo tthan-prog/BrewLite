@@ -4,7 +4,7 @@
 
 - **Thời gian:** 25/10/2026, 21:00 – 22:00
 - **Người ghi biên bản:** A
-- **Có mặt:** A, B, C, D, E
+- **Có mặt:** A, B, C, D
 
 ## Phần 1. Sprint Review
 

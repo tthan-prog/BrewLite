@@ -13,7 +13,6 @@
 | B | Hồ Thiên Ngân | 
 | C | Hà Thiên Long | 
 | D | Giản Thiên Lực | 
-| E | Lê Thuận | 
 
 
 ## 1. Sprint Goal (theo đề Assignment 2, mục 7)
@@ -42,11 +41,11 @@ Hoàn thành luồng end-to-end, tự động hóa đóng gói và triển khai,
 |---|---|---|---|
 | 5.1 | Đăng ký, đăng nhập, thanh toán mô phỏng | Hà Thiên Long | Hồ Thiên Ngân |
 | 5.1 | Tạo đơn, trạng thái đơn | Hồ Thiên Ngân | Hà Thiên Long |
-| 5.1 | Giao diện menu, giỏ hàng, thanh toán, lịch sử đơn | Giản Thiên Lực | Lê Thuận |
-| 5.2 | Unit, integration, E2E, `docker-compose.yml`, `/health` | Lê Thuận, Hà Thiên Long | Hà Thiên Long |
+| 5.1 | Giao diện menu, giỏ hàng, thanh toán, lịch sử đơn | Giản Thiên Lực | Nguyễn Lê Nhựt Thắng |
+| 5.2 | Unit, integration, E2E, `docker-compose.yml`, `/health` | Nguyễn Lê Nhựt Thắng, Hà Thiên Long | Hà Thiên Long |
 | 5.3 | Pipeline CD, rollback | Nguyễn Lê Nhựt Thắng | Hồ Thiên Ngân |
 | 5.4 | Triển khai production, release v0.1.x, README | Nguyễn Lê Nhựt Thắng | Giản Thiên Lực |
-| 5.4 | Video demo luồng end-to-end | Giản Thiên Lực | Lê Thuận |
+| 5.4 | Video demo luồng end-to-end | Giản Thiên Lực | Nguyễn Lê Nhựt Thắng |
 | 5.4 | Sprint Review và Retrospective | Nguyễn Lê Nhựt Thắng | Cả nhóm |
 
 Nguyên tắc: người nghiệm thu không phải người viết task đó.

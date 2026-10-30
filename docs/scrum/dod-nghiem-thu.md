@@ -15,14 +15,14 @@ Mục đích: mỗi task trong 10 task của Assignment 1 có **bằng chứng**
 |---|---|---|---|
 | 1 | Khởi tạo dự án | A | B |
 | 2 | API sản phẩm | C (B: schema, seed) | D |
-| 3 | Trang Menu | D | E |
+| 3 | Trang Menu | D | A |
 | 4 | Chi tiết, size, topping | D | C |
 | 5 | Giỏ hàng | D | B |
 | 6 | API tạo đơn | B | D |
-| 7 | Đăng ký, đăng nhập | C | E |
+| 7 | Đăng ký, đăng nhập | C | B |
 | 8 | Thanh toán | C | B |
-| 9 | Xác nhận, lịch sử đơn | E | C |
-| 10 | Nghiệp vụ nâng cao | B, C | E |
+| 9 | Xác nhận, lịch sử đơn | A | C |
+| 10 | Nghiệp vụ nâng cao | B, C | D |
 
 ## 3. Chuẩn bị (mỗi người nghiệm thu làm một lần)
 
@@ -76,14 +76,14 @@ Người nghiệm thu điền bảng này (hoặc gửi cho A điền). Cập nh
 |---|---|---|---|---|---|---|---|---|
 | 1 | Nhóm (theo phân công: B) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
 | 2 | Nhóm (theo phân công: D) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
-| 3 | Nhóm (theo phân công: E) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
+| 3 | Nhóm (theo phân công: A) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
 | 4 | Nhóm (theo phân công: C) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
 | 5 | Nhóm (theo phân công: B) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
 | 6 | Nhóm (theo phân công: D) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
-| 7 | Nhóm (theo phân công: E) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
+| 7 | Nhóm (theo phân công: B) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
 | 8 | Nhóm (theo phân công: B) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
 | 9 | Nhóm (theo phân công: C) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
-| 10 | Nhóm (theo phân công: E) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
+| 10 | Nhóm (theo phân công: D) | 23/10 | Đạt | Đạt | Đạt | Đạt | Đạt | Nhóm đã kiểm tra, A xác nhận |
 
 Điền "Đạt" hoặc "Chưa đạt" cho từng cột D1 đến D4. Kết luận "Đạt" khi cả 4 cột đều đạt.
 
@@ -92,7 +92,7 @@ Người nghiệm thu điền bảng này (hoặc gửi cho A điền). Cập nh
 | Mốc | Việc | Người làm |
 |---|---|---|
 | Sáng 23/10 | A mở Pull Request, gửi bảng phân công vào nhóm chat | A |
-| 23/10 đến trưa 24/10 | Mỗi người nghiệm thu task của mình, Approve PR, ghi kết quả | B, C, D, E |
+| 23/10 đến trưa 24/10 | Mỗi người nghiệm thu task của mình, Approve PR, ghi kết quả | A, B, C, D |
 | Chiều 24/10 | A tổng hợp, cập nhật README mục 8.2 và báo cáo mục 6.4 | A |
 | Tối 24/10 | Mốc cắt phạm vi: task chưa đạt thì sửa hoặc đưa vào backlog | Cả nhóm |
 | 25/10 | Sprint 3 Review và Retrospective, đóng băng code tối | Cả nhóm |

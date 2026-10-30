@@ -36,6 +36,6 @@ Quy ước mã: US = user story, UC = use-case, Activity/Sequence/Class = sơ đ
 ## Quy tắc cập nhật
 
 1. Mỗi PR thêm tính năng phải sửa dòng tương ứng trong ma trận.
-2. E rà ma trận trước khi nộp: mọi FR mức Must phải có thiết kế, code và test.
+2. A rà ma trận trước khi nộp: mọi FR mức Must phải có thiết kế, code và test.
 3. Nếu tạo phẩm của task trước thiếu, ghi rõ ở đây thay vì bỏ trống im lặng.
 4. FR-02, FR-04 và NFR-05 được kiểm bằng test E2E Playwright (`tests/e2e`, job `e2e-browser` trong CI). PWA mới ở mức manifest, chưa có service worker.

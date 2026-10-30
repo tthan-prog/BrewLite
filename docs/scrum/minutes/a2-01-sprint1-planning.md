@@ -13,7 +13,6 @@
 | B | Hồ Thiên Ngân | 
 | C | Hà Thiên Long | 
 | D | Giản Thiên Lực | 
-| E | Lê Thuận | 
 
 ## 1. Sprint Goal (theo đề Assignment 2, mục 6)
 
@@ -39,10 +38,10 @@ Tạo nền tảng kỹ thuật, tài liệu có kiểm soát phiên bản và m
 | Task | Việc | Người làm chính | Người nghiệm thu |
 |---|---|---|---|
 | 4.1 | Repo, cấu trúc, README, `.env.example`, branch protection, quy ước commit, DoD | Nguyễn Lê Nhựt Thắng (Scrum Master, dev nền tảng) | Hồ Thiên Ngân |
-| 4.2 | Đưa tạo phẩm Task 1–3 vào `docs`, gắn tag `assign1-final`, thay đổi qua PR | Nguyễn Lê Nhựt Thắng, Lê Thuận (viết tài liệu yêu cầu) | Giản Thiên Lực |
-| 4.3 | Dữ liệu mẫu, `GET /products`, `GET /products/:id` | Hồ Thiên Ngân (dữ liệu, seed), C (API) | Lê Thuận |
-| 4.3 | Màn hình menu mobile-first, loading, empty, error | Giản Thiên Lực (frontend) | Lê Thuận |
-| 4.3 | Kiểm thử tối thiểu API và luồng menu | Lê Thuận (kiểm thử) | Hà Thiên Long |
+| 4.2 | Đưa tạo phẩm Task 1–3 vào `docs`, gắn tag `assign1-final`, thay đổi qua PR | Nguyễn Lê Nhựt Thắng (viết tài liệu yêu cầu) | Giản Thiên Lực |
+| 4.3 | Dữ liệu mẫu, `GET /products`, `GET /products/:id` | Hồ Thiên Ngân (dữ liệu, seed), C (API) | Nguyễn Lê Nhựt Thắng |
+| 4.3 | Màn hình menu mobile-first, loading, empty, error | Giản Thiên Lực (frontend) | Nguyễn Lê Nhựt Thắng |
+| 4.3 | Kiểm thử tối thiểu API và luồng menu | Nguyễn Lê Nhựt Thắng (kiểm thử) | Hà Thiên Long |
 | 4.4 | Pipeline CI và chặn merge khi đỏ | Nguyễn Lê Nhựt Thắng | Hà Thiên Long |
 
 Nguyên tắc: người nghiệm thu không phải người viết task đó (theo `docs/scrum/dod-nghiem-thu.md`).

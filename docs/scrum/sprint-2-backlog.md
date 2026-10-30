@@ -14,7 +14,7 @@
 | 2 | Trang Menu, trang chi tiết (size, topping) | 3, 4 | D | 6 | Hoàn thành giao diện (22/10) | Commit "add BrewLite menu cart checkout and order history" |
 | 3 | Giỏ hàng: thêm, sửa, xóa, tổng tiền, badge | 5 | D | 3 | Hoàn thành giao diện (22/10) | Cùng commit trên |
 | 4 | `POST /orders`: validate, trạng thái PENDING | 6 | B (C) | 5 | Hoàn thành (22/10) | Có idempotency và kiểm soát tồn kho đồng thời |
-| 5 | Đăng ký, đăng nhập, JWT, guard | 7 | C (E) | 5 | Một phần | Giao diện đăng nhập xong 22/10; backend auth chuyển sang Sprint 3 |
+| 5 | Đăng ký, đăng nhập, JWT, guard | 7 | C (A) | 5 | Một phần | Giao diện đăng nhập xong 22/10; backend auth chuyển sang Sprint 3 |
 | 6 | `GET /products` nối menu với dữ liệu thật | 2 | C | (đã tính ở T2) | Chưa xong | Chuyển sang Sprint 3 |
 
 ## Rủi ro và vướng mắc

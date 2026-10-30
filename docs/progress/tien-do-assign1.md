@@ -1,6 +1,6 @@
 # Bảng tiến độ Assignment 1 (cập nhật 23/10/2026)
 
-Hạn nộp: 27/10/2026. Điểm: 10 task, mỗi task 1 điểm, tổng 10 điểm.
+Hạn nộp: 02/11/2026. Điểm: 10 task, mỗi task 1 điểm, tổng 10 điểm.
 
 ## 1. Tiến độ 10 task
 
@@ -14,7 +14,7 @@ Hạn nộp: 27/10/2026. Điểm: 10 task, mỗi task 1 điểm, tổng 10 đi�
 | 6 | API tạo đơn | 2 | B | 5 | Xong | e2e đạt | Đạt | `POST /orders` (JWT, validate, PENDING) |
 | 7 | Đăng ký, đăng nhập | 2 | C | 5 | Xong | e2e đạt | Đạt | bcrypt, JWT, guard, `/login`, `/register` |
 | 8 | Thanh toán | 3 | C | 5 | Xong | e2e đạt | Đạt | `POST /payments`, PAID/PAYMENT_FAILED, thử lại |
-| 9 | Xác nhận, lịch sử, bàn giao | 3 | E | 3 | Xong | Chạy thử trình duyệt | Đạt | `/orders/me`, trang xác nhận, Docker |
+| 9 | Xác nhận, lịch sử, bàn giao | 3 | A | 3 | Xong | Chạy thử trình duyệt | Đạt | `/orders/me`, trang xác nhận, Docker |
 | 10 | Nghiệp vụ nâng cao | 3 | B, C | 8 | Xong | 3 test bắt buộc đạt | Đạt | State machine, idempotency, tồn kho, khuyến mãi, điểm |
 
 Tổng: 10/10 task xong code; nghiệm thu chéo ghi nhận Đạt theo xác nhận của nhóm.
@@ -44,9 +44,8 @@ Tài liệu: Product Backlog, 3 Sprint Backlog, Burndown, 6 biên bản (bản n
 
 | Việc | Người | Hạn | Trạng thái |
 |---|---|---|---|
-| Merge PR, B, C, D, E Approve hoặc comment nghiệm thu trên GitHub | B, C, D, E | 24/10 | Cần làm |
+| Merge PR, B, C, D Approve hoặc comment nghiệm thu trên GitHub | B, C, D | 24/10 | Cần làm |
 | Ghi tên người nghiệm thu thật vào `dod-nghiem-thu.md` và báo cáo mục 6.4 | A | 24/10 | Cần làm |
-| E có ít nhất một commit hoặc PR | E | 25/10 | Cần làm |
 | Điền MSSV, lớp, nhóm vào báo cáo LaTeX (ảnh đã được chèn) | A, D | 26/10 | Cần làm |
 | Cả nhóm đọc và sửa 6 biên bản họp cho đúng thực tế | Cả nhóm | 25/10 | Cần làm |
 | Họp Sprint 3 Review và Retrospective, cập nhật biên bản 06 | Cả nhóm | 25/10 | Chưa đến |
@@ -57,6 +56,5 @@ Tài liệu: Product Backlog, 3 Sprint Backlog, Burndown, 6 biên bản (bản n
 | Rủi ro | Mức | Xử lý |
 |---|---|---|
 | Bằng chứng nghiệm thu chỉ là xác nhận chung, thiếu Approve trên GitHub | Cao | Nhờ từng người Approve hoặc comment trên PR |
-| Phân bố commit lệch (E chưa có) | Trung bình | Giao việc cụ thể cho E |
 | Burndown Sprint 1 trễ | Thấp | Đã ghi trung thực trong Retrospective |
 | Làm song song Assignment 2 cùng hạn | Cao | Dùng chung mã nguồn; xem kế hoạch Assignment 2 |
