@@ -1,0 +1,79 @@
+@startuml sequence-payment
+title UC-01 Thanh toán đơn hàng
+skinparam shadowing false
+skinparam defaultFontSize 13
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam ParticipantPadding 6
+hide footbox
+autonumber
+
+actor "Khách hàng" as C
+participant "Giao diện web\n(Next.js)" as UI
+participant "API\n(PaymentsService)" as PS
+participant "OrdersService" as OS
+database "PostgreSQL" as DB
+
+C -> UI : Chọn phương thức,\nxác nhận thanh toán
+activate UI
+UI -> PS ++ : thanhToán(orderId, method,\nIdempotency-Key)
+PS -> PS : xácThựcJWT(), kiểmTraDữLiệu()
+
+break JWT hoặc dữ liệu không hợp lệ
+  PS --> UI : lỗi 401 / 400
+  UI --> C : Báo lỗi
+end
+
+PS -> DB ++ : tìm Payment (userId, khóa)
+return Payment hoặc rỗng
+
+break khóa đã dùng
+  PS --> UI : kết quả cũ (cùng nội dung)\nhoặc lỗi 409 (khác nội dung)
+  UI --> C : Hiển thị kết quả hoặc báo lỗi
+end
+
+PS -> DB ++ : mở giao dịch, tìm Order
+return Order hoặc rỗng
+
+break đơn không hợp lệ (không tồn tại,\nkhông thuộc người dùng, sai trạng thái)
+  PS -> DB : ROLLBACK
+  PS --> UI : lỗi 404 / 400
+  UI --> C : Báo không thể thanh toán
+end
+
+opt đơn đang PAYMENT_FAILED (thử lại)
+  PS -> OS ++ : changeStatus(PENDING)
+  return Order PENDING
+end
+
+PS -> PS : mô phỏng kết quả (simulate)
+PS -> DB : lưu Payment (SUCCESS / FAILED)
+
+alt thanh toán thành công
+  PS -> OS ++ : changeStatus(PAID)
+  OS -> DB ++ : trừ nguyên liệu có điều kiện\n(stock ≥ cần)
+  return số dòng cập nhật
+  alt đủ nguyên liệu
+    OS -> DB : Order → PAID, cộng điểm (EARN)
+    return Order PAID
+    PS -> DB : COMMIT
+  else kho vừa hết do đơn khác
+    OS --> PS : thiếu nguyên liệu
+    PS -> DB : ROLLBACK (không trừ tiền, không trừ kho)
+    PS -> OS : changeStatus(PAYMENT_FAILED, lý do)
+  end
+else thanh toán thất bại
+  PS -> OS ++ : changeStatus(PAYMENT_FAILED)
+  return Order PAYMENT_FAILED
+  PS -> DB : COMMIT
+end
+
+PS --> UI -- : 200 {payment, order}
+UI --> C -- : Xác nhận đơn hoặc báo lỗi,\ncho thử lại / hủy đơn
+
+note over PS, DB
+Trừ nguyên liệu, Payment và đổi trạng thái Order
+nằm trong một giao dịch. PAYMENT_FAILED là kết quả
+nghiệp vụ. Thử lại cần Idempotency-Key mới.
+end note
+@enduml

@@ -16,7 +16,7 @@
 
 ## Kết quả kiểm chứng
 
-Repo đang ở trạng thái Public và branch protection trên `main` hoạt động: PR thử nghiệm #30 có check `api` đỏ nên bị chặn merge (ảnh 16–19 trong `docs/evidence/`). Tùy chọn "Do not allow bypassing" đang tắt nên chủ repo vẫn có thể bỏ qua quy tắc; nhóm quy ước vẫn gộp qua PR.
+Repo đang ở trạng thái Public và branch protection trên `main` hoạt động: PR thử nghiệm #30 có check `api` đỏ nên bị chặn merge (ảnh 16–19 trong `docs/as2/evidence/`). Tùy chọn "Do not allow bypassing" đang tắt nên chủ repo vẫn có thể bỏ qua quy tắc; nhóm quy ước vẫn gộp qua PR.
 
 ## Hệ quả
 

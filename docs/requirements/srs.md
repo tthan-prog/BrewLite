@@ -10,17 +10,17 @@
 | FR-04 | Giỏ hàng | Thêm, sửa số lượng, xóa món; hiển thị tổng tiền | Must | Tổng tiền = Σ (đơn giá + phụ phí size + topping) × số lượng |
 | FR-05 | Xác thực | Đăng ký và đăng nhập; phát JWT; mật khẩu băm bằng bcrypt | Must | Đăng nhập đúng nhận JWT; sai mật khẩu trả 401; DB không lưu mật khẩu thô |
 | FR-06 | Xác thực | Chặn đặt đơn khi chưa đăng nhập | Must | `POST /orders` không có JWT trả 401 |
-| FR-07 | Đặt đơn | Tạo đơn từ giỏ hàng, trạng thái PENDING, trừ tồn kho trong cùng transaction | Must | Đơn tạo đúng; `stock` giảm; hết hàng thì từ chối và không tạo đơn |
+| FR-07 | Đặt đơn | Tạo đơn từ giỏ hàng, trạng thái PENDING; kiểm tra đủ nguyên liệu cho cả đơn (món có công thức) hoặc trừ `Product.stock` trong cùng transaction (món chưa có công thức) | Must | Đơn tạo đúng; thiếu nguyên liệu hoặc hết hàng thì từ chối (400) và không tạo đơn; với món có công thức, tạo đơn chưa trừ nguyên liệu |
 | FR-08 | Thanh toán | Thanh toán Ví hoặc Thẻ mô phỏng; thành công → PAID, thất bại → PAYMENT_FAILED (API trả 200 kèm trạng thái đơn); thử lại được | Must | `POST /payments` đổi trạng thái đúng; thất bại giữ nguyên giỏ hàng |
 | FR-09 | Thanh toán | Gửi lại yêu cầu thanh toán với cùng Idempotency-Key không tạo thêm thanh toán/đơn | Must | Hai request cùng khóa cho một kết quả và một bản ghi |
 | FR-10 | Trạng thái đơn | Máy trạng thái đơn; chặn chuyển sai trạng thái | Must | PENDING → PAID/PAYMENT_FAILED/CANCELLED; PAID → PREPARING/CANCELLED; PREPARING → READY → COMPLETED; chuyển sai trả lỗi |
 | FR-11 | Trạng thái đơn | Nhân viên cập nhật trạng thái đơn | Should | `PATCH /orders/:id/status` chỉ vai trò STAFF thực hiện được |
 | FR-12 | Lịch sử | Khách xem lịch sử và chi tiết đơn của mình | Must | `GET /orders/me` chỉ trả đơn của người dùng hiện tại; `GET /orders/:id` chỉ chủ đơn hoặc STAFF xem được (người khác nhận 404) |
-| FR-13 | Tồn kho | Đặt đồng thời không làm tồn kho âm; hủy đơn hoàn lại tồn kho | Must | Test chạy N request đồng thời, số đơn thành công ≤ tồn kho |
+| FR-13 | Tồn kho | Nguyên liệu chỉ bị trừ khi thanh toán thành công (cập nhật có điều kiện trong cùng transaction); đặt và thanh toán đồng thời không làm tồn kho âm; hủy đơn chỉ hoàn phần đã trừ | Must | Test chạy N request đồng thời, số đơn thành công ≤ tồn kho; nếu kho hết đúng lúc thanh toán thì không trừ tiền, không trừ kho và đơn chuyển PAYMENT_FAILED; hủy đơn chưa thanh toán không đụng tới kho |
 | FR-14 | Khuyến mãi | Áp mã khuyến mãi hợp lệ để giảm giá | Should | Mã hợp lệ giảm đúng; mã sai/hết hạn bị từ chối |
 | FR-15 | Điểm thưởng | Cộng điểm khi đơn thanh toán thành công (PAID): 1 điểm / 10.000đ; hủy đơn đã PAID thì trừ lại; mỗi lần đổi điểm ghi một giao dịch điểm (`LoyaltyTransaction`) | Should | `User.points` tăng đúng số điểm khi đơn PAID và giảm lại khi hủy đơn đã PAID; có bản ghi `LoyaltyTransaction` loại EARN (và REVERSAL khi hủy) tương ứng |
 | FR-16 | Quản trị | Giao diện quản lý sản phẩm và khuyến mãi | Could | Ngoài MVP |
-| FR-17 | Thanh toán | Kết nối cổng thanh toán thật | Won't | Không thực hiện |
+| FR-17 | Thanh toán | Kết nối cổng thanh toán thật | Won't | Không thực hiện. Thanh toán QR chỉ chạy chế độ giả lập; phần ký và xác minh cho cổng sandbox VNPay/MoMo có sẵn nhưng chưa kiểm chứng với cổng thật (xem `docs/as2/payment-qr-ingredients.md`) |
 
 ## 2. Yêu cầu phi chức năng
 
@@ -40,5 +40,5 @@
 
 ## 3. Use-case tổng quát
 
-Xem sơ đồ `docs/diagrams/usecase-overview.puml` (đã có, kèm bản kết xuất `usecase-overview.svg`). Actor: Customer, Staff, Payment Service (mô phỏng). Use-case: Xem menu, Xem chi tiết, Quản lý giỏ hàng, Đăng ký/Đăng nhập, **Đặt và thanh toán đơn hàng**, Xem lịch sử đơn, Cập nhật trạng thái đơn.
+Xem sơ đồ `docs/diagrams/usecase-overview.puml` (đã có, kèm bản kết xuất `usecase-overview.svg`). Actor: Khách hàng, Nhân viên, Dịch vụ thanh toán (mô phỏng). Use case: Xem menu, Xem chi tiết sản phẩm, Quản lý giỏ hàng, Đăng ký tài khoản, Đăng nhập, **Đặt đơn**, **Thanh toán đơn** (hai use case của UC-01), Xem lịch sử đơn, Đổi quà bằng điểm, Cập nhật trạng thái đơn, Hủy đơn, Quản lý nguyên liệu.
 

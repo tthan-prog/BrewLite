@@ -1,45 +1,50 @@
-
 @startuml usecase-overview
-title Use Case Diagram - BrewLite
+title Use case diagram - BrewLite (tổng quan)
 left to right direction
 skinparam shadowing false
+skinparam packageStyle rectangle
 
-actor Customer
-actor Staff
-actor "Payment Service\n(mô phỏng)" as PAY
+actor "Khách hàng" as Customer
+actor "Nhân viên" as Staff
+actor "Dịch vụ thanh toán\n(mô phỏng)" as PAY
 
-rectangle BrewLite {
+rectangle "BrewLite" {
   usecase "Xem menu" as UC_Menu
   usecase "Xem chi tiết sản phẩm" as UC_Detail
   usecase "Quản lý giỏ hàng" as UC_Cart
-  usecase "Đăng ký" as UC_Register
+  usecase "Đăng ký tài khoản" as UC_Register
   usecase "Đăng nhập" as UC_Login
-  usecase "Đặt và thanh toán\nđơn hàng (UC-01)" as UC_Checkout
-  usecase "Xem lịch sử và\nchi tiết đơn" as UC_History
+  usecase "Đặt đơn" as UC_Order
+  usecase "Thanh toán đơn" as UC_Pay
+  usecase "Xem lịch sử đơn" as UC_History
+  usecase "Đổi quà bằng điểm" as UC_Redeem
   usecase "Cập nhật trạng thái đơn" as UC_Status
-  usecase "Áp mã khuyến mãi" as UC_Promo
+  usecase "Hủy đơn" as UC_Cancel
+  usecase "Quản lý nguyên liệu" as UC_Stock
 }
 
-Customer --> UC_Menu
-Customer --> UC_Detail
-Customer --> UC_Cart
-Customer --> UC_Register
-Customer --> UC_Login
-Customer --> UC_Checkout
-Customer --> UC_History
+Customer -- UC_Menu
+Customer -- UC_Detail
+Customer -- UC_Cart
+Customer -- UC_Register
+Customer -- UC_Login
+Customer -- UC_Order
+Customer -- UC_Pay
+Customer -- UC_History
+Customer -- UC_Redeem
 
-Staff --> UC_Status
-PAY --> UC_Checkout
+Staff -- UC_Status
+Staff -- UC_Cancel
+Staff -- UC_Stock
 
-UC_Checkout ..> UC_Login : <<include>>
-UC_Promo ..> UC_Checkout : <<extend>>
+UC_Pay -- PAY
 
-note right of UC_Checkout
-  Yêu cầu đăng nhập trước khi đặt đơn.
-  Thanh toán Ví / Thẻ mô phỏng.
-  Thất bại có thể thử lại.
-  Khi PAID: tự động cộng điểm thưởng.
-  Khi hủy đơn PAID: hoàn tác điểm.
+UC_Order ..> UC_Login : <<include>>
+UC_Pay ..> UC_Login : <<include>>
+UC_Redeem ..> UC_Login : <<include>>
+
+note bottom of UC_Pay
+  UC-01 gồm "Đặt đơn" và "Thanh toán đơn";
+  chi tiết ở sơ đồ usecase-checkout.
 end note
-
 @enduml

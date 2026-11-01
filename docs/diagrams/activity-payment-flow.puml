@@ -1,0 +1,53 @@
+@startuml activity-payment-flow
+title Activity diagram - Thanh toán và xử lý đơn hàng (phần 2/2)
+skinparam shadowing false
+
+|Khách hàng|
+start
+repeat
+  |Khách hàng|
+  :Chọn phương thức\nthanh toán;
+  :Xác nhận thanh toán;
+
+  |Hệ thống|
+  :Kiểm tra Idempotency-Key;
+
+  |Dịch vụ thanh toán|
+  :Xử lý thanh toán;
+
+  |Hệ thống|
+  if (Thanh toán\nthành công?) then (Có)
+    :Trừ nguyên liệu\ncủa đơn;
+    if (Còn đủ\nnguyên liệu?) then (Có)
+      :Chuyển đơn sang PAID;
+      :Cộng điểm thưởng;
+    else (Không)
+      :Hủy giao dịch,\nkhông trừ tiền;
+      :Chuyển đơn sang\nPAYMENT_FAILED;
+    endif
+  else (Không)
+    :Chuyển đơn sang\nPAYMENT_FAILED;
+  endif
+
+  if (Đơn đã PAID?) then (Chưa)
+    |Khách hàng|
+    :Nhận thông báo\nthanh toán thất bại;
+    :Giữ giỏ hàng để thử lại;
+  else (Rồi)
+  endif
+repeat while (Đơn đã PAID?) is (Chưa) not (Rồi)
+
+|Khách hàng|
+:Xem xác nhận đơn;
+
+|Nhân viên|
+:Chuyển đơn sang PREPARING;
+:Chuyển đơn sang READY;
+
+|Khách hàng|
+:Nhận đồ uống;
+
+|Nhân viên|
+:Chuyển đơn sang COMPLETED;
+stop
+@enduml

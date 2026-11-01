@@ -1,0 +1,75 @@
+@startuml class-payment-reward
+title Class diagram - Thanh toán, phiên QR và quà đổi điểm (khớp schema.prisma)
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+class User {
+  - id : int
+  - points : int
+  + redeem(rewardId : int) : Redemption
+}
+class Order {
+  - id : int
+  - status : OrderStatus
+  - total : int
+}
+class Payment {
+  - id : int
+  - method : PaymentMethod
+  - status : PaymentStatus
+  - amount : int
+  - idempotencyKey : string
+  - requestHash : string
+  - providerRef : string
+}
+class PaymentIntent {
+  - id : int
+  - token : string
+  - provider : PaymentProvider
+  - amount : int
+  - status : IntentStatus
+  - mode : string
+  - expiresAt : datetime
+  - paidAt : datetime
+  + confirmSimulated(identifier : string, pin : string) : void
+}
+class PaymentAccount {
+  - id : int
+  - provider : PaymentProvider
+  - identifier : string
+  - holderName : string
+  - pinHash : string
+  - balance : int
+}
+class Reward {
+  - id : int
+  - name : string
+  - description : string
+  - pointsCost : int
+  - active : boolean
+}
+class Redemption {
+  - id : int
+  - pointsSpent : int
+  - code : string
+  - createdAt : datetime
+}
+
+Order "1" -- "0..*" Payment : được thanh toán bởi >
+User "1" -- "0..*" Payment : thực hiện >
+Order "1" -- "0..*" PaymentIntent : có phiên QR >
+User "1" -- "0..*" PaymentIntent : tạo >
+PaymentIntent "0..*" -- "0..1" PaymentAccount : trả từ >
+User "1" -- "0..*" Redemption : đổi >
+Reward "1" -- "0..*" Redemption : được đổi trong >
+
+note bottom of Payment
+  method : PaymentMethod = WALLET | CARD | BANK | MOMO | VNPAY;
+  status : PaymentStatus = SUCCESS | FAILED.
+end note
+note bottom of PaymentIntent
+  provider : PaymentProvider = BANK | MOMO | VNPAY;
+  status : IntentStatus = PENDING | PAID | FAILED | EXPIRED.
+  confirmSimulated ánh xạ tới PaymentIntentsService.
+end note
+@enduml

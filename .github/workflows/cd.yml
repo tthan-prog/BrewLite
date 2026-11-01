@@ -170,4 +170,4 @@ jobs:
       - name: Hướng dẫn rollback khi lỗi
         if: failure()
         run: |
-          echo "::warning::Rollback: Actions -> CD -> Run workflow -> nhập image_tag là tag ổn định trước đó (xem docs/deployment.md mục 5)."
+          echo "::warning::Rollback: Actions -> CD -> Run workflow -> nhập image_tag là tag ổn định trước đó (xem docs/deployment.md mục 6)."

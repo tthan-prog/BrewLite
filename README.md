@@ -2,21 +2,21 @@
 
 Ứng dụng đặt cà phê không dùng tiền mặt: khách xem menu, chọn size và topping, thêm vào giỏ, đăng nhập, thanh toán (mô phỏng) và theo dõi đơn hàng; nhân viên (STAFF) xử lý đơn qua API.
 
-Bài tập lớn môn **Công nghệ Phần mềm**, Trường Đại học Sài Gòn, học kỳ I năm học 2026–2027, làm theo quy trình **Agile Scrum**. Hạn nộp: 27/10/2026.
+Bài tập lớn môn **Công nghệ Phần mềm**, Trường Đại học Sài Gòn, học kỳ I năm học 2026–2027, làm theo quy trình **Agile Scrum**. Hạn nộp Assignment 1: 02/11/2026; hạn Assignment 2 theo thông báo của giảng viên.
 
-## Trạng thái dự án (cập nhật 24/10/2026)
+## Trạng thái dự án (cập nhật 02/11/2026)
 
 | Hạng mục | Tình trạng |
 |---|---|
 | Assignment 1 (10 task) | **Hoàn thành code cả 10 task**, chạy đầu-cuối từ giao diện đến CSDL |
-| Kiểm thử | 22 unit test và 32 test tích hợp đạt (PostgreSQL thật); lint và build backend, frontend sạch |
+| Kiểm thử | 36 unit test, 81 test tích hợp (PostgreSQL thật) và 10 test E2E Playwright đạt; lint và build backend, frontend sạch |
 | Docker Compose | Chạy được 3 dịch vụ (db, backend, frontend); đã chạy thử trên Windows (Docker Desktop + WSL 2) |
-| Nghiệm thu chéo (điều kiện tính điểm) | **Đã nghiệm thu, cả 10 task đạt DoD** (xác nhận 23/10/2026, xem `docs/scrum/dod-nghiem-thu.md`) |
-| Bằng chứng Scrum | Product Backlog, 3 Sprint Backlog, Burndown, biên bản (`docs/scrum/`) |
-| Báo cáo | Bản LaTeX tại `docs/report/latex/` (as1, as2; cách biên dịch ở `docs/report/README.md`); còn điền MSSV, lớp, nhóm |
+| Nghiệm thu chéo (điều kiện tính điểm) | **Đã nghiệm thu, cả 10 task đạt DoD** (xác nhận 23/10/2026, xem `docs/as1/scrum/dod-nghiem-thu.md`) |
+| Bằng chứng Scrum | Product Backlog, 3 Sprint Backlog, Burndown, biên bản (`docs/as1/scrum/`) |
+| Báo cáo | Bản LaTeX tại `docs/as1/report/` và `docs/as2/report/` (cách biên dịch ở `docs/chung/huong-dan-bao-cao-latex.md`); còn điền MSSV, lớp, nhóm |
 | Assignment 2 (Requirements to Deployment) | Đã có SRS, use-case, sơ đồ, ADR, ma trận truy vết, CI/CD; **đã triển khai production** (xem [Mục 15](#15-assignment-2-từ-yêu-cầu-đến-triển-khai)) |
 | Production (HTTPS) | Web https://brewlite-web.onrender.com/menu; API https://brewlite-api.onrender.com/health; bản hiện tại **v0.1.2** ([Release](https://github.com/tthan-prog/BrewLite/releases/tag/v0.1.2)) |
-| Sprint 3 Review và Retrospective | Dự kiến 25/10/2026; đã soạn bản nháp biên bản |
+| Sprint 3 Review và Retrospective | Đã họp 25/10/2026; biên bản hoàn chỉnh |
 
 Chi tiết từng task ở [Mục 8](#8-api-và-tiến-độ-task).
 
@@ -55,7 +55,7 @@ Xem menu → Chọn sản phẩm (size, topping) → Thêm vào giỏ → Xem gi
 
 **Đã làm:** menu từ API, chi tiết sản phẩm, giỏ hàng, đăng ký và đăng nhập (JWT, phân quyền CUSTOMER/STAFF), tạo đơn, thanh toán mô phỏng, xác nhận và lịch sử đơn, máy trạng thái đơn hàng, Idempotency-Key, kiểm soát tồn kho đồng thời, mã khuyến mãi, điểm thưởng.
 
-**Ngoài phạm vi:** giao diện cho barista (STAFF thao tác qua API), cổng thanh toán thật, quản lý kho nguyên liệu, quên mật khẩu, hồ sơ cá nhân.
+**Ngoài phạm vi:** giao diện cho barista (STAFF thao tác qua API), cổng thanh toán thật, quản lý kho nguyên liệu đầy đủ (nhập theo lô, nhà cung cấp, kiểm kê), quên mật khẩu, hồ sơ cá nhân. Phần mở rộng sau Assignment 1 (thanh toán QR giả lập, nguyên liệu và công thức, điểm thưởng, đổi quà) ở [Mục 8b](#8b-mở-rộng-thanh-toán-qr-nguyên-liệu-điểm-thưởng).
 
 ---
 
@@ -102,10 +102,10 @@ Một số gói của NestJS CLI yêu cầu `node: ^22.22.3 || ^24.15.0 || >=26.
 
 | Nhóm | Công cụ | Cách dùng |
 |---|---|---|
-| Mã nguồn | Git, GitHub | Mỗi chức năng một nhánh, gộp qua Pull Request vào `main` |
-| Liên lạc | Nhóm chat | Daily Scrum, đăng biên bản |
-| Tài liệu | Google Drive, thư mục `docs/` | Báo cáo, slide, bản nháp |
-| Sơ đồ | Mermaid, draw.io | ERD (`docs/design/ERD_MemberB`), state machine |
+| Mã nguồn | Git, GitHub | Mỗi thành viên một nhánh riêng, gộp qua Pull Request vào `main` |
+| Liên lạc | Nhóm chat Zalo | Daily Scrum 20:00, trao đổi, đăng biên bản |
+| Tài liệu | Google Drive, thư mục `docs/` | Báo cáo, slide, biên bản |
+| Sơ đồ | Mermaid, draw.io | ERD (`docs/chung/ERD_MemberB`), state machine |
 | Chạy và đóng gói | Docker Compose | `docker compose up --build` |
 | Kiểm thử | Vitest, Supertest | Unit, e2e, test bắt buộc Task 10 |
 
@@ -119,27 +119,25 @@ Phạm vi chạy: bằng docker-compose trên máy nhóm hoặc máy giảng vi�
 brewlite/
 ├── apps/
 │   ├── api/                       # NestJS (backend)
-│   │   ├── src/                   # auth, products, orders, payments, prisma
+│   │   ├── src/                   # auth, products, orders, payments, ingredients, rewards, prisma
 │   │   ├── prisma/                # schema.prisma, migrations/, seed.ts
 │   │   ├── scripts/               # seed-if-empty.mjs (seed an toàn khi deploy)
-│   │   ├── test/                  # e2e: assign1.e2e-spec.ts, app.e2e-spec.ts
+│   │   ├── test/                  # tích hợp: assign1, qr-ingredients, realism, app, cors (*.e2e-spec.ts)
 │   │   ├── prisma7.config.ts
 │   │   └── Dockerfile
 │   └── web/                       # Next.js (frontend)
-│       └── src/app/               # menu, login, register, orders/confirmation, orders/history
+│       └── src/app/               # menu, login, register, orders/confirmation, orders/history, rewards, pay/[token], staff/ingredients
 ├── docs/
+│   ├── README.md                  # bản đồ: muốn tìm gì thì mở đâu
 │   ├── requirements/              # context-and-scope, srs, use-case-checkout (Assignment 2, Task 1)
-│   ├── diagrams/                  # activity, sequence, class, use-case (.puml + .svg/.png) (Task 2)
-│   ├── architecture/              # architecture.md, adr/, deployment-diagram (Task 3)
+│   ├── diagrams/                  # activity (2 phần), sequence (đặt đơn, thanh toán), class (3 sơ đồ), use-case (.puml + .svg/.png) (Task 2)
+│   ├── architecture/              # architecture.md, adr/, deployment-diagram, cicd-pipeline (Task 3)
 │   ├── traceability-matrix.md     # ma trận truy vết
 │   ├── deployment.md              # triển khai, rollback
-│   ├── scrum/                     # backlog, burndown, biên bản, quy trình DoD
-│   ├── progress/                  # bảng tiến độ
-│   ├── design/                    # ERD
-│   ├── report/                    # báo cáo LaTeX (latex/as1, latex/as2)
-│   ├── team-agreement.md
-│   └── message-to-lecturer.md
-├── tests/                         # (Assignment 2) integration/E2E bổ sung nếu có
+│   ├── as1/                       # Assignment 1 (giữa kì): report/, scrum/, phan-cong.md, tien-do.md, message-to-lecturer.md
+│   ├── as2/                       # Assignment 2 (cuối kì), phần ngoài cấu trúc bắt buộc: report/, scrum/, evidence/, release-notes/, phan-cong.md, message-to-lecturer.md, payment-qr-ingredients.md
+│   └── chung/                     # dùng cho cả hai bài: team-agreement.md, bang-dong-gop.md, huong-dan-bao-cao-latex.md, mau-bien-ban/, ERD_MemberB/
+├── tests/                         # e2e/: Playwright (brewlite-flow.spec.ts)
 ├── .github/workflows/             # ci.yml, cd.yml
 ├── docker-compose.yml
 ├── .env.example
@@ -286,7 +284,7 @@ Mọi route (trừ `/`, `/health`, `/products*`, `/toppings`, `/auth/register`, 
 | GET | `/orders/:id` | Chi tiết đơn (chủ đơn hoặc STAFF) | đăng nhập | 9 |
 | GET | `/orders` | Tất cả đơn | STAFF | 6 |
 | POST | `/payments` | Thanh toán mô phỏng (`WALLET` hoặc `CARD`; `simulate: "FAIL"` để ép lỗi khi demo); idempotent; PAID cộng điểm, lỗi thì PAYMENT_FAILED | đăng nhập | 8, 10 |
-| PATCH | `/orders/:id/status` | STAFF chuyển PREPARING, READY, COMPLETED, CANCELLED (hủy hoàn kho) | STAFF | 10 |
+| PATCH | `/orders/:id/status` | STAFF chuyển PREPARING, READY, COMPLETED, CANCELLED (hủy chỉ hoàn phần đã trừ) | STAFF | 10 |
 
 `GET /health`, `GET /toppings`, `GET /auth/me`, `GET /orders/:id` và `PATCH /orders/:id/status` là bổ sung của nhóm (đề không nêu).
 
@@ -297,25 +295,25 @@ Mọi route (trừ `/`, `/health`, `/products*`, `/toppings`, `/auth/register`, 
 | # | Task | Sprint | Người làm chính | Trạng thái | Nghiệm thu chéo |
 |---|---|---|---|---|---|
 | 1 | Khởi tạo dự án | 1 | A | Xong | Đạt |
-| 2 | API danh sách sản phẩm | 1 | C (B: schema, seed) | Xong | Đạt |
+| 2 | API danh sách sản phẩm | 1 | A (B: schema, seed) | Xong | Đạt |
 | 3 | Trang Menu | 1 | D | Xong (gọi API; loading, lỗi, rỗng) | Đạt |
 | 4 | Chi tiết, size, topping | 1 | D | Xong (giá do server tính lại) | Đạt |
 | 5 | Giỏ hàng | 2 | D | Xong (thêm, sửa, xóa, tổng tiền, badge) | Đạt |
 | 6 | API tạo đơn | 2 | B | Xong (JWT, validate, PENDING) | Đạt |
-| 7 | Đăng ký, đăng nhập | 2 | C | Xong (bcrypt, JWT, guard, trang `/login`, `/register`) | Đạt |
-| 8 | Thanh toán không tiền mặt | 3 | C | Xong (Ví/Thẻ mô phỏng, PAID/PAYMENT_FAILED, thử lại) | Đạt |
-| 9 | Xác nhận, lịch sử đơn, bàn giao | 3 | A | Xong (`/orders/me`, trang xác nhận, Docker, README) | Đạt |
-| 10 | Nghiệp vụ nâng cao | 3 | B, C | Xong (state machine, idempotency, tồn kho, khuyến mãi, điểm; test a, b, c) | Đạt |
+| 7 | Đăng ký, đăng nhập | 2 | A (backend); C (giao diện) | Xong (bcrypt, JWT, guard, trang `/login`, `/register`) | Đạt |
+| 8 | Thanh toán không tiền mặt | 3 | A | Xong (Ví/Thẻ mô phỏng, PAID/PAYMENT_FAILED, thử lại) | Đạt |
+| 9 | Xác nhận, lịch sử đơn, bàn giao | 3 | C (giao diện); A (API, Docker, README) | Xong (`/orders/me`, trang xác nhận, Docker, README) | Đạt |
+| 10 | Nghiệp vụ nâng cao | 3 | A, B | Xong (state machine, idempotency, tồn kho, khuyến mãi, điểm; test a, b, c) | Đạt |
 
 **Giới hạn đã biết:** thanh toán chỉ mô phỏng; không có giao diện barista; trường đường/đá trong giỏ chỉ hiển thị, chưa lưu vào đơn; migration của các bảng bổ sung viết tay, cần đối chiếu với Prisma khi đổi môi trường.
 
-Kết quả nghiệm thu chi tiết: `docs/scrum/dod-nghiem-thu.md`.
+Kết quả nghiệm thu chi tiết: `docs/as1/scrum/dod-nghiem-thu.md`.
 
 ---
 
-## 8b. Mở rộng: thanh toán QR, nguyên liệu, điểm thưởng (nhánh `feature/qr-payment-ingredients`)
+## 8b. Mở rộng: thanh toán QR, nguyên liệu, điểm thưởng
 
-Xem [docs/payment-qr-ingredients.md](docs/payment-qr-ingredients.md): tài khoản test (ngân hàng/MoMo/VNPay), mã QR thanh toán, điểm cộng sau thanh toán, trang đổi quà `/rewards`, kho nguyên liệu và công thức từng ly. Sau khi pull nhánh này cần chạy lại migrate và seed.
+Xem [docs/as2/payment-qr-ingredients.md](docs/as2/payment-qr-ingredients.md): tài khoản test (ngân hàng/MoMo/VNPay), mã QR thanh toán, điểm cộng sau thanh toán, trang đổi quà `/rewards`, kho nguyên liệu và công thức từng ly. Phần này đã gộp vào `main` (Pull Request #49 và #50); sau khi cập nhật mã nguồn cần chạy lại migrate và seed.
 
 ## 9. Nghiệp vụ đơn hàng
 
@@ -339,7 +337,7 @@ Mọi chuyển tiếp khác bị chặn (lỗi 4xx). Mã nguồn: `apps/api/src/
 | Quy tắc | Cách làm |
 |---|---|
 | Giá | Server tính lại từ CSDL: giá gốc + phụ thu size (S +0, M +5.000, L +10.000đ) + topping; không tin giá từ client |
-| Tồn kho | Trừ bằng `updateMany` có điều kiện (stock ≥ số lượng) trong transaction; hủy đơn hoàn kho |
+| Tồn kho | Món có công thức: tạo đơn chỉ kiểm tra nguyên liệu, trừ bằng `updateMany` có điều kiện (stock ≥ cần) trong transaction thanh toán; món chưa có công thức trừ `Product.stock` khi tạo đơn; hủy đơn chỉ hoàn phần đã trừ |
 | Idempotency | Header `Idempotency-Key` bắt buộc khi tạo đơn và thanh toán; ràng buộc unique, gửi lại cùng khóa trả về kết quả cũ |
 | Khuyến mãi | `WELCOME10`, `SAVE20K` (điều kiện đơn tối thiểu ở Mục 6.2) |
 | Điểm thưởng | 1 điểm cho mỗi 10.000đ, cộng khi đơn PAID, thu hồi khi hủy đơn đã PAID |
@@ -377,7 +375,7 @@ Bộ test E2E kiểm tra: thực đơn từ API, luồng đăng ký, đăng nh�
 
 Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cùng `DATABASE_URL` và `JWT_SECRET` (ví dụ `docker compose up -d db`, rồi migrate và seed như Mục 6.3). Các test tự tạo dữ liệu riêng nhưng **không** nên chạy trên CSDL có dữ liệu thật.
 
-**Kết quả (23/10/2026, nhánh main):** 22 unit test và 32 test tích hợp đạt; 7 test E2E Playwright đạt trong CI; build và lint backend sạch; lint và build frontend đạt.
+**Kết quả (nhánh main, commit `2cae795`):** 36 unit test, 81 test tích hợp và 10 test E2E Playwright đạt; build và lint backend sạch; lint và build frontend đạt.
 
 **Ba test bắt buộc của Task 10:**
 
@@ -391,7 +389,7 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 
 ## 11. Quy ước làm việc nhóm
 
-**Nhánh:** `main` luôn chạy được, không push trực tiếp. Mỗi chức năng một nhánh `feature/<mô-tả-ngắn>`; sửa lỗi dùng `fix/<mô-tả-ngắn>`.
+**Nhánh:** `main` luôn chạy được, không push trực tiếp. Mỗi thành viên làm trên nhánh riêng của mình (ví dụ `feature/<mô-tả-ngắn>` hoặc `fix/<mô-tả-ngắn>`), commit lên nhánh đó rồi gộp vào `main` qua Pull Request.
 
 **Commit:** thông điệp ngắn, rõ, mỗi commit một việc (ví dụ `feat(cart): thêm xóa sản phẩm khỏi giỏ`).
 
@@ -411,14 +409,14 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 
 | Nội dung | Vị trí |
 |---|---|
-| Product Backlog (10 task, điểm, trạng thái) | `docs/scrum/product-backlog.md` |
-| Sprint Backlog 1, 2, 3 | `docs/scrum/sprint-1-backlog.md`, `sprint-2-backlog.md`, `sprint-3-backlog.md` |
-| Burndown và cách tính | `docs/scrum/burndown-sprint-*.csv`, `burndown-ghi-chu.md` |
-| Biên bản Planning, Review, Retrospective | `docs/scrum/minutes/` |
-| Mẫu biên bản | `docs/scrum/meeting-minutes-template.md`, `retrospective-template.md` |
-| Thỏa thuận nhóm | `docs/team-agreement.md` |
-| ERD | `docs/design/ERD_MemberB/`; sơ đồ kiến trúc và ERD bản PlantUML: `docs/diagrams/architecture-container.puml`, `docs/diagrams/erd.puml` |
-| Báo cáo (LaTeX) | `docs/report/latex/as1`, `docs/report/latex/as2`; hướng dẫn: `docs/report/README.md` |
+| Product Backlog (10 task, điểm, trạng thái) | `docs/as1/scrum/product-backlog.md` |
+| Sprint Backlog 1, 2, 3 | `docs/as1/scrum/sprint-1-backlog.md`, `sprint-2-backlog.md`, `sprint-3-backlog.md` |
+| Burndown và cách tính | `docs/as1/scrum/burndown-sprint-*.csv`, `burndown-ghi-chu.md` |
+| Biên bản Planning, Review, Retrospective | `docs/as1/scrum/minutes/` (Assignment 1), `docs/as2/scrum/minutes/` (Assignment 2) |
+| Mẫu biên bản | `docs/chung/mau-bien-ban/meeting-minutes-template.md`, `retrospective-template.md` |
+| Thỏa thuận nhóm | `docs/chung/team-agreement.md` |
+| ERD | `docs/chung/ERD_MemberB/`; sơ đồ kiến trúc và ERD bản PlantUML: `docs/diagrams/architecture-container.puml`, `docs/diagrams/erd.puml` |
+| Báo cáo (LaTeX) | `docs/as1/report`, `docs/as2/report`; hướng dẫn: `docs/chung/huong-dan-bao-cao-latex.md` |
 | Video demo Assignment 2 | https://drive.google.com/file/d/1uxrJSc9OkNkD-68vCTKXsPb0DcUudtat/view?usp=sharing |
 
 **Nhịp Sprint:**
@@ -428,8 +426,8 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 | 1 | 14–18/10 | 1, 2, 3, 4 | Xong Task 1; còn 9/11 điểm |
 | 2 | 19–22/10 | 5, 6, 7 + tồn | Còn 8/22 điểm |
 | 3 | 23–25/10 | 8, 9, 10 + tồn | Hoàn thành, đạt DoD; Review ngày 25/10 |
-| Hoàn thiện | 26/10 | Rà DoD, tập demo | – |
-| Nộp | 27/10 | – | – |
+| Hoàn thiện | 26/10 – 01/11 | Rà DoD, test e2e, báo cáo LaTeX, tập demo | – |
+| Nộp | 02/11 | – | – |
 
 ---
 
@@ -455,10 +453,10 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 
 | Ký hiệu | Họ tên | MSSV | Vai trò |
 |---|---|---|---|
-| A | Nguyễn Lê Nhựt Thắng | | Scrum Master, Dev nền tảng, kiểm thử, Product Owner tạm |
-| B | Hồ Thiên Ngân | | Dev backend (dữ liệu, đơn hàng, nghiệp vụ lõi) |
-| C | Hà Thiên Long | | Dev backend (xác thực, thanh toán, state machine) |
-| D | Giản Thiên Lực | | Dev frontend, slide |
+| A | Nguyễn Lê Nhựt Thắng | | Scrum Master, Dev nền tảng và backend (API sản phẩm, xác thực, thanh toán, state machine) |
+| B | Hồ Thiên Ngân | | Dev backend (ERD, schema, seed, đơn hàng, idempotency, tồn kho) |
+| C | Hà Thiên Long | | Dev frontend, kiểm thử, Product Owner tạm |
+| D | Giản Thiên Lực | | Dev frontend (menu, chi tiết, giỏ hàng, thanh toán), slide |
 
 **Giảng viên hướng dẫn:** Từ Lăng Phiêu
 
@@ -467,15 +465,15 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 
 ## 15. Assignment 2: từ yêu cầu đến triển khai
 
-Dùng chung mã nguồn với Assignment 1. Hạn nộp 27/10/2026. Năm task, mỗi task 2 điểm; task sau chỉ được nghiệm thu khi tạo phẩm của task trước đã có trên Git.
+Dùng chung mã nguồn với Assignment 1. Hạn nộp theo thông báo của giảng viên. Năm task, mỗi task 2 điểm; task sau chỉ được nghiệm thu khi tạo phẩm của task trước đã có trên Git.
 
 | Task | Nội dung | Tạo phẩm | Trạng thái |
 |---|---|---|---|
-| 1 | Khai thác và đặc tả yêu cầu | `docs/requirements/` (context-and-scope, srs, use-case-checkout) | Có bản đầy đủ, cần A rà |
+| 1 | Khai thác và đặc tả yêu cầu | `docs/requirements/` (context-and-scope, srs, use-case-checkout) | Có bản đầy đủ, do Hà Thiên Long (C) rà |
 | 2 | Mô hình hóa | `docs/diagrams/` (activity, sequence, class, use-case; `.puml` và `.svg`) | Đã vẽ lại khớp code |
 | 3 | Kiến trúc | `docs/architecture/` (architecture.md, 7 ADR, deployment diagram) | Đã chốt Prisma và Render |
-| 4 | Sprint 1 | Cấu trúc `apps/api`, `apps/web`; MVP menu; CI (`ci.yml`) | Đã có; CI chặn merge khi lỗi, có một lần đỏ (run #13) và một lần xanh (run #14), xem `docs/evidence/` |
-| 5 | Sprint 2, CI/CD, production | `cd.yml`, `docs/deployment.md`, `docs/release-notes/` | Đã deploy lên Render (HTTPS); CD chạy từ tag; đã thử rollback; release v0.1.2 |
+| 4 | Sprint 1 | Cấu trúc `apps/api`, `apps/web`; MVP menu; CI (`ci.yml`) | Đã có; CI chặn merge khi lỗi, có một lần đỏ (run #13) và một lần xanh (run #14), xem `docs/as2/evidence/` |
+| 5 | Sprint 2, CI/CD, production | `cd.yml`, `docs/deployment.md`, `docs/as2/release-notes/` | Đã deploy lên Render (HTTPS); CD chạy từ tag; đã thử rollback; release v0.1.2 |
 
 Ma trận truy vết: `docs/traceability-matrix.md`. Hướng dẫn triển khai và rollback: `docs/deployment.md`.
 
@@ -488,13 +486,13 @@ Ma trận truy vết: `docs/traceability-matrix.md`. Hướng dẫn triển khai
 | Web (HTTPS) | https://brewlite-web.onrender.com/menu |
 | API | https://brewlite-api.onrender.com |
 | Health check | https://brewlite-api.onrender.com/health |
-| Bản phát hành | v0.1.2: [GitHub Releases](https://github.com/tthan-prog/BrewLite/releases) (release notes: `docs/release-notes/`) |
+| Bản phát hành | v0.1.2: [GitHub Releases](https://github.com/tthan-prog/BrewLite/releases) (release notes: `docs/as2/release-notes/`) |
 | Nền tảng | Render gói Free (Singapore); PostgreSQL chỉ truy cập qua mạng nội bộ của Render, không public |
 | Tài khoản mẫu (dữ liệu seed) | `customer@brewlite.com` / `password123` (chỉ để demo) |
 
 > Render gói Free tự tắt khi không có truy cập, lần mở đầu có thể chờ khoảng 50 giây. Database Free hết hạn ngày 22/11/2026 và không có sao lưu.
 
-**CI** (`.github/workflows/ci.yml`, chạy mỗi pull request): bốn job `api` (lint, unit test, build), `api-e2e` (test tích hợp trên PostgreSQL), `web` (lint, build) và `e2e-browser` (Playwright). Nhánh `main` có quy tắc bảo vệ: phải qua pull request, cần check `api` và `web` đạt và có một lượt Approve mới merge được. Bằng chứng một lần CI đỏ và một lần xanh: `docs/evidence/` (ảnh 16 đến 18).
+**CI** (`.github/workflows/ci.yml`, chạy mỗi pull request): bốn job `api` (lint, unit test, build), `api-e2e` (test tích hợp trên PostgreSQL), `web` (lint, build) và `e2e-browser` (Playwright). Nhánh `main` có quy tắc bảo vệ: phải qua pull request, cần check `api` và `web` đạt và có một lượt Approve mới merge được. Bằng chứng một lần CI đỏ và một lần xanh: `docs/as2/evidence/` (ảnh 16 đến 18).
 
 **Deploy** (`.github/workflows/cd.yml`): đẩy tag phiên bản, ví dụ
 
@@ -506,10 +504,10 @@ git push origin v0.1.3
 
 CD sẽ chạy kiểm tra chất lượng, build image Docker (gắn tag `sha-<7 ký tự commit>` và tên tag), đẩy lên GitHub Container Registry, gọi Deploy Hook của Render cho api và web, rồi chạy smoke test (`/health`, `/products`, `/menu`). Migration cơ sở dữ liệu chạy tự động khi API khởi động (`prisma migrate deploy`), các migration chỉ thêm nên bản cũ vẫn chạy được trên cơ sở dữ liệu mới.
 
-**Rollback:** vào GitHub, Actions, workflow **CD**, **Run workflow**, nhập `image_tag` của bản ổn định trước đó (ví dụ `sha-e445b63` là v0.1.1). Workflow bỏ qua bước build, deploy lại đúng image đó cho cả api và web rồi chạy smoke test. Đã chạy thử ngày 23/10/2026 (từ v0.1.2 về v0.1.1 rồi triển khai lại): xem ảnh 20 đến 25 trong `docs/evidence/`.
+**Rollback:** vào GitHub, Actions, workflow **CD**, **Run workflow**, nhập `image_tag` của bản ổn định trước đó (ví dụ `sha-e445b63` là v0.1.1). Workflow bỏ qua bước build, deploy lại đúng image đó cho cả api và web rồi chạy smoke test. Đã chạy thử ngày 23/10/2026 (từ v0.1.2 về v0.1.1 rồi triển khai lại): xem ảnh 20 đến 25 trong `docs/as2/evidence/`.
 
-Hướng dẫn thiết lập lần đầu, biến môi trường, các lỗi đã gặp: `docs/deployment.md`. Bằng chứng kiểm tra trên production: `docs/evidence/`.
+Hướng dẫn thiết lập lần đầu, biến môi trường, các lỗi đã gặp: `docs/deployment.md`. Bằng chứng kiểm tra trên production: `docs/as2/evidence/`.
 
 ---
 
-*README phiên bản 2.2, cập nhật ngày 27/10/2026: báo cáo LaTeX, video demo, sơ đồ kiến trúc và ERD; trạng thái production, CI/CD và rollback của Assignment 2. Cập nhật khi có thay đổi về cài đặt, cách chạy hoặc trạng thái nghiệm thu.*
+*README phiên bản 2.4, cập nhật ngày 02/11/2026: chốt phân công 4 người, nghiệm thu chéo bằng chạy Docker, số liệu test 36/81/10, cấu trúc `docs/` tách as1, as2, chung, báo cáo LaTeX AS1/AS2; trạng thái production, CI/CD và rollback của Assignment 2. Cập nhật khi có thay đổi về cài đặt, cách chạy hoặc trạng thái nghiệm thu.*
