@@ -1,6 +1,6 @@
 # Triển khai và rollback (Assignment 2 – Task 3.2 và 5.3–5.4)
 
-> **Trạng thái (23/10/2026):** đã triển khai thật lên Render (ADR-007). Pipeline CD chạy xanh một lần đầy đủ (quality, build, push GHCR, deploy hook, smoke test) từ nhánh `fix/cd-config-check`. Mục nào chưa chạy thử ghi **[Chưa kiểm chứng]**.
+> **Trạng thái (23/10/2026; mục 7 cập nhật 02/11/2026):** đã triển khai thật lên Render (ADR-007). Pipeline CD chạy xanh một lần đầy đủ (quality, build, push GHCR, deploy hook, smoke test) từ nhánh `fix/cd-config-check`. Mục nào chưa chạy thử ghi **[Chưa kiểm chứng]**.
 
 ## 1. Ba môi trường
 
@@ -82,8 +82,8 @@ Push tag `v*` → Lint, Test, Build (api và web) → Build Docker image (tag `s
 
 - [ ] Người ngoài nhóm clone repo, chạy theo README được.
 - [x] URL frontend và API truy cập được qua HTTPS.
-- [ ] DB production chỉ dùng Internal URL, không mở truy cập từ Internet.
-- [ ] Secret không có trong repository hoặc log CI.
+- [x] DB production chỉ dùng Internal URL, không mở truy cập từ Internet (bảng PostgreSQL Inbound IP Rules để trống; ảnh 26 trong `docs/as2/evidence/`).
+- [x] Secret không có trong repository hoặc log CI (repository đã quét ngày 02/11/2026; ảnh 27, 28 và log CD ở ảnh 29 trong `docs/as2/evidence/`).
 - [x] Có release/tag và release notes.
 - [x] Có ảnh/log một lần CI **đạt** và một lần CI **phát hiện lỗi** (run #13 đỏ, run #14 xanh).
 - [x] Có ảnh/log một lần CD chạy thành công (v0.1.1, v0.1.2).

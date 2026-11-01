@@ -1,0 +1,65 @@
+@startuml class-inventory
+title Class diagram - Kho nguyên liệu và công thức (khớp apps/api/prisma/schema.prisma)
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+class Product {
+  - id : int
+  - name : string
+  - stock : int
+  + maxCups() : int
+}
+class Topping {
+  - id : int
+  - name : string
+  - price : int
+}
+class Ingredient {
+  - id : int
+  - name : string
+  - unit : string
+  - stock : int
+  - sugarScaled : boolean
+  - iceScaled : boolean
+  + restock(quantity : int) : void
+}
+class RecipeItem {
+  - quantity : int
+}
+class ToppingRecipeItem {
+  - quantity : int
+}
+class OrderIngredientUse {
+  - quantity : int
+  - consumed : boolean
+}
+class Order {
+  - id : int
+  - status : OrderStatus
+}
+class OrderItem {
+  - quantity : int
+  - size : string
+  - usesRecipe : boolean
+}
+
+Product "0..*" -- "0..*" Ingredient : dùng theo công thức >
+(Product, Ingredient) .. RecipeItem
+Topping "0..*" -- "0..*" Ingredient : dùng theo công thức >
+(Topping, Ingredient) .. ToppingRecipeItem
+Order "0..*" -- "0..*" Ingredient : cần >
+(Order, Ingredient) .. OrderIngredientUse
+Order "1" *-- "1..*" OrderItem : gồm >
+OrderItem "0..*" -- "1" Product : tham chiếu >
+
+note bottom of OrderIngredientUse
+  Tạo đơn: ghi nhu cầu với consumed = false (chỉ kiểm tra).
+  Thanh toán thành công: trừ Ingredient.stock có điều kiện, consumed = true.
+  Hủy đơn: chỉ hoàn các dòng consumed = true.
+  Món chưa có công thức (usesRecipe = false) dùng Product.stock.
+end note
+note right of RecipeItem
+  quantity = lượng nguyên liệu cho 1 ly size S;
+  size M nhân 125%, L nhân 150% (làm tròn lên).
+end note
+@enduml

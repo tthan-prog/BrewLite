@@ -1,0 +1,47 @@
+@startuml cicd-pipeline
+title Activity diagram - Quy trình CI/CD của BrewLite (GitHub Actions)
+skinparam shadowing false
+
+|Lập trình viên|
+start
+:Tạo Pull Request\nhoặc push lên main;
+
+|GitHub Actions - CI|
+:Chạy 4 job:\napi, api-e2e,\nweb, e2e-browser;
+if (Cả 4 job\nxanh?) then (Có)
+  :Cho phép gộp PR;
+else (Không)
+  :Chặn gộp PR;
+  |Lập trình viên|
+  :Sửa lỗi và push lại;
+  stop
+endif
+
+|Lập trình viên|
+:Đẩy tag v* hoặc chạy tay\nvới image_tag (quay lui);
+
+|GitHub Actions - CD|
+if (Chạy tay với\nimage_tag?) then (Không)
+  :Job quality:\ncài đặt, lint,\ntest, build;
+  :Job build-and-push:\ndựng image api, web;
+  :Đẩy image lên GHCR;
+else (Có)
+  :Bỏ qua build,\ndùng image_tag đã có;
+endif
+:Gọi Deploy Hook\nkèm imgURL (api, web);
+
+|Render|
+:Kéo image từ GHCR,\nkhởi động lại dịch vụ;
+
+|GitHub Actions - CD|
+:Smoke test:\n/health, /products, /menu;
+if (Smoke test đạt?) then (Có)
+  :Bản mới đang chạy;
+  stop
+else (Không)
+  :Cảnh báo, hướng dẫn\nquay lui;
+  |Lập trình viên|
+  :Chạy CD với image_tag\ncủa bản ổn định trước;
+  stop
+endif
+@enduml

@@ -1,6 +1,6 @@
 # Kiến trúc hệ thống (Assignment 2 – Task 3.1)
 
-> **Cập nhật 23/10/2026.** Cột "Hiện trạng" phản ánh mã nguồn thật trên nhánh `main`. Cập nhật khi quyết định thay đổi và ghi lý do trong pull request.
+> **Cập nhật 23/10/2026, bổ sung module và sơ đồ triển khai 02/11/2026.** Cột "Hiện trạng" phản ánh mã nguồn thật trên nhánh `main`. Cập nhật khi quyết định thay đổi và ghi lý do trong pull request.
 
 ## 1. Phương pháp trình bày
 
@@ -11,7 +11,7 @@ Kiến trúc phân lớp kết hợp mức container của mô hình C4: ngườ
 | Thành phần | Công nghệ | Trách nhiệm | Mã nguồn | Hiện trạng |
 |---|---|---|---|---|
 | Web (frontend) | Next.js (App Router), mobile-first/PWA | Giao diện: menu, chi tiết, giỏ hàng, thanh toán, đơn | `apps/web` | Có: menu, chi tiết, giỏ hàng, đăng nhập/đăng ký, xác nhận đơn, lịch sử đơn |
-| API (backend) | NestJS, JWT, validation | Nghiệp vụ, xác thực, phân quyền, truy cập DB | `apps/api` | Có: auth, products, orders, payments, `/health` |
+| API (backend) | NestJS, JWT, validation | Nghiệp vụ, xác thực, phân quyền, truy cập DB | `apps/api` | Có: auth, products, orders, payments, ingredients, rewards, `/health` |
 | Cơ sở dữ liệu | PostgreSQL 16 + migration | Lưu người dùng, sản phẩm, đơn, thanh toán, giao dịch điểm và bản ghi idempotency | `docker-compose.yml` (db), thư mục migration trong `apps/api` | Có schema Prisma và migration; seed 12 sản phẩm, 4 topping |
 | Payment Service (mô phỏng) | Module trong NestJS | Giả lập thanh toán Ví/Thẻ thành công hoặc thất bại; xử lý `Idempotency-Key` cho payment | `apps/api/src/payments` | Có (Ví/Thẻ, giả lập lỗi bằng `simulate`) |
 | CI/CD | GitHub Actions + GHCR | Lint, test, build, đóng gói image, deploy, smoke test | `.github/workflows` | Có `ci.yml` và `cd.yml`; đã chạy thật trên GitHub (CI run #13 đỏ, #14 xanh; CD xanh ở v0.1.1 và v0.1.2) |
@@ -23,7 +23,9 @@ Kiến trúc phân lớp kết hợp mức container của mô hình C4: ngườ
 | `auth` | Đăng ký, đăng nhập, JWT, guard theo vai trò |
 | `products` | `GET /products`, `GET /products/:id`, tồn kho |
 | `orders` | Tạo đơn trong transaction, máy trạng thái, lịch sử đơn |
-| `payments` | Thanh toán mô phỏng, Idempotency-Key |
+| `payments` | Thanh toán mô phỏng, Idempotency-Key; thanh toán QR (chế độ giả lập, có cấu hình cổng sandbox VNPay/MoMo) |
+| `ingredients` | Nguyên liệu, công thức món, tồn kho nguyên liệu, nhân viên bổ sung tồn |
+| `rewards` | Quà đổi bằng điểm thưởng |
 | `prisma` | `PrismaService` truy cập PostgreSQL (adapter pg) |
 | (trong `orders`) | Khuyến mãi (`promoCode`) và điểm thưởng (`User.points` và lịch sử `LoyaltyTransaction`) nằm trong dịch vụ đơn hàng |
 | `app.controller` | `GET /` và `GET /health` |
@@ -49,7 +51,7 @@ Kiến trúc phân lớp kết hợp mức container của mô hình C4: ngườ
 
 ## 6. Truy vết sang deployment diagram
 
-Mỗi container trong `deployment-diagram.puml` phải khớp một dòng ở bảng mục 2 và có thư mục mã nguồn tương ứng. Khi thêm hoặc bỏ container, cập nhật cả hai.
+Quy trình CI/CD (động) được vẽ chi tiết ở `cicd-pipeline.puml` (activity diagram); sơ đồ triển khai chỉ thể hiện ranh giới local, CI và production cùng đường đi của image. Mỗi container trong `deployment-diagram.puml` phải khớp một dòng ở bảng mục 2 và có thư mục mã nguồn tương ứng. Khi thêm hoặc bỏ container, cập nhật cả hai.
 
 ## 7. Danh sách ADR
 

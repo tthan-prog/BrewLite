@@ -36,4 +36,4 @@ Dùng **Render**: hai Web Service chạy **image Docker lấy từ GHCR** (`brew
 - Lần gọi đầu có thể chậm do khởi động nguội: smoke test chờ tối đa 5 phút; trước khi demo nên mở trang web một lần để "làm nóng".
 - DB hết hạn sau 30 ngày: đủ cho đợt chấm; nếu giảng viên chấm muộn thì tạo DB mới hoặc nâng cấp.
 - Phương án dự phòng nếu Render không phù hợp: VPS tự quản chạy Docker Compose + reverse proxy (Caddy) lấy HTTPS tự động; khi đó phải cập nhật `cd.yml`, `deployment.md` và sơ đồ deployment.
-- Đã deploy thật lên Render (web và API qua HTTPS, database nội bộ). Kết quả và bằng chứng nằm trong `deployment.md` và `docs/evidence/`.
+- Đã deploy thật lên Render (web và API qua HTTPS, database nội bộ). Kết quả và bằng chứng nằm trong `deployment.md` và `docs/as2/evidence/`.

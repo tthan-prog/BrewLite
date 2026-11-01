@@ -1,0 +1,60 @@
+@startuml sequence-order
+title UC-01 Đặt đơn hàng
+skinparam shadowing false
+skinparam defaultFontSize 13
+skinparam sequenceMessageAlign left
+skinparam ParticipantPadding 4
+skinparam responseMessageBelowArrow true
+hide footbox
+autonumber
+
+actor "Khách hàng" as C
+participant "Giao diện web\n(Next.js)" as UI
+participant "API\n(OrdersService)" as API
+database "PostgreSQL" as DB
+
+C -> UI : Xác nhận đặt đơn
+activate UI
+UI -> API ++ : tạoĐơn(món, mã khuyến mãi,\nIdempotency-Key)
+API -> API : xácThựcJWT(), kiểmTraDữLiệu()
+
+break JWT hoặc dữ liệu không hợp lệ
+  API --> UI : lỗi 401 / 400
+  UI --> C : Báo lỗi
+end
+
+API -> DB ++ : tìm bản ghi Idempotency\n(userId, khóa)
+return bản ghi hoặc rỗng
+
+break khóa đã dùng
+  API --> UI : đơn cũ (cùng nội dung)\nhoặc lỗi 409 (khác nội dung)
+  UI --> C : Hiển thị đơn cũ hoặc báo lỗi
+end
+
+API -> DB : Mở giao dịch
+loop mỗi món trong đơn
+  API -> DB ++ : kiểm tra tồn kho theo công thức\n(món chưa có công thức: trừ Product.stock)
+  return tồn kho
+  break không có sản phẩm, thiếu nguyên liệu hoặc hết hàng
+    API -> DB : ROLLBACK
+    API --> UI : lỗi 404 / 400
+    UI --> C : Báo thiếu nguyên liệu hoặc hết hàng
+  end
+end
+
+opt có mã khuyến mãi
+  API -> DB ++ : kiểm tra Promotion, tăng usageCount
+  return hợp lệ
+end
+
+API -> DB : lưu Order (PENDING), OrderItem,\nOrderIngredientUse, IdempotencyRecord
+API -> DB : COMMIT
+API --> UI -- : 201 {mã đơn, tổng tiền}
+UI --> C -- : Hiển thị mã đơn và tổng tiền
+
+note over API, DB
+Mọi ghi dữ liệu nằm trong một giao dịch.
+Nguyên liệu chỉ được kiểm tra ở bước này,
+việc trừ kho diễn ra khi thanh toán thành công.
+end note
+@enduml

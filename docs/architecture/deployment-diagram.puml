@@ -1,60 +1,75 @@
 @startuml deployment-diagram
-title Deployment diagram – BrewLite (production: Render, xem ADR-007)
+title Deployment diagram - BrewLite (local, CI và production trên Render, xem ADR-006, ADR-007)
 skinparam shadowing false
-skinparam nodeStyle rectangle
 
-node "Thiết bị người dùng" as DEV {
+node "Thiết bị người dùng" <<device>> as DEV {
   artifact "Trình duyệt / PWA" as BROWSER
 }
 
-node "Máy lập trình viên (local)" as LOCAL {
-  node "Docker Compose" as COMPOSE {
+node "Internet" <<network>> as NET
+
+node "CI/CD (GitHub Actions)" <<CI>> as CI {
+  artifact "ci.yml\nLint, Unit Test, Build\n(mỗi pull request)" as A_CI
+  artifact "cd.yml\nBuild image, Deploy, Smoke test\n(tag v* hoặc chạy tay)" as A_CD
+  artifact "GitHub Secrets / Variables\n(Deploy Hook, URL production)" as A_SEC
+}
+
+node "GitHub Container Registry (GHCR)" <<registry>> as REG {
+  artifact "brewlite-web:sha-<7 ký tự>\n(image)" as IMG_WEB
+  artifact "brewlite-api:sha-<7 ký tự>\n(image)" as IMG_API
+}
+
+node "Render (production)" <<cloud platform>> as PROD {
+  node "Web Service brewlite-web\nPORT 3000" <<execution environment>> as P_WEB {
+    artifact "Next.js (container)" as A_WEB
+  }
+  node "Web Service brewlite-api\nPORT 3001" <<execution environment>> as P_API {
+    artifact "NestJS (container)\nGET /health" as A_API
+  }
+  node "Render PostgreSQL\n(không public)" <<database server>> as P_DB {
+    artifact "CSDL brewlite" as A_DB
+    artifact "Ổ đĩa lưu trữ bền vững\n(persistent storage)" as A_DISK
+  }
+}
+
+node "Máy lập trình viên" <<device>> as LOCAL {
+  node "Docker Compose" <<execution environment>> as COMPOSE {
     artifact "web :3000" as L_WEB
     artifact "api :3001" as L_API
-    database "db :5432\nvolume pgdata" as L_DB
+    artifact "db :5432\n(volume pgdata)" as L_DB
   }
 }
 
-cloud "GitHub" as GH {
-  artifact "Mã nguồn (repo)" as REPO
-  node "GitHub Actions" as CI {
-    artifact "ci.yml: install, lint, unit test, build" as CIJOB
-    artifact "cd.yml: quality, build image, push GHCR,\ndeploy Render, smoke test" as CDJOB
-  }
-  node "GitHub Secrets / Variables\nSecrets: RENDER_API_DEPLOY_HOOK,\nRENDER_WEB_DEPLOY_HOOK\nVariables: PRODUCTION_API_URL,\nPRODUCTION_WEB_URL" as SECRETS
-}
+BROWSER -- NET : <<HTTPS 443>>
+NET -- P_WEB : <<HTTPS 443>>
+NET -- P_API : <<HTTPS 443, REST/JSON>>
+P_WEB -- P_API : <<HTTPS>>
+P_API -- P_DB : <<TCP 5432, mạng nội bộ>>
+A_DB -- A_DISK : <<lưu trữ>>
 
-node "GitHub Container Registry (GHCR)\nPackages cần Public nếu Render kéo image không credentials" as REG {
-  artifact "ghcr.io/<owner>/brewlite-api:sha-<7 ký tự>" as IMG_API
-  artifact "ghcr.io/<owner>/brewlite-web:sha-<7 ký tự>" as IMG_WEB
-}
+A_CD ..> IMG_WEB : <<push image>>
+A_CD ..> IMG_API : <<push image>>
+A_CD ..> P_WEB : <<Deploy Hook, HTTPS>>
+A_CD ..> P_API : <<Deploy Hook, HTTPS>>
+A_CD ..> P_API : <<Smoke test GET /health>>
+IMG_WEB ..> P_WEB : <<deploy>>
+IMG_API ..> P_API : <<deploy>>
+A_SEC ..> A_CD : <<secret của CI>>
 
-cloud "Render (production)" as PROD {
-  node "Web Service (Next.js)\nimage brewlite-web\nPORT 3000" as P_WEB
-  node "Web Service (NestJS)\nimage brewlite-api\nPORT 3001\nGET /health" as P_API
-  database "Render PostgreSQL\nInternal Database URL\nkhông public" as P_DB
-  node "Environment của service\nDATABASE_URL, JWT_SECRET,\nFRONTEND_ORIGIN" as P_ENV
-  node "Logs và health check" as P_LOG
-}
+L_WEB -- L_API : <<HTTP>>
+L_API -- L_DB : <<TCP 5432>>
 
-BROWSER --> P_WEB : HTTPS 443
-BROWSER --> P_API : HTTPS 443 (REST/JSON, JWT)
-P_WEB ..> P_API : gọi API qua NEXT_PUBLIC_API_URL
-P_API --> P_DB : TCP 5432 (mạng nội bộ)
-P_ENV ..> P_API
-P_API ..> P_LOG
-P_WEB ..> P_LOG
-
-REPO --> CIJOB : pull request / push main
-REPO --> CDJOB : push tag v* / chạy tay
-SECRETS ..> CDJOB
-CDJOB --> IMG_API : docker build / push
-CDJOB --> IMG_WEB : docker build / push
-CDJOB --> P_API : Deploy Hook + imgURL (sha-...)
-CDJOB --> P_WEB : Deploy Hook + imgURL (sha-...)
-IMG_API ..> P_API : Render kéo image
-IMG_WEB ..> P_WEB : Render kéo image
-
-L_WEB --> L_API : HTTP
-L_API --> L_DB : TCP 5432
+note bottom of P_API
+  Biến môi trường: DATABASE_URL, JWT_SECRET, FRONTEND_ORIGIN
+  (cấu hình trên Render, không lưu trong repo).
+  Log: xem trong Render Logs; health check: GET /health.
+end note
+note bottom of REG
+  Package cần Public nếu Render kéo image không dùng credentials.
+end note
+note bottom of CI
+  Ranh giới: Local (máy lập trình viên, Docker Compose),
+  CI/CD (GitHub Actions, log nằm ở tab Actions),
+  Production (Render).
+end note
 @enduml

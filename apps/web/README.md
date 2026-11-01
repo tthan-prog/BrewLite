@@ -1,6 +1,6 @@
 # BrewLite Frontend
 
-Frontend dùng Next.js App Router, React và TypeScript. Phần giao diện E phụ trách gồm đăng ký/đăng nhập (Task 7), trang xác nhận và lịch sử đơn hàng (Task 9).
+Frontend dùng Next.js App Router, React và TypeScript. Phần giao diện do Hà Thiên Long phụ trách gồm đăng ký/đăng nhập (Task 7), trang xác nhận và lịch sử đơn hàng (Task 9).
 
 ## Chạy trên máy cá nhân
 

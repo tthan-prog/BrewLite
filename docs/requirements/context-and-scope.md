@@ -38,7 +38,7 @@ Quán cà phê quy mô nhỏ cần để khách đặt món và thanh toán khô
 - Kết nối cổng thanh toán thật.
 - Ứng dụng di động native.
 - Giao hàng, bản đồ, nhiều chi nhánh.
-- Quản lý nguyên liệu chi tiết (chỉ dùng `Product.stock`).
+- Quản lý kho nguyên liệu đầy đủ (nhập hàng theo lô, nhà cung cấp, kiểm kê). Hệ thống có kho nguyên liệu và công thức từng món ở mức cơ bản, nhân viên chỉ bổ sung tồn (restock).
 
 ## 4. Giả định
 
@@ -48,7 +48,7 @@ Quán cà phê quy mô nhỏ cần để khách đặt món và thanh toán khô
 | G2 | Một cửa hàng duy nhất, một loại tiền (VND) |
 | G3 | Phụ phí size: S +0, M +5.000, L +10.000 đồng |
 | G4 | Điểm thưởng: 1 điểm cho mỗi 10.000 đồng của đơn hoàn tất |
-| G5 | Tồn kho chỉ tính trên `Product.stock`, trừ khi tạo đơn, hoàn lại khi đơn bị hủy |
+| G5 | Tồn kho tính theo nguyên liệu (`Ingredient.stock`) cho món có công thức, trừ khi thanh toán thành công; món chưa có công thức dùng `Product.stock`, trừ khi tạo đơn; hủy đơn chỉ hoàn phần đã trừ |
 | G6 | Đơn mới tạo ở trạng thái PENDING; thanh toán chuyển sang PAID hoặc PAYMENT_FAILED |
 | G7 | Nhóm tự chọn các điểm đề chưa nêu rõ và báo giảng viên để xác nhận |
 
@@ -58,7 +58,7 @@ Quán cà phê quy mô nhỏ cần để khách đặt món và thanh toán khô
 |---|---|
 | R1 | Bắt buộc Next.js (frontend), NestJS (backend), PostgreSQL; được bổ sung công nghệ khác |
 | R2 | Frontend theo hướng mobile-first/PWA |
-| R3 | Hạn nộp 27/10/2026 |
+| R3 | Hạn nộp Assignment 1: 02/11/2026; hạn Assignment 2 theo thông báo của giảng viên |
 | R4 | Nhóm 4 người, làm theo Scrum |
 | R5 | Production phải truy cập được qua HTTPS; DB production không public; secret không nằm trong repo |
 | R6 | Task làm tuần tự và có lịch sử commit rõ ràng |
@@ -68,7 +68,7 @@ Quán cà phê quy mô nhỏ cần để khách đặt món và thanh toán khô
 | # | Rủi ro | Khả năng | Ảnh hưởng | Giảm thiểu |
 |---|---|---|---|---|
 | RK1 | Không kịp triển khai production | Trung bình | Cao | Deploy thử sớm (23/10) |
-| RK2 | Hai bài tập lớn chồng lịch | Cao | Trung bình | Dùng chung mã nguồn, ưu tiên theo `plan-2-assignment.md` |
-| RK3 | Lỗi đặt đơn đồng thời gây âm tồn kho | Trung bình | Cao | Cập nhật có điều kiện trong transaction, có test |
+| RK2 | Hai bài tập lớn chồng lịch | Cao | Trung bình | Dùng chung mã nguồn, ưu tiên hoàn thành Assignment 1 trước rồi mới tới Assignment 2 |
+| RK3 | Lỗi đặt hoặc thanh toán đồng thời gây âm tồn kho | Trung bình | Cao | Cập nhật có điều kiện trong transaction, có test |
 | RK4 | Sơ đồ và SRS mâu thuẫn nhau | Trung bình | Trung bình | Rà bằng `traceability-matrix.md` |
-| RK5 | Thành viên chậm tiến độ | Trung bình | Trung bình | Quy trình trong `team-agreement.md` |
+| RK5 | Thành viên chậm tiến độ | Trung bình | Trung bình | Quy trình trong `docs/chung/team-agreement.md` |

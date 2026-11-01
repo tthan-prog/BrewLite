@@ -6,7 +6,7 @@
 
 ## Bối cảnh
 
-Đề Assignment 2 yêu cầu cấu trúc `apps/web`, `apps/api`, `docs`, `tests`, `.github/workflows`. Nhóm 4 người, hạn nộp ngắn, cần chung một lịch sử commit để truy vết.
+Đề Assignment 2 yêu cầu cấu trúc `apps/web`, `apps/api`, `docs`, `tests`, `.github/workflows`. Nhóm 4 người, cần chung một lịch sử commit để truy vết.
 
 ## Quyết định
 
@@ -17,7 +17,7 @@ Một repository duy nhất; frontend ở `apps/web`, backend ở `apps/api`. Ha
 - Một pull request có thể sửa cả hai phía và tài liệu liên quan.
 - CI chạy hai job (`api`, `web`).
 - Docker build dùng đường dẫn `apps/api`, `apps/web`.
-- Cấu trúc ban đầu `backend/`, `frontend/` được đổi tên thành `apps/api`, `apps/web` cho khớp đề (script `ap-dung-cau-truc-moi.ps1`).
+- Cấu trúc ban đầu `backend/`, `frontend/` được đổi tên thành `apps/api`, `apps/web` cho khớp đề.
 
 ## Phương án đã cân nhắc
 

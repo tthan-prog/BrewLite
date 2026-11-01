@@ -5,7 +5,7 @@
 
 ## Bối cảnh
 
-Đề yêu cầu thanh toán Ví/Thẻ mô phỏng (FR-08) và chống thanh toán lặp khi client gửi lại (FR-09). Sequence diagram có lifeline "Payment Service".
+Đề yêu cầu thanh toán Ví/Thẻ mô phỏng (FR-08) và chống thanh toán lặp khi client gửi lại (FR-09). Sequence diagram thanh toán (`sequence-payment`) có lifeline `PaymentsService`.
 
 ## Quyết định
 
