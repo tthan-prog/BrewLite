@@ -20,7 +20,7 @@
 | Task 5.3 và 5.4: `deployment.md`, release notes | `docs/deployment.md`, `docs/as2/release-notes` | 25/10/2026 | 26/10/2026 | Tạo phẩm có trong repo; chờ người làm xác nhận | chưa có dữ liệu | |
 | Task 2.2: Rà sequence diagram với `orders.service.ts`, `payments.service.ts` | `docs/diagrams/sequence-order.puml`, `sequence-payment.puml` và `.svg` | 23/10/2026 | 24/10/2026 | Hoàn thành (commit 25/10) | 100 | Nghiệm thu: Giản Thiên Lực |
 | Task 3.2: Rà deployment diagram, ADR-006, ADR-007 | `docs/diagrams/`, `docs/architecture/` | 23/10/2026 | 25/10/2026 | Tạo phẩm có trong repo; chờ người làm xác nhận | chưa có dữ liệu | Nghiệm thu: Hồ Thiên Ngân |
-| Cập nhật tài liệu theo logic trừ nguyên liệu khi thanh toán (SRS, use-case, ADR-005, sequence, activity, truy vết) | Tài liệu và sơ đồ khớp mã nguồn | `[đề xuất]` 30/10/2026 | `[đề xuất]` 01/11/2026 | Chưa làm | 0 | Đang chờ nhóm duyệt; không thêm phạm vi mới |
+| Cập nhật tài liệu theo logic trừ nguyên liệu khi thanh toán (SRS, use-case, ADR-005, sequence, activity, truy vết) | Tài liệu và sơ đồ khớp mã nguồn | 30/10/2026 | 02/11/2026 | Hoàn thành | 100 | Đã đối chiếu SRS, ADR-005, sequence, activity và ma trận truy vết với mã nguồn (logic trừ nguyên liệu khi thanh toán); chờ nhóm xác nhận; không thêm phạm vi mới |
 | Task 5.4: Sprint Review và Retrospective Sprint 1, 2 | `docs/as2/scrum/minutes/a2-02`, `a2-04` | 24/10/2026 | 26/10/2026 | Hoàn thành | 100 | Scrum Master; nghiệm thu: cả nhóm |
 | Báo cáo LaTeX Assignment 2 theo mẫu SGU: tổng hợp, chương Scrum, CI/CD, triển khai, bàn giao | `docs/as2/report/main.tex` | 29/10/2026 | chưa có dữ liệu | Bản đầu đã soạn; chờ MSSV | 85 `[ước lượng]` | Hạn phụ thuộc thông báo của giảng viên |
 

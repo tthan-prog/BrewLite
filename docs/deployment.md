@@ -1,6 +1,8 @@
 # Triển khai và rollback (Assignment 2 – Task 3.2 và 5.3–5.4)
 
 > **Trạng thái (23/10/2026; mục 7 cập nhật 02/11/2026):** đã triển khai thật lên Render (ADR-007). Pipeline CD chạy xanh một lần đầy đủ (quality, build, push GHCR, deploy hook, smoke test) từ nhánh `fix/cd-config-check`. Mục nào chưa chạy thử ghi **[Chưa kiểm chứng]**.
+>
+> **Cập nhật 07/11/2026 (v0.1.3):** CD chạy từ tag `v0.1.3` đỏ ở bước smoke test do web chưa khởi động xong (HTTP 502 ở `/menu`); CD #15 chạy thủ công với `image_tag=sha-ecd11bd` xanh. Thanh toán sandbox VNPay đã thử trên production (ảnh 31 đến 42 trong `docs/as2/evidence/`).
 
 ## 1. Ba môi trường
 
@@ -68,7 +70,7 @@ Push tag `v*` → Lint, Test, Build (api và web) → Build Docker image (tag `s
 2. **Image:** tag bằng commit SHA (bất biến) và tag phiên bản; nền tảng `linux/amd64`.
 3. **Deploy:** chỉ dùng secret của GitHub (hook URL); không có secret trong repo.
 4. **Migration:** `apps/api/Dockerfile` chạy `prisma migrate deploy` khi container API khởi động, **trước** khi nhận request. Chỉ viết migration thêm (thêm bảng/cột), tránh xóa/đổi tên cột, để bản image cũ vẫn chạy được trên schema mới khi rollback.
-5. **Smoke test:** chờ `GET /health` trả `{"status":"ok"}` tối đa 5 phút, rồi gọi `GET /products` và `GET /menu` của web.
+5. **Smoke test:** chờ `GET /health` trả `{"status":"ok"}` tối đa 5 phút, rồi gọi `GET /products` và `GET /menu` của web. Hạn chế đã biết: `GET /products` và `GET /menu` chỉ gọi một lần, không thử lại; nếu web trên Render Free chưa khởi động xong thì smoke test đỏ dù bản triển khai đúng (đã gặp ở v0.1.3). Khi đó chạy lại workflow CD thủ công với `image_tag` của bản vừa phát hành.
 6. **Thất bại:** nếu hook trả lỗi, pipeline dừng và bản đang chạy giữ nguyên; nếu smoke test lỗi, log in cảnh báo và hướng dẫn rollback (mục 6).
 
 ## 6. Rollback
@@ -87,4 +89,4 @@ Push tag `v*` → Lint, Test, Build (api và web) → Build Docker image (tag `s
 - [x] Secret không có trong repository hoặc log CI (repository đã quét ngày 02/11/2026; ảnh 27, 28 và log CD ở ảnh 29 trong `docs/as2/evidence/`).
 - [x] Có release/tag và release notes.
 - [x] Có ảnh/log một lần CI **đạt** và một lần CI **phát hiện lỗi** (run #13 đỏ, run #14 xanh).
-- [x] Có ảnh/log một lần CD chạy thành công (v0.1.1, v0.1.2).
+- [x] Có ảnh/log một lần CD chạy thành công (v0.1.1, v0.1.2; v0.1.3 qua CD #15 thủ công, ảnh 41).
