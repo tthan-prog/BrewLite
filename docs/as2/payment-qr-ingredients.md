@@ -48,7 +48,9 @@ Tài liệu mô tả phần mở rộng sau Assignment 1, đã gộp vào `main`
 - CORS: khi không phải production, API cho phép origin `localhost` và IP mạng nội bộ; `next dev` tự cho phép mọi IP LAN của máy (`allowedDevOrigins`).
 - Giới hạn: máy có nhiều card mạng thật có thể dò nhầm IP (khi đó đặt tay `PUBLIC_WEB_URL=http://<IP>:3000`); Wi-Fi bật cách ly thiết bị thì điện thoại không vào được laptop. Trên Render, đặt `PUBLIC_WEB_URL=https://brewlite-web.onrender.com` và `NEXT_PUBLIC_API_URL` tới API công khai.
 
-**Chưa kiểm chứng:** việc gọi cổng VNPay/MoMo sandbox thật (cần mã đối tác do họ cấp; sandbox không truy cập được từ môi trường phát triển). Phần ký/xác minh được test bằng unit test theo đặc tả công khai của họ; cần thử với khóa thật trước khi tin vào chế độ sandbox.
+**Đã kiểm chứng (07/11/2026, production `v0.1.3`):** luồng sandbox VNPay đến trạng thái `PAID`. Đơn #10 (70.000đ) chuyển hướng sang `sandbox.vnpayment.vn`, thanh toán bằng thẻ test NCB và OTP, VNPay gọi về Return URL, server xác minh chữ ký và số tiền rồi chốt đơn, cộng 7 điểm, trừ kho theo công thức (ảnh 31 đến 42 trong `docs/as2/evidence/`). Luồng giả lập (QR và PIN `123456`) đã chạy ở đơn #9.
+
+**Chưa kiểm chứng:** IPN của VNPay (chưa khai báo IPN URL trên cổng; đơn được chốt qua Return URL), cổng MoMo sandbox, và đối soát giao dịch phía Merchant Admin của VNPay. Phần ký/xác minh của MoMo và IPN chỉ được test bằng unit test theo đặc tả công khai.
 
 ## 4. Điểm thưởng và đổi quà
 

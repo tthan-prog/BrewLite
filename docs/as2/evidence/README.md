@@ -80,11 +80,36 @@ Thu thập ngày 02/11/2026.
 
 Quét repository bằng `git grep` ngày 02/11/2026: không có khóa, token hay URL Deploy Hook thật; chỉ có giá trị mẫu trong `.env.example` và giá trị chỉ dùng cho CI (`ci-only-secret`, `ci:ci`). `JWT_SECRET` và `DATABASE_URL` production cấu hình trên Render, không nằm trong repository.
 
+## Thanh toán QR sandbox VNPay và trừ kho nguyên liệu (v0.1.3, Task 5.4)
+
+Thu thập ngày 07/11/2026 trên production (image `sha-ecd11bd`, tag `v0.1.3`). Cổng thanh toán là sandbox của VNPay (tiền thử nghiệm, không có tiền thật); thẻ dùng là thẻ test ngân hàng NCB do VNPay cung cấp.
+
+| Ảnh | Minh họa cho chức năng |
+|---|---|
+| 31-thanh-toan-chon-vnpay-qr.png | Trang thanh toán có đủ các phương thức: ví và thẻ mô phỏng, MoMo, VNPay, chuyển khoản ngân hàng (đang chọn "VNPay - quét mã QR") |
+| 32-qr-vnpay-don11-dang-cho-thanh-toan.png | Sinh mã QR cho đơn #11 (80.000đ): hộp thoại QR, đếm ngược hết hạn "Còn 9:58", trạng thái "đang chờ thanh toán". Đơn này chưa thanh toán nên không trừ kho |
+| 33-kho-nguyen-lieu-truoc-khi-thanh-toan.png | Kho nguyên liệu (`/staff/ingredients`) trước khi thanh toán đơn #10: đá viên 59.587 g, cà phê hạt 4.945 g, sữa đặc 2.917 ml |
+| 34-kho-nguyen-lieu-sau-khi-thanh-toan.png | Kho sau khi đơn #10 thanh toán thành công: đá viên 59.362 g, cà phê hạt 4.915 g, sữa đặc 2.872 ml |
+| 35-lich-su-don-hang-don10-paid.png | Lịch sử đơn hàng: đơn #10 `PAID` 70.000đ (cùng đơn #9 `PAID`, #8 `CANCELLED`) |
+| 36-vnpay-sandbox-chon-phuong-thuc.png | Chuyển hướng sang cổng sandbox VNPay: trang chọn phương thức thanh toán (Test) |
+| 37-vnpay-sandbox-nhap-the-ncb-test.png | Cổng sandbox: thanh toán qua Ngân hàng NCB, số tiền 70.000 VND, nhập thẻ test |
+| 38-vnpay-sandbox-xac-thuc-otp.png | Cổng sandbox: bước xác thực OTP, giao dịch có thời hạn |
+| 39-brewlite-thanh-toan-thanh-cong-tren-dien-thoai.png | Quay về BrewLite (Return URL): "Thanh toán thành công", đơn #10 Cà phê sữa đá size L, 70.000đ, +7 điểm (tổng 119) |
+| 40-don10-paid-tren-may-tinh-cong-diem.png | Trang xác nhận trên máy tính tự chuyển sang `PAID`, +7 điểm (tổng 119, trước đó 112) |
+| 41-cd15-chay-thu-cong-image-tag-xanh.png | CD #15 chạy thủ công với `image_tag=sha-ecd11bd`: xanh, 13 giây. CD chạy từ tag `v0.1.3` đỏ ở bước smoke test (web chưa khởi động xong, HTTP 502 ở `/menu`) |
+| 42-render-bien-moi-truong-vnpay-an-gia-tri.png | Render: các biến `VNPAY_TMN_CODE`, `VNPAY_HASH_SECRET`, `PUBLIC_API_URL`, `PUBLIC_WEB_URL`, `SEED_IF_EMPTY` có cấu hình (giá trị bị ẩn) |
+
+Số liệu tự kiểm tra: 70.000đ cho 7 điểm (1 điểm mỗi 10.000đ); 112 + 7 = 119. Mức trừ kho của đơn #10 (Cà phê sữa đá size L, hệ số 150% theo `SIZE_RECIPE_PERCENT`): đá 150 g x 1,5 = 225 g (59.587 - 59.362), cà phê 20 g x 1,5 = 30 g (4.945 - 4.915), sữa đặc 30 ml x 1,5 = 45 ml (2.917 - 2.872). Ảnh kho không ghi số đơn nên việc gắn với đơn #10 dựa vào mức trừ khớp công thức.
+
+Phạm vi chứng minh: đơn được chốt `PAID` qua đường Return URL của VNPay. Chưa khai báo IPN URL trên cổng VNPay nên chưa có bằng chứng cho IPN; chưa thử MoMo sandbox; chưa có ảnh trang quản trị Merchant Admin của VNPay.
+
 ## Sơ đồ đi kèm
 
 Sơ đồ PlantUML (nguồn, SVG, PNG) nằm ở `docs/diagrams/`; báo cáo LaTeX Assignment 2 dùng các bản PNG trong `docs/as2/report/uml/`.
 
 ## Chưa có trong thư mục này
 
+- Bằng chứng IPN của VNPay, MoMo sandbox và trang giao dịch trong Merchant Admin của VNPay (xem mục thanh toán QR sandbox ở trên).
+- CD đỏ lần chạy theo tag `v0.1.3` (smoke test 502 vì web chưa khởi động xong): lưu trên tab Actions của GitHub.
 - Log chi tiết bước Unit test của run #13 trên GitHub (xem trên tab Actions).
 - CD đỏ lần đầu (tag `v0.1.0`, thiếu cấu hình URL và hook): lưu trên tab Actions của GitHub.
