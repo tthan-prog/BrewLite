@@ -20,7 +20,7 @@
 | FR-14 | Khuyến mãi | Áp mã khuyến mãi hợp lệ để giảm giá | Should | Mã hợp lệ giảm đúng; mã sai/hết hạn bị từ chối |
 | FR-15 | Điểm thưởng | Cộng điểm khi đơn thanh toán thành công (PAID): 1 điểm / 10.000đ; hủy đơn đã PAID thì trừ lại; mỗi lần đổi điểm ghi một giao dịch điểm (`LoyaltyTransaction`) | Should | `User.points` tăng đúng số điểm khi đơn PAID và giảm lại khi hủy đơn đã PAID; có bản ghi `LoyaltyTransaction` loại EARN (và REVERSAL khi hủy) tương ứng |
 | FR-16 | Quản trị | Giao diện quản lý sản phẩm và khuyến mãi | Could | Ngoài MVP |
-| FR-17 | Thanh toán | Kết nối cổng thanh toán thật | Won't | Không thực hiện. Thanh toán QR chỉ chạy chế độ giả lập; phần ký và xác minh cho cổng sandbox VNPay/MoMo có sẵn nhưng chưa kiểm chứng với cổng thật (xem `docs/as2/payment-qr-ingredients.md`) |
+| FR-17 | Thanh toán | Kết nối cổng thanh toán thật | Won't | Không kết nối cổng thanh toán thật (không có tiền thật). Mặc định thanh toán QR chạy giả lập; chế độ sandbox VNPay đã thử ngày 07/11/2026 đến trạng thái `PAID` qua Return URL; IPN và MoMo sandbox chưa kiểm chứng (xem `docs/as2/payment-qr-ingredients.md`) |
 
 ## 2. Yêu cầu phi chức năng
 
