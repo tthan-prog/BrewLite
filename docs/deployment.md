@@ -36,6 +36,7 @@
 | `FRONTEND_ORIGIN` | Env của service API | URL web production (CORS), ví dụ `https://brewlite-web.onrender.com` |
 | `PORT` | Env của hai service | API: `3001`; Web: `3000` |
 | `SEED_IF_EMPTY` | Env của service API | `true` ở lần deploy đầu để nạp dữ liệu mẫu **chỉ khi CSDL rỗng**; sau đó có thể xóa |
+| `SEED_MISSING` | Env của service API | `true` khi nâng cấp lên bản có nguyên liệu, QR, quà đổi điểm trên CSDL **đã có dữ liệu**: chỉ **thêm** nguyên liệu, công thức, tài khoản thanh toán TEST và quà còn thiếu (không xóa, không ghi đè số dư hay tồn kho đang có, chạy lại an toàn). Khác `prisma db seed` (xóa sạch). Sau lần chạy đầu có thể xóa biến |
 | `NEXT_PUBLIC_API_URL` | GitHub **Variable** `PRODUCTION_API_URL` | Gắn lúc build image web; đổi giá trị thì phải build lại (chạy lại CD) |
 | `PRODUCTION_WEB_URL` | GitHub Variable | Dùng cho smoke test |
 | `RENDER_API_DEPLOY_HOOK`, `RENDER_WEB_DEPLOY_HOOK` | GitHub **Secrets** | Deploy Hook URL của từng service (Settings của service trên Render); là bí mật, không in ra log |
