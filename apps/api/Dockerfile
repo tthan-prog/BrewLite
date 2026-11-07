@@ -25,4 +25,5 @@ COPY --from=build /app/scripts ./scripts
 EXPOSE 3001
 # Áp dụng migration (chỉ thêm, an toàn khi rollback), tùy chọn seed khi CSDL rỗng, rồi chạy server.
 # Seed thủ công (docker compose exec ... db seed) vẫn xoá sạch dữ liệu; còn SEED_IF_EMPTY=true chỉ chạy khi chưa có sản phẩm.
-CMD ["sh", "-c", "npx prisma migrate deploy --config prisma7.config.ts && if [ \"$SEED_IF_EMPTY\" = \"true\" ]; then node scripts/seed-if-empty.mjs; fi && node dist/main.js"]
+# SEED_MISSING=true chỉ THÊM dữ liệu nguyên liệu, tài khoản test, quà còn thiếu vào CSDL đã có dữ liệu (không xóa, chạy lại an toàn).
+CMD ["sh", "-c", "npx prisma migrate deploy --config prisma7.config.ts && if [ \"$SEED_IF_EMPTY\" = \"true\" ]; then node scripts/seed-if-empty.mjs; fi && if [ \"$SEED_MISSING\" = \"true\" ]; then node scripts/seed-missing.mjs; fi && node dist/main.js"]
