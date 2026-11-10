@@ -21,7 +21,7 @@
 | Health check | https://brewlite-api.onrender.com/health |
 | Nền tảng | Render (gói Free, region Singapore) |
 | Registry | GitHub Container Registry (`ghcr.io/tthan-prog/brewlite-api`, `brewlite-web`) |
-| Phiên bản hiện tại (tag) | v0.1.2 (commit `7b1ea96`, image `sha-7b1ea96`); bản trước: v0.1.1 |
+| Phiên bản hiện tại (tag) | v0.1.3 (commit `ecd11bd`, image `sha-ecd11bd`); bản trước: v0.1.2 (`sha-7b1ea96`) |
 | Database | Render PostgreSQL 16 (Free); chỉ truy cập qua Internal Database URL, inbound IP rules đã chặn toàn bộ truy cập từ Internet |
 
 **Giới hạn của gói Free (đã thấy trên bảng điều khiển Render ngày 23/10/2026):**

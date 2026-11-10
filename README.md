@@ -2,9 +2,9 @@
 
 Ứng dụng đặt cà phê không dùng tiền mặt: khách xem menu, chọn size và topping, thêm vào giỏ, đăng nhập, thanh toán (mô phỏng) và theo dõi đơn hàng; nhân viên (STAFF) xử lý đơn qua API.
 
-Bài tập lớn môn **Công nghệ Phần mềm**, Trường Đại học Sài Gòn, học kỳ I năm học 2026–2027, làm theo quy trình **Agile Scrum**. Hạn nộp Assignment 1: 02/11/2026; hạn Assignment 2 theo thông báo của giảng viên.
+Bài tập lớn môn **Công nghệ Phần mềm**, Trường Đại học Sài Gòn, học kỳ I năm học 2026–2027, làm theo quy trình **Agile Scrum**. Hạn nộp Assignment 1 và Assignment 2: 15/11/2026.
 
-## Trạng thái dự án (cập nhật 02/11/2026)
+## Trạng thái dự án (cập nhật 10/11/2026)
 
 | Hạng mục | Tình trạng |
 |---|---|
@@ -13,9 +13,9 @@ Bài tập lớn môn **Công nghệ Phần mềm**, Trường Đại học Sài
 | Docker Compose | Chạy được 3 dịch vụ (db, backend, frontend); đã chạy thử trên Windows (Docker Desktop + WSL 2) |
 | Nghiệm thu chéo (điều kiện tính điểm) | **Đã nghiệm thu, cả 10 task đạt DoD** (xác nhận 23/10/2026, xem `docs/as1/scrum/dod-nghiem-thu.md`) |
 | Bằng chứng Scrum | Product Backlog, 3 Sprint Backlog, Burndown, biên bản (`docs/as1/scrum/`) |
-| Báo cáo | Bản LaTeX tại `docs/as1/report/` và `docs/as2/report/` (cách biên dịch ở `docs/chung/huong-dan-bao-cao-latex.md`); còn điền MSSV, lớp, nhóm |
+| Báo cáo | Bản LaTeX tại `docs/as1/report/` và `docs/as2/report/` (cách biên dịch ở `docs/chung/huong-dan-bao-cao-latex.md`); còn build PDF cuối |
 | Assignment 2 (Requirements to Deployment) | Đã có SRS, use-case, sơ đồ, ADR, ma trận truy vết, CI/CD; **đã triển khai production** (xem [Mục 15](#15-assignment-2-từ-yêu-cầu-đến-triển-khai)) |
-| Production (HTTPS) | Web https://brewlite-web.onrender.com/menu; API https://brewlite-api.onrender.com/health; bản hiện tại **v0.1.2** ([Release](https://github.com/tthan-prog/BrewLite/releases/tag/v0.1.2)) |
+| Production (HTTPS) | Web https://brewlite-web.onrender.com/menu; API https://brewlite-api.onrender.com/health; bản hiện tại **v0.1.3** ([Release](https://github.com/tthan-prog/BrewLite/releases/tag/v0.1.3)) |
 | Sprint 3 Review và Retrospective | Đã họp 25/10/2026; biên bản hoàn chỉnh |
 
 Chi tiết từng task ở [Mục 8](#8-api-và-tiến-độ-task).
@@ -427,7 +427,7 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 | 2 | 19–22/10 | 5, 6, 7 + tồn | Còn 8/22 điểm |
 | 3 | 23–25/10 | 8, 9, 10 + tồn | Hoàn thành, đạt DoD; Review ngày 25/10 |
 | Hoàn thiện | 26/10 – 01/11 | Rà DoD, test e2e, báo cáo LaTeX, tập demo | – |
-| Nộp | 02/11 | – | – |
+| Nộp | 15/11| – | – |
 
 ---
 
@@ -453,10 +453,10 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 
 | Ký hiệu | Họ tên | MSSV | Vai trò |
 |---|---|---|---|
-| A | Nguyễn Lê Nhựt Thắng | | Scrum Master, Dev nền tảng và backend (API sản phẩm, xác thực, thanh toán, state machine) |
-| B | Hồ Thiên Ngân | | Dev backend (ERD, schema, seed, đơn hàng, idempotency, tồn kho) |
-| C | Hà Thiên Long | | Dev frontend, kiểm thử, Product Owner tạm |
-| D | Giản Thiên Lực | | Dev frontend (menu, chi tiết, giỏ hàng, thanh toán), slide |
+| A | Nguyễn Lê Nhựt Thắng | 3124560085 | Scrum Master, Dev nền tảng và backend (API sản phẩm, xác thực, thanh toán, state machine) |
+| B | Hồ Thiên Ngân | 3124410224 | Dev backend (ERD, schema, seed, đơn hàng, idempotency, tồn kho) |
+| C | Hà Thiên Long | 3124410193 | Dev frontend, kiểm thử, Product Owner tạm |
+| D | Giản Thiên Lực | 3124410206 | Dev frontend (menu, chi tiết, giỏ hàng, thanh toán), slide |
 
 **Giảng viên hướng dẫn:** Từ Lăng Phiêu
 
@@ -465,15 +465,15 @@ Test tích hợp chạy trên PostgreSQL thật, cần đã migrate và seed cù
 
 ## 15. Assignment 2: từ yêu cầu đến triển khai
 
-Dùng chung mã nguồn với Assignment 1. Hạn nộp theo thông báo của giảng viên. Năm task, mỗi task 2 điểm; task sau chỉ được nghiệm thu khi tạo phẩm của task trước đã có trên Git.
+Dùng chung mã nguồn với Assignment 1. Hạn nộp 15/11/2026. Năm task, mỗi task 2 điểm; task sau chỉ được nghiệm thu khi tạo phẩm của task trước đã có trên Git.
 
 | Task | Nội dung | Tạo phẩm | Trạng thái |
 |---|---|---|---|
-| 1 | Khai thác và đặc tả yêu cầu | `docs/requirements/` (context-and-scope, srs, use-case-checkout) | Có bản đầy đủ, do Hà Thiên Long (C) rà |
-| 2 | Mô hình hóa | `docs/diagrams/` (activity, sequence, class, use-case; `.puml` và `.svg`) | Đã vẽ lại khớp code |
+| 1 | Khai thác và đặc tả yêu cầu | `docs/requirements/` (context-and-scope, srs, use-case-checkout) | Có bản đầy đủ |
+| 2 | Mô hình hóa | `docs/diagrams/` (activity, sequence, class, use-case; `.puml` và `.svg`) | Đã hoàn thành |
 | 3 | Kiến trúc | `docs/architecture/` (architecture.md, 7 ADR, deployment diagram) | Đã chốt Prisma và Render |
 | 4 | Sprint 1 | Cấu trúc `apps/api`, `apps/web`; MVP menu; CI (`ci.yml`) | Đã có; CI chặn merge khi lỗi, có một lần đỏ (run #13) và một lần xanh (run #14), xem `docs/as2/evidence/` |
-| 5 | Sprint 2, CI/CD, production | `cd.yml`, `docs/deployment.md`, `docs/as2/release-notes/` | Đã deploy lên Render (HTTPS); CD chạy từ tag; đã thử rollback; release v0.1.2 |
+| 5 | Sprint 2, CI/CD, production | `cd.yml`, `docs/deployment.md`, `docs/as2/release-notes/` | Đã deploy lên Render (HTTPS); CD chạy từ tag; đã thử rollback; release v0.1.3 |
 
 Ma trận truy vết: `docs/traceability-matrix.md`. Hướng dẫn triển khai và rollback: `docs/deployment.md`.
 
@@ -486,7 +486,7 @@ Ma trận truy vết: `docs/traceability-matrix.md`. Hướng dẫn triển khai
 | Web (HTTPS) | https://brewlite-web.onrender.com/menu |
 | API | https://brewlite-api.onrender.com |
 | Health check | https://brewlite-api.onrender.com/health |
-| Bản phát hành | v0.1.2: [GitHub Releases](https://github.com/tthan-prog/BrewLite/releases) (release notes: `docs/as2/release-notes/`) |
+| Bản phát hành | v0.1.3: [GitHub Releases](https://github.com/tthan-prog/BrewLite/releases) (release notes: `docs/as2/release-notes/`) |
 | Nền tảng | Render gói Free (Singapore); PostgreSQL chỉ truy cập qua mạng nội bộ của Render, không public |
 | Tài khoản mẫu (dữ liệu seed) | `customer@brewlite.com` / `password123` (chỉ để demo) |
 
@@ -498,8 +498,8 @@ Ma trận truy vết: `docs/traceability-matrix.md`. Hướng dẫn triển khai
 
 ```bash
 git checkout main && git pull
-git tag v0.1.3
-git push origin v0.1.3
+git tag v0.1.4
+git push origin v0.1.4
 ```
 
 CD sẽ chạy kiểm tra chất lượng, build image Docker (gắn tag `sha-<7 ký tự commit>` và tên tag), đẩy lên GitHub Container Registry, gọi Deploy Hook của Render cho api và web, rồi chạy smoke test (`/health`, `/products`, `/menu`). Migration cơ sở dữ liệu chạy tự động khi API khởi động (`prisma migrate deploy`), các migration chỉ thêm nên bản cũ vẫn chạy được trên cơ sở dữ liệu mới.
@@ -510,4 +510,4 @@ Hướng dẫn thiết lập lần đầu, biến môi trường, các lỗi đ�
 
 ---
 
-*README phiên bản 2.4, cập nhật ngày 02/11/2026: chốt phân công 4 người, nghiệm thu chéo bằng chạy Docker, số liệu test 36/81/10, cấu trúc `docs/` tách as1, as2, chung, báo cáo LaTeX AS1/AS2; trạng thái production, CI/CD và rollback của Assignment 2. Cập nhật khi có thay đổi về cài đặt, cách chạy hoặc trạng thái nghiệm thu.*
+*README phiên bản 2.5, cập nhật ngày 10/11/2026: hạn nộp 15/11, MSSV, bản bàn giao v0.1.3. Phiên bản 2.4 (02/11/2026): chốt phân công 4 người, nghiệm thu chéo bằng chạy Docker, số liệu test 36/81/10, cấu trúc `docs/` tách as1, as2, chung, báo cáo LaTeX AS1/AS2; trạng thái production, CI/CD và rollback của Assignment 2. Cập nhật khi có thay đổi về cài đặt, cách chạy hoặc trạng thái nghiệm thu.*

@@ -6,14 +6,14 @@ Quy ước mã: US = user story, UC = use-case, Activity/Sequence/Class = sơ đ
 
 | Mã yêu cầu | Use-case / User story | Thiết kế / Sơ đồ | Code / API | Test |
 |---|---|---|---|---|
-| FR-01 Hiển thị danh sách sản phẩm | US-01 Xem menu | Activity-01, Class-01 (Product) | `GET /products` (`apps/api/src/products`); trang `apps/web/src/app/menu` | INT-T01: "GET /products trả danh sách có id, name, price, imageUrl" |
+| FR-01 Hiển thị danh sách sản phẩm | US-01 Xem menu | Activity-01, Class-01 (Product) | `GET /products` (`apps/api/src/products`); trang `apps/web/src/app/menu` | INT-T01: "GET /products trả danh sách có id, name, price, imageUrl"; E2E-T01a (menu hiển thị sản phẩm lấy từ API) |
 | FR-02 Trạng thái loading/rỗng/lỗi | US-01 Xem menu | Activity-01 | Trang menu (`apps/web`) | E2E-T03a (đang tải), E2E-T03b (rỗng), E2E-T03c (lỗi và thử lại) – Playwright, `tests/e2e/brewlite-flow.spec.ts` |
 | FR-03 Chi tiết, size, topping | US-02 Xem chi tiết | Class-01 (Product, Topping, Size) | `GET /products/:id`, `GET /toppings` | INT-T02: "GET /products/:id: có -> 200, không có -> 404, id sai -> 400" |
-| FR-04 Giỏ hàng, tổng tiền | US-03 Quản lý giỏ hàng | Activity-01 | Giỏ hàng trong trang menu (`apps/web`) | E2E-T01a/T01b (Playwright, `tests/e2e/brewlite-flow.spec.ts`) |
+| FR-04 Giỏ hàng, tổng tiền | US-03 Quản lý giỏ hàng | Activity-01 | Giỏ hàng trong trang menu (`apps/web`) | E2E-T01b (thêm vào giỏ trong luồng đặt hàng), E2E-T06 (giỏ không vượt 50 ly mỗi dòng) – Playwright, `tests/e2e/brewlite-flow.spec.ts` |
 | FR-05 Đăng ký, đăng nhập | US-04 Xác thực | Class-01 (User) | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` | INT-T03: "hash mật khẩu bằng bcrypt…", "trùng email -> 409; sai mật khẩu -> 401…", "đăng nhập đúng trả JWT dùng được" |
 | FR-06 Chặn đặt đơn khi chưa đăng nhập | UC-01 (E1) | Activity-01, Sequence-01, Sequence-02 | `JwtAuthGuard` trên `POST /orders` | INT-T04: "cần đăng nhập (401 khi thiếu token)" |
 | FR-07 Tạo đơn, kiểm tra nguyên liệu | UC-01 | Sequence-01, Class-01 (Order, OrderItem) | `POST /orders` (`apps/api/src/orders`) | INT-T05: "tính giá theo size…", "validate: thiếu items…", "userId trong body bị bỏ qua" |
-| FR-08 Thanh toán Ví/Thẻ | UC-01 | Sequence-02, Class-01 (Payment) | `POST /payments` (`apps/api/src/payments`) | INT-T06: "thanh toán thành công -> PAID…", "thanh toán lỗi -> PAYMENT_FAILED, thử lại được rồi PAID" |
+| FR-08 Thanh toán Ví/Thẻ | UC-01 | Sequence-02, Class-01 (Payment) | `POST /payments` (`apps/api/src/payments`) | INT-T06: "thanh toán thành công -> PAID…", "thanh toán lỗi -> PAYMENT_FAILED, thử lại được rồi PAID"; E2E-T01b, E2E-T07 (giả lập thất bại rồi thử lại trên giao diện) |
 | FR-09 Idempotency | UC-01 (A2) | Sequence-01, Sequence-02, ADR-004 | `Idempotency-Key` ở `POST /orders` và `POST /payments` | INT-T07: "gửi 2 lần cùng key chỉ tạo 1 đơn…", "10 yêu cầu song song cùng key…", "gửi lại cùng Idempotency-Key không thanh toán lần hai" |
 | FR-10 Máy trạng thái đơn | UC-01, UC-02 | Class-01 (OrderStatus) | `apps/api/src/orders/order-state.ts` | API-T01: `order-state.spec.ts` (mọi cặp trạng thái); INT-T08: "chuyển trạng thái sai bị chặn (400)…" |
 | FR-11 STAFF cập nhật trạng thái | UC-02 | Class-01 (Role) | `PATCH /orders/:id/status` | INT-T09: "STAFF đi hết luồng PAID -> PREPARING -> READY -> COMPLETED", "…CUSTOMER không được gọi PATCH (403)" |

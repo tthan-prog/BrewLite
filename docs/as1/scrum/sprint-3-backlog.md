@@ -1,6 +1,6 @@
 # Sprint 3 Backlog
 
-- **Thời gian:** 23/10 – 25/10/2026 (đóng băng code tối 25/10; hoàn thiện 26/10 – 01/11; nộp 02/11)
+- **Thời gian:** 23/10 – 25/10/2026
 - **Sprint Goal:** Hoàn thành đường găng Task 7 → 8 → 9 → 10, có test chứng minh nghiệp vụ, docker-compose chạy end-to-end.
 - **Daily Scrum:** hằng ngày 20:00 qua nhóm chat.
 - **Sprint Review và Retrospective:** 25/10/2026, 20:00, xem `minutes/06-sprint3-review-retro.md`.
@@ -17,14 +17,13 @@
 | 5 | State machine, idempotency, tồn kho đồng thời, khuyến mãi, điểm thưởng + test 10a/10b/10c | 10 | B (10b, 10c), A (10a, 10d) | 8 | Hoàn thành, đạt DoD (23/10) | 22 unit test + 32 e2e test đạt |
 | 6 | Nghiệm thu chéo từng task (A–D, không tự nghiệm thu) | 1–10 | A, B, C, D | – | Hoàn thành (23/10) | Kết quả ở `dod-nghiem-thu.md` |
 | 7 | Báo cáo LaTeX Assignment 1, chụp ảnh minh họa | – | D, C, A | – | Đang làm (còn điền MSSV) | |
-| 8 | Đóng băng code 25/10 tối; 26/10 rà lại, tập demo | – | A | – | Theo kế hoạch | |
+| 8 | Từ 26/10 rà lại, tập demo | – | A | – | Theo kế hoạch | |
 
 ## Rủi ro
 
 | Ngày | Rủi ro | Người xử lý | Hướng xử lý |
 |---|---|---|---|
 | 23/10 | Nghiệm thu chéo chưa có bằng chứng | A | Nghiệm thu bằng cách chạy Docker; kết quả ghi ở `dod-nghiem-thu.md` |
-| 23/10 | Thời gian còn ngắn trước mốc đóng băng code 25/10 | A | Mốc cắt phạm vi tối 24/10 và 25/10 theo kế hoạch |
 
 ## Kết quả Sprint
 

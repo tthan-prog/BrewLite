@@ -1,7 +1,7 @@
 # Bằng chứng triển khai và kiểm tra trên production
 
 Thu thập ngày 23/10/2026. Frontend: https://brewlite-web.onrender.com, API: https://brewlite-api.onrender.com.
-Sản phẩm triển khai: tag `v0.1.2` (commit `7b1ea96`, image `sha-7b1ea96`).
+Sản phẩm triển khai hiện tại: tag `v0.1.3` (commit `ecd11bd`, image `sha-ecd11bd`, từ 07/11/2026). Ảnh 01–29 chụp trên bản `v0.1.2` (commit `7b1ea96`) và vẫn là bằng chứng hợp lệ cho CI/CD, rollback và bảo mật; ảnh 31–42 chụp trên `v0.1.3`.
 
 ## Luồng người dùng trên production
 

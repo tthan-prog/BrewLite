@@ -6,13 +6,13 @@
 
 Kính gửi thầy Từ Lăng Phiêu,
 
-Em là Nguyễn Lê Nhựt Thắng, [MSSV], đại diện nhóm [số/tên nhóm] lớp [tên lớp] môn Công nghệ Phần mềm. Nhóm em xin nộp báo cáo Bài tập lớn 1 (giữa kì) BrewLite theo quy trình Agile Scrum:
+Em là Nguyễn Lê Nhựt Thắng, MSSV 3124560085, đại diện nhóm [số/tên nhóm] lớp [tên lớp] môn Công nghệ Phần mềm. Nhóm em xin nộp báo cáo Bài tập lớn 1 (giữa kì) BrewLite theo quy trình Agile Scrum:
 
 - **Báo cáo (LaTeX, file PDF đính kèm):** quy trình Scrum, kết quả 10 task và kết quả kiểm thử.
-- **Mã nguồn:** https://github.com/tthan-prog/BrewLite (mốc Assignment 1 là tag `assign1-final`; nhánh `main` đã gồm phần mở rộng sau đó).
+- **Mã nguồn:** https://github.com/tthan-prog/BrewLite (mốc Assignment 1 là tag `assign1-final`, commit `9581384`; nhánh `main` đã gồm phần mở rộng sau đó).
 
 Về một số điểm đề chưa rõ, nhóm đã chọn như sau: Task 6 tạo đơn ở trạng thái PENDING và Task 8 chuyển sang PAID hoặc PAYMENT_FAILED; có thêm endpoint cho nhân viên (STAFF) cập nhật trạng thái đơn để phục vụ demo và test; nhóm bổ sung bảng topping và mã khuyến mãi vào mô hình dữ liệu.
 
 Em cảm ơn thầy.
 
-Nguyễn Lê Nhựt Thắng – [MSSV] – [Số điện thoại hoặc kênh liên lạc]
+Nguyễn Lê Nhựt Thắng – 3124560085 – [Số điện thoại hoặc kênh liên lạc]

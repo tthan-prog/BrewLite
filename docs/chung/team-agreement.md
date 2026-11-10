@@ -3,7 +3,7 @@
 ## 1. Mục tiêu
 
 - Hoàn thành BrewLite đạt Definition of Done cho càng nhiều task càng tốt, theo thứ tự ưu tiên: Task 1–9 trước, Task 10 sau.
-- Nộp đúng hạn: báo cáo, slide, mã nguồn, demo. (Hạn Assignment 1: 02/11/2026; hạn Assignment 2 theo thông báo của giảng viên.)
+- Nộp đúng hạn: báo cáo, slide, mã nguồn, demo. (Hạn nộp cả Assignment 1 và Assignment 2: 15/11/2026.)
 - Mọi thành viên đều viết code và đều có commit trên Git.
 
 ## 2. Vai trò
@@ -31,7 +31,6 @@ Vai trò là "người chịu trách nhiệm chính", không phải "chỉ một
 - Không push trực tiếp lên `main`; mỗi thành viên làm trên nhánh riêng của mình, gộp vào `main` qua pull request và có ít nhất một người khác xem.
 - Hoàn thành nghĩa là đã đẩy lên GitHub, được review và báo cho nhóm.
 - Task chỉ tính xong khi đạt Definition of Done và được **người khác** nghiệm thu (nghiệm thu chéo bằng cách chạy Docker, xem `docs/as1/scrum/dod-nghiem-thu.md`).
-- Đóng băng code vào tối 25/10; từ đó chỉ sửa lỗi.
 - Thay đổi phạm vi chỉ được chốt khi cả nhóm đồng thuận. Khi không đồng thuận thì bỏ phiếu; nếu hòa, Scrum Master có phiếu quyết định.
 - Không đưa mật khẩu, khóa bí mật, file `.env` lên Git.
 
