@@ -44,6 +44,7 @@ PR thử nghiệm #30 (đóng, không merge): cố ý đổi kỳ vọng một t
 | 16-ci-do-run13-job-api-loi.png | CI run #13 **đỏ**: job `api` lỗi, các job còn lại xanh |
 | 17-pr30-merge-bi-chan.png | PR #30: check `api` (Required) đỏ, "Merging is blocked", nút Merge bị làm mờ, thêm yêu cầu Review |
 | 18-ci-xanh-run14-sau-khi-sua.png | Sau commit khôi phục test, CI run #14 **xanh** cả 4 job |
+| 43-ci-xanh-main-run85-pr58.png | Ngày 10/11/2026: CI run #85 trên `main` (commit `afdd005`, merge PR #58 chốt bản bàn giao) **xanh** cả 4 job: `api` 23s, `api-e2e` 42s, `web` 1m 7s, `e2e-browser` 1m 49s |
 
 ## Rollback và deploy lại (Task 5.3)
 

@@ -577,7 +577,7 @@ Kết nối an toàn và endpoint health của production ở Hình~\ref{fig:htt
 \hinh{ev08-health-ok.jpg}{.82\linewidth}{\texttt{/health} trả \texttt{\{"status":"ok","service":"brewlite-backend"\}}}{fig:health}
 
 \subsection{CI}\label{sec:se-ci}
-\texttt{ci.yml} chạy cho mọi PR với bốn job: \texttt{api} (cài đặt, lint, unit test, build), \texttt{api-e2e} (migration, seed, test tích hợp trên PostgreSQL thật), \texttt{web} (lint, build) và \texttt{e2e-browser} (Playwright). Lần chạy gần nhất trên \texttt{main} (run \#60) xanh ở cả bốn job.
+\texttt{ci.yml} chạy cho mọi PR với bốn job: \texttt{api} (cài đặt, lint, unit test, build), \texttt{api-e2e} (migration, seed, test tích hợp trên PostgreSQL thật), \texttt{web} (lint, build) và \texttt{e2e-browser} (Playwright). Lần chạy gần nhất trên \texttt{main} (run \#85, commit \texttt{afdd005}, ngày 10/11/2026, sau khi merge PR \#58) xanh ở cả bốn job (Hình~\ref{fig:run85}).
 
 \textbf{Minh chứng CI chặn merge (Task 4.4).} Nhóm tạo PR thử nghiệm \#30, cố ý đổi kỳ vọng một test trong \path{order-state.spec.ts} (đơn PAID không được nhảy thẳng sang COMPLETED). Kết quả: test lỗi ở máy (Hình~\ref{fig:localfail}), CI run \#13 đỏ ở job \texttt{api} (Hình~\ref{fig:run13}), PR bị chặn merge vì check \texttt{api} là Required (Hình~\ref{fig:blocked}); sau khi sửa, run \#14 xanh (Hình~\ref{fig:run14}). PR \#30 được đóng, không merge.
 \hinh{ev19-test-loi-chay-o-may.jpg}{.82\linewidth}{Test lỗi khi chạy ở máy: \texttt{expected false to be true}}{fig:localfail}
@@ -585,6 +585,7 @@ Kết nối an toàn và endpoint health của production ở Hình~\ref{fig:htt
 \hinh{ev17-pr30-merge-bi-chan.jpg}{.92\linewidth}{PR \#30: check \texttt{api} (Required) đỏ, ``Merging is blocked''}{fig:blocked}
 \hinh{ev18-ci-xanh-run14-sau-khi-sua.jpg}{.92\linewidth}{CI run \#14 xanh sau khi sửa}{fig:run14}
 \hinh{ev15-ci-xanh-merge-pr22.jpg}{.92\linewidth}{CI xanh 4/4 job (api, api-e2e, web, e2e-browser) sau khi merge PR \#22}{fig:ci4}
+\hinh{ev43-ci-xanh-main-run85-pr58.jpg}{.92\linewidth}{CI run \#85 trên \texttt{main} (commit \texttt{afdd005}, 10/11/2026): xanh 4/4 job}{fig:run85}
 
 \subsection{CD, di trú dữ liệu và quay lui}\label{sec:se-cd}
 \texttt{cd.yml} chạy khi gắn tag \texttt{v*} hoặc chạy tay (\texttt{workflow\_dispatch}, tham số \texttt{image\_tag}) theo ba bước: (1) \emph{quality}: lint và test; (2) \emph{build}: dựng image Docker, đẩy lên GHCR với tag \texttt{sha-...}; (3) \emph{deploy}: gọi Deploy Hook của Render cho API và web kèm \texttt{imgURL}, rồi smoke test gọi \texttt{/health}. Secret nằm trong GitHub Secrets; migration chạy trước khi API khởi động. CD lần đầu (tag \texttt{v0.1.0}) đỏ vì thiếu cấu hình URL và hook; sau khi bổ sung, CD xanh từ \texttt{v0.1.1} và \texttt{v0.1.2}. Bản bàn giao \texttt{v0.1.3} (07/11/2026): CD chạy từ tag đỏ ở bước smoke test vì web chưa khởi động xong (\texttt{/menu} trả 502, smoke test không thử lại); nhóm chạy tay CD \#15 với \texttt{image\_tag=sha-ecd11bd} và lần này xanh (Hình~\ref{fig:cd013}).
