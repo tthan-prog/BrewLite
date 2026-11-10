@@ -1,6 +1,6 @@
 # Bảng tiến độ Assignment 1 (cập nhật 23/10/2026; mục 2 bổ sung 31/10/2026, mục 4 bổ sung 01/11/2026)
 
-Hạn nộp: 02/11/2026. Điểm: 10 task, mỗi task 1 điểm, tổng 10 điểm.
+Hạn nộp: 15/11/2026 (giảng viên dời từ 02/11/2026). Điểm: 10 task, mỗi task 1 điểm, tổng 10 điểm.
 
 ## 1. Tiến độ 10 task
 
@@ -46,10 +46,11 @@ Tài liệu: Product Backlog, 3 Sprint Backlog, Burndown, 6 biên bản, quy tr�
 | Việc | Người | Hạn | Trạng thái |
 |---|---|---|---|
 | Ghi tên người nghiệm thu thật vào `dod-nghiem-thu.md` và báo cáo mục 3.1 | Nguyễn Lê Nhựt Thắng | 24/10 | Hoàn thành (01/11) |
-| Điền MSSV, lớp, nhóm vào báo cáo LaTeX (ảnh đã được chèn) | A, D | 26/10 | Cần làm |
+| Điền MSSV, lớp, nhóm vào báo cáo LaTeX (ảnh đã được chèn) | A, D | 12/11 | Đã điền MSSV trên trang bìa (10/11); lớp và số nhóm chỉ cần trong tin nhắn nộp bài |
 | Hoàn chỉnh 6 biên bản họp cho đúng thực tế | Nguyễn Lê Nhựt Thắng | 25/10 | Hoàn thành (01/11) |
 | Họp Sprint 3 Review và Retrospective, cập nhật biên bản 06 | Cả nhóm | 25/10 | Đã họp 25/10; biên bản 06 đã hoàn chỉnh (01/11) |
-| Đóng băng code tối 25/10; rà soát và hoàn thiện báo cáo 26/10 – 01/11; nộp 02/11 | Cả nhóm | 25/10 – 02/11 | Đang thực hiện |
+| Rà soát và hoàn thiện báo cáo 26/10 – 14/11 | Cả nhóm | 26/10 – 14/11 | Đang thực hiện |
+| Hạn kết thúc 15/11: chốt nội dung 12/11, build PDF cuối và duyệt chung 13/11, nộp 15/11 | Cả nhóm | 15/11 | Đang thực hiện |
 
 ## 5. Rủi ro
 

@@ -27,7 +27,7 @@
 
 ## 3. Vướng mắc cần hỗ trợ
 
-- Còn nhiều việc trong ba ngày của Sprint 3 (đóng băng code tối 25/10).
+- Còn nhiều việc trong ba ngày của Sprint 3.
 
 ## 4. Mức tiến độ chung
 

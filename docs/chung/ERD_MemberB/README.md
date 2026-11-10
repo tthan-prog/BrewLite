@@ -1,6 +1,6 @@
 # ERD - BrewLite
 
-Đây là bản ERD (Entity Relationship Diagram) phần cơ sở dữ liệu của Assignment 1 do Hồ Thiên Ngân (B) thiết kế, chốt ngày 20/10/2026, gồm 10 bảng lõi của đơn hàng. Các bảng bổ sung ở Assignment 2 (nguyên liệu, công thức, thanh toán QR, đổi thưởng) nằm trong `docs/diagrams/erd.puml`.
+Đây là bản ERD (Entity Relationship Diagram) phần cơ sở dữ liệu của Assignment 1 do Hồ Thiên Ngân (B) thiết kế, chốt ngày 20/10/2026, gồm 10 bảng lõi của đơn hàng. Các bảng bổ sung ở Assignment 2 (nguyên liệu, công thức, thanh toán QR, đổi thưởng) nằm trong `docs/diagrams/erd.puml` (bản cập nhật ngày 10/11/2026 vẽ đủ 18 bảng theo `apps/api/prisma/schema.prisma` của bản v0.1.3).
 
 ## Quan hệ chính
 

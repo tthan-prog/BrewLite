@@ -1,6 +1,6 @@
 # Nhiệm vụ và phân công Assignment 1 (giữa kì)
 
-- **Hạn nộp:** 02/11/2026.
+- **Hạn nộp:** 15/11/2026
 - **Nhóm:** 4 thành viên: A Nguyễn Lê Nhựt Thắng, B Hồ Thiên Ngân, C Hà Thiên Long, D Giản Thiên Lực.
 - **Nguồn dữ liệu:** `docs/as1/scrum/product-backlog.md`, `sprint-1/2/3-backlog.md`, `dod-nghiem-thu.md`, `docs/as1/tien-do.md`.
 - **Cách đọc:** ngày bắt đầu và hạn lấy từ Sprint Backlog (Sprint 1: 14–18/10; Sprint 2: 19–22/10; Sprint 3: 23–25/10/2026). Phần trăm hoàn thành là 100% khi task đã đạt DoD theo biên bản nhóm; phần dở ghi `[ước lượng]`.
@@ -18,7 +18,7 @@
 | Task 10 (10a, 10d): máy trạng thái, khuyến mãi, điểm thưởng | Test (a) chặn chuyển trạng thái sai; `WELCOME10`; 1 điểm / 10.000 đồng | 23/10/2026 | 25/10/2026 | Hoàn thành (23/10) | 100 | Cùng Hồ Thiên Ngân làm Task 10 |
 | Scrum Master: biên bản Sprint, Burndown | `docs/as1/scrum/minutes/01–06`, `burndown-*.csv` | 14/10/2026 | 25/10/2026 | Hoàn thành | 100 | Biên bản 01–06 đã hoàn chỉnh (01/11) |
 | Nghiệm thu chéo Task 3, 4, 5, 6, 9 và Task 10 (10b, 10c) | Dòng nghiệm thu trong `dod-nghiem-thu.md` | 23/10/2026 | 24/10/2026 | Đạt (23/10) | 100 | Chạy Docker |
-| Báo cáo LaTeX Assignment 1 (2–3 trang, theo mẫu SGU) | `docs/as1/report/main.tex` | 29/10/2026 | 02/11/2026 | Nội dung đã hoàn chỉnh (3 trang nội dung + phụ lục); chờ MSSV và build PDF bằng pdfLaTeX | 90 `[ước lượng]` | Còn điền MSSV, lớp, nhóm |
+| Báo cáo LaTeX Assignment 1 (2–3 trang, theo mẫu SGU) | `docs/as1/report/main.tex` | 29/10/2026 | 13/11/2026 | Nội dung đã hoàn chỉnh (3 trang nội dung + phụ lục); đã điền MSSV; chờ build PDF cuối | 95 `[ước lượng]` | Nộp 15/11/2026 |
 
 ## B. Hồ Thiên Ngân (Backend: dữ liệu, đơn hàng)
 
@@ -35,7 +35,7 @@
 |---|---|---|---|---|---|---|
 | Task 7 (phần giao diện): đăng ký, đăng nhập | Trang `/login`, `/register` | 19/10/2026 | 22/10/2026 | Hoàn thành giao diện (22/10) | 100 | Cùng Nguyễn Lê Nhựt Thắng (backend) làm Task 7 |
 | Task 9 (phần giao diện): xác nhận, lịch sử đơn | Trang xác nhận, trang lịch sử đơn | 23/10/2026 | 25/10/2026 | Hoàn thành (23/10) | 100 | Cùng Nguyễn Lê Nhựt Thắng (API, Docker, README) làm Task 9 |
-| Product Vision, FR/NFR, user story (báo cáo chương 1 và 3) | Nội dung yêu cầu trong báo cáo | 14/10/2026 | 02/11/2026 | Đã đưa vào báo cáo LaTeX | 100 | |
+| Product Vision, FR/NFR, user story (báo cáo chương 1 và 3) | Nội dung yêu cầu trong báo cáo | 14/10/2026 | 13/11/2026 | Đã đưa vào báo cáo LaTeX | 100 | |
 | Kiểm thử: chạy test, kiểm tra yêu cầu | Kết quả unit, tích hợp, E2E (36, 81, 10 test) | 14/10/2026 | 25/10/2026 | Hoàn thành | 100 | Số test lấy từ lần chạy trên `main` |
 | Product Owner tạm: ước lượng điểm, ưu tiên Product Backlog | `product-backlog.md` | 14/10/2026 | 18/10/2026 | Hoàn thành | 100 | |
 | Nghiệm thu chéo Task 8 và Task 10 (10a, 10d) | Dòng nghiệm thu trong `dod-nghiem-thu.md` | 23/10/2026 | 24/10/2026 | Đạt (23/10) | 100 | Chạy Docker |
@@ -47,5 +47,5 @@
 | Task 3: Trang Menu | Lưới sản phẩm, loading, rỗng, lỗi | 14/10/2026 | 18/10/2026 | Hoàn thành giao diện (22/10) | 100 | Thực tế gộp vào Sprint 2 |
 | Task 4: Chi tiết, size, topping | Chọn size S/M/L và topping, tính giá | 14/10/2026 | 18/10/2026 | Hoàn thành giao diện (22/10) | 100 | Thực tế gộp vào Sprint 2 |
 | Task 5: Giỏ hàng | Thêm, sửa, xóa, tổng tiền, badge | 19/10/2026 | 22/10/2026 | Hoàn thành giao diện (22/10) | 100 | |
-| Ảnh minh họa cho báo cáo | Ảnh chụp màn hình luồng chính (`docs/as2/evidence`) | 23/10/2026 | 25/10/2026 | Đã đưa vào phụ lục báo cáo | 100 | Cùng Hà Thiên Long; slide thuộc Assignment 2, không cần cho Assignment 1 |
+| Ảnh minh họa cho báo cáo | Ảnh chụp màn hình luồng chính (`docs/as2/evidence`) | 23/10/2026 | 25/10/2026 | Đã đưa vào phụ lục báo cáo | 100 | Cùng Hà Thiên Long; slide thuộc Assignment 2 |
 | Nghiệm thu chéo Task 2 | Dòng nghiệm thu trong `dod-nghiem-thu.md` | 23/10/2026 | 24/10/2026 | Đạt (23/10) | 100 | Chạy Docker |

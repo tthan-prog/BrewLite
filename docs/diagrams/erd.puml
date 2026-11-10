@@ -1,5 +1,5 @@
 @startuml erd
-title Mô hình dữ liệu BrewLite (đối chiếu apps/api/prisma/schema.prisma)
+title Mô hình dữ liệu BrewLite: 18 bảng (đối chiếu apps/api/prisma/schema.prisma, v0.1.3)
 skinparam shadowing false
 hide circle
 skinparam linetype ortho
@@ -50,6 +50,9 @@ entity OrderItem {
   quantity : Int
   unitPrice : Int
   size : String
+  usesRecipe : Boolean
+  sugar : Int?
+  ice : Int?
 }
 entity OrderItemTopping {
   * orderItemId : Int <<PK, FK>>
@@ -68,6 +71,7 @@ entity Payment {
   amount : Int
   idempotencyKey : String
   requestHash : String
+  providerRef : String?
   (unique: userId + idempotencyKey)
 }
 entity IdempotencyRecord {
@@ -99,6 +103,81 @@ entity Promotion {
   usageCount : Int
 }
 
+entity Ingredient {
+  * id : Int <<PK>>
+  --
+  name : String <<unique>>
+  unit : String
+  stock : Int
+  sugarScaled : Boolean
+  iceScaled : Boolean
+}
+entity RecipeItem {
+  * id : Int <<PK>>
+  --
+  productId : Int <<FK>>
+  ingredientId : Int <<FK>>
+  quantity : Int
+  (unique: productId + ingredientId)
+}
+entity ToppingRecipeItem {
+  * id : Int <<PK>>
+  --
+  toppingId : Int <<FK>>
+  ingredientId : Int <<FK>>
+  quantity : Int
+  (unique: toppingId + ingredientId)
+}
+entity OrderIngredientUse {
+  * orderId : Int <<PK, FK>>
+  * ingredientId : Int <<PK, FK>>
+  --
+  quantity : Int
+  consumed : Boolean
+}
+entity PaymentAccount {
+  * id : Int <<PK>>
+  --
+  provider : PaymentProvider
+  identifier : String
+  holderName : String
+  pinHash : String
+  balance : Int
+  (unique: provider + identifier)
+}
+entity PaymentIntent {
+  * id : Int <<PK>>
+  --
+  token : String <<unique>>
+  orderId : Int <<FK>>
+  userId : Int <<FK>>
+  accountId : Int? <<FK>>
+  provider : PaymentProvider
+  amount : Int
+  status : IntentStatus
+  mode : String
+  expiresAt : DateTime
+  providerRef : String?
+  paidAt : DateTime?
+}
+entity Reward {
+  * id : Int <<PK>>
+  --
+  name : String
+  description : String
+  pointsCost : Int
+  active : Boolean
+}
+entity Redemption {
+  * id : Int <<PK>>
+  --
+  userId : Int <<FK>>
+  rewardId : Int <<FK>>
+  pointsSpent : Int
+  code : String <<unique>>
+  createdAt
+}
+
 User ||--o{ Order
 User ||--o{ Payment
 User ||--o{ IdempotencyRecord
@@ -110,5 +189,16 @@ Order ||--o{ LoyaltyTransaction
 Product ||--o{ OrderItem
 OrderItem ||--o{ OrderItemTopping
 Topping ||--o{ OrderItemTopping
+Product ||--o{ RecipeItem
+Ingredient ||--o{ RecipeItem
+Topping ||--o{ ToppingRecipeItem
+Ingredient ||--o{ ToppingRecipeItem
+Order ||--o{ OrderIngredientUse
+Ingredient ||--o{ OrderIngredientUse
+Order ||--o{ PaymentIntent
+User ||--o{ PaymentIntent
+PaymentAccount |o--o{ PaymentIntent
+User ||--o{ Redemption
+Reward ||--o{ Redemption
 Promotion .. Order : áp theo promoCode\n(không có khóa ngoại)
 @enduml

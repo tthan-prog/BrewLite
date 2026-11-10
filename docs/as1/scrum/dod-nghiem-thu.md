@@ -97,6 +97,6 @@ Người nghiệm thu điền bảng này (hoặc gửi cho Nguyễn Lê Nhựt 
 | Tối 23/10 (họp Sprint Planning 3) | Nghiệm thu chéo bằng cách chạy Docker, ghi kết quả vào mục 6 | Cả nhóm |
 | 24/10 | Nguyễn Lê Nhựt Thắng tổng hợp, cập nhật README mục 8.2 và báo cáo mục 3.1 | Nguyễn Lê Nhựt Thắng |
 | Tối 24/10 | Mốc cắt phạm vi: task chưa đạt thì sửa hoặc đưa vào backlog | Cả nhóm |
-| 25/10 | Sprint 3 Review và Retrospective, đóng băng code tối | Cả nhóm |
+| 25/10 | Sprint 3 Review và Retrospective | Cả nhóm |
 
 **Ghi chú:** kết quả trên do Nguyễn Lê Nhựt Thắng tổng hợp sau buổi nghiệm thu chéo ngày 23/10/2026.

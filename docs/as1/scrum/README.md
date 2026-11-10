@@ -15,7 +15,7 @@ Thư mục này lưu **bằng chứng làm theo Scrum** (đề yêu cầu quy tr
 | `docs/chung/bang-dong-gop.md` | Bảng đóng góp của các thành viên | A |
 | `docs/chung/mau-bien-ban/meeting-minutes-template.md`, `retrospective-template.md` | Mẫu biên bản họp, mẫu Review và Retrospective | A |
 
-## Nhịp Sprint (Assignment 1, hạn nộp 02/11/2026)
+## Nhịp Sprint (Assignment 1, hạn nộp 15/11/2026)
 
 | Sprint | Thời gian | Task theo đề | Sprint Review + Retrospective |
 |---|---|---|---|
@@ -23,7 +23,7 @@ Thư mục này lưu **bằng chứng làm theo Scrum** (đề yêu cầu quy tr
 | 2 | 19–22/10 | 7, 5, 6 | 22/10 |
 | 3 | 23–25/10 | 8, 9, 10 | 25/10 |
 | Hoàn thiện | 26/10 – 01/11 | rà DoD, test e2e, báo cáo LaTeX, tập demo | – |
-| Nộp / bảo vệ | 02/11 | – | – |
+| Nộp / bảo vệ | Hạn kết thúc 15/11 | – | – |
 
 ## Sự kiện Scrum và cách ghi lại
 

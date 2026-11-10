@@ -147,9 +147,9 @@ KHOA CÔNG NGHỆ THÔNG TIN
 	~~\\
 	\hline
 	\\
-	\multicolumn{1}{l}{\textbf{{\Large Bài tập lớn 2 (cuối kì): từ yêu cầu đến triển khai}}}\\
+	\multicolumn{1}{l}{\textbf{{\large Bài tập lớn 2 (cuối kì): từ yêu cầu đến triển khai}}}\\
 	\\
-	\textbf{{\Huge BrewLite -- Ứng dụng đặt đồ uống}}\\
+	\textbf{{\huge BrewLite -- Ứng dụng đặt đồ uống}}\\
 	\\
 	\hline
 \end{tabular}
@@ -160,10 +160,10 @@ KHOA CÔNG NGHỆ THÔNG TIN
 \begin{table}[h]
 \begin{tabular}{rrl}
 \hspace{5 cm} & GVHD: &Từ Lăng Phiêu\\
-& SV: & Nguyễn Lê Nhựt Thắng - \fillme{MSSV}\\
-& & Hồ Thiên Ngân - \fillme{MSSV} \\
-& & Hà Thiên Long - \fillme{MSSV} \\
-& & Giản Thiên Lực - \fillme{MSSV}\\
+& SV: & Nguyễn Lê Nhựt Thắng - 3124560085\\
+& & Hồ Thiên Ngân - 3124410224 \\
+& & Hà Thiên Long - 3124410193 \\
+& & Giản Thiên Lực - 3124410206\\
 \end{tabular}
 \vspace{1.5 cm}
 \end{table}
@@ -181,7 +181,6 @@ KHOA CÔNG NGHỆ THÔNG TIN
 \listoffigures
 \clearpage
 \listoftables
-\clearpage
 \clearpage
 \section*{Danh mục từ viết tắt}\addcontentsline{toc}{section}{Danh mục từ viết tắt}
 \begin{longtable}{@{}p{3cm}p{10cm}@{}}
@@ -223,7 +222,7 @@ Nghiệm thu chéo & Cross acceptance & Người khác với người viết tas
 
 \clearpage
 \section*{Tóm tắt}\addcontentsline{toc}{section}{Tóm tắt}
-Báo cáo trình bày Assignment 2 của dự án BrewLite, đi từ yêu cầu đến triển khai: khai thác và đặc tả yêu cầu (17 yêu cầu chức năng, 11 yêu cầu phi chức năng), mô hình hóa bằng UML, thiết kế kiến trúc kèm bảy quyết định kiến trúc, và hai Sprint hiện thực (20--26/10/2026). Sản phẩm là ứng dụng đặt đồ uống dùng Next.js, NestJS, PostgreSQL, có pipeline CI bốn job, pipeline CD từ tag phiên bản lên GHCR và Render, kèm smoke test. Nhóm đã chứng minh CI chặn merge khi test lỗi và quay lui thành công từ phiên bản \texttt{v0.1.2} về bản trước rồi triển khai lại. Ma trận truy vết nối yêu cầu với thiết kế, mã nguồn và test. Còn mở: dấu vết nghiệm thu chéo trên GitHub, và các giới hạn của gói hạ tầng miễn phí (web tạm ngủ, CSDL hết hạn 22/11/2026).
+Báo cáo trình bày Assignment 2 của dự án BrewLite, đi từ yêu cầu đến triển khai: khai thác và đặc tả yêu cầu (17 yêu cầu chức năng, 11 yêu cầu phi chức năng), mô hình hóa bằng UML, thiết kế kiến trúc kèm bảy quyết định kiến trúc, và hai Sprint hiện thực (20--26/10/2026). Sản phẩm là ứng dụng đặt đồ uống dùng Next.js, NestJS, PostgreSQL, có pipeline CI bốn job, pipeline CD từ tag phiên bản lên GHCR và Render, kèm smoke test. Nhóm đã chứng minh CI chặn merge khi test lỗi và quay lui thành công về bản trước rồi triển khai lại. Phiên bản bàn giao là \texttt{v0.1.3} (07/11/2026). Ma trận truy vết nối yêu cầu với thiết kế, mã nguồn và test. Còn mở: dấu vết nghiệm thu chéo trên GitHub, và các giới hạn của gói hạ tầng miễn phí (web tạm ngủ, CSDL hết hạn 22/11/2026).
 
 \vspace{6pt}
 \noindent\textbf{Từ khóa:} yêu cầu phần mềm; UML; kiến trúc; CI/CD; triển khai; truy vết
@@ -268,10 +267,15 @@ Vận hành & Docker Compose, GitHub Actions, GHCR, Render \\
 Sơ đồ & PlantUML (nguồn trong \path{docs/diagrams}) \\ \bottomrule
 \end{tabular}
 \end{table}
-Kho mã nguồn: \url{https://github.com/tthan-prog/BrewLite}. Web production: \url{https://brewlite-web.onrender.com}. API: \url{https://brewlite-api.onrender.com/health}. Phiên bản bàn giao: tag \texttt{v0.1.2} (commit \texttt{7b1ea96}, image \texttt{sha-7b1ea96}).
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item Kho mã nguồn: \url{https://github.com/tthan-prog/BrewLite}
+\item Web production: \url{https://brewlite-web.onrender.com}
+\item API: \url{https://brewlite-api.onrender.com/health}
+\item Phiên bản bàn giao: tag \texttt{v0.1.3}, phát hành 07/11/2026\\(commit \texttt{ecd11bd}, image \texttt{sha-ecd11bd})
+\end{itemize}
 
 \subsection{Cấu trúc báo cáo}\label{sec:se-cautruc}
-mục~\ref{ch:quanly} trình bày quản lý dự án; mục~\ref{ch:yeucau} đặc tả yêu cầu; mục~\ref{ch:mohinh} mô hình UML; mục~\ref{ch:kientruc} kiến trúc; mục~\ref{ch:trienkhai-se} hiện thực và CI/CD; mục~\ref{ch:kiemthu} kiểm thử; mục~\ref{ch:banggiao} bàn giao và nhìn lại; mục~\ref{ch:truyvet} ma trận truy vết; mục~\ref{ch:ketluan-se} kết luận. Phụ lục gồm bảng đối chiếu đề bài, phân công và tư liệu bổ sung.
+mục~\ref{ch:quanly} trình bày quản lý dự án; mục~\ref{ch:yeucau} đặc tả yêu cầu; mục~\ref{ch:mohinh} mô hình UML; mục~\ref{ch:kientruc} kiến trúc; mục~\ref{ch:trienkhai-se} hiện thực và CI/CD; mục~\ref{ch:kiemthu} kiểm thử; mục~\ref{ch:banggiao} bàn giao và nhìn lại; mục~\ref{ch:truyvet} ma trận truy vết; mục~\ref{ch:ketluan-se} kết luận. Phụ lục gồm bảng đối chiếu đề bài, phân công và đóng góp, và tư liệu bổ sung.
 
 \section{Quản lý dự án (Scrum)}\label{ch:quanly}
 \subsection{Vai trò / trách nhiệm trong nhóm}\label{sec:se-vaitro}
@@ -289,7 +293,7 @@ Giản Thiên Lực (D) & Frontend & Menu, giỏ, thanh toán, lịch sử; acti
 \end{table}
 
 \subsection{Sự kiện và artefact}\label{sec:se-suKien}
-Sprint Planning đầu Sprint (20/10 và 24/10), Daily Scrum hằng ngày tối đa 15 phút qua nhóm chat, Sprint Review và Retrospective cuối Sprint (24/10 và 26/10). Artefact: Product Backlog, Sprint Backlog (kèm Sprint Goal) và Increment là bản chạy được trên production. Biên bản nằm ở \path{docs/as2/scrum/minutes/a2-*}. Quy ước chung: không đẩy trực tiếp lên \texttt{main}; mỗi chức năng một nhánh; PR phải qua check \texttt{api} và \texttt{web}, cần một approval; đóng băng mã tối 25/10.
+Sprint Planning đầu Sprint (20/10 và 24/10), Daily Scrum hằng ngày tối đa 15 phút qua nhóm chat, Sprint Review và Retrospective cuối Sprint (24/10 và 26/10). Artefact: Product Backlog, Sprint Backlog (kèm Sprint Goal) và Increment là bản chạy được trên production. Product Backlog và Sprint Backlog tổng hợp ở \path{docs/as2/scrum/product-backlog.md}; biên bản nằm ở \path{docs/as2/scrum/minutes/a2-*}. Quy ước chung: không đẩy trực tiếp lên \texttt{main}; mỗi chức năng một nhánh; PR phải qua check \texttt{api} và \texttt{web}, cần một approval.
 
 \subsection{Kế hoạch và diễn biến từng Sprint}\label{sec:se-sprint}
 \subsubsection{Sprint 1 (20--23/10/2026)}
@@ -300,7 +304,7 @@ Sprint Planning đầu Sprint (20/10 và 24/10), Daily Scrum hằng ngày tối 
 \toprule \textbf{Task} & \textbf{Nội dung} & \textbf{Làm chính} & \textbf{Nghiệm thu} \\ \midrule \endhead
 \bottomrule \endlastfoot
 4.1 & Repo, cấu trúc, README, \texttt{.env.example}, branch protection, quy ước commit, DoD & A & B \\
-4.2 & Tạo phẩm Task 1--3 trong \path{docs}, tag \texttt{assign1-final}, thay đổi qua PR & A; C (viết yêu cầu) & D \\
+4.2 & Tạo phẩm Task 1--3 trong \path{docs}, tag \texttt{assign1-final} (commit \texttt{9581384}), thay đổi qua PR & A; C (viết yêu cầu) & D \\
 4.3 & Dữ liệu mẫu, \texttt{GET /products}, \texttt{GET /products/:id} & B (dữ liệu), A (API) & C \\
 4.3 & Màn hình menu mobile-first, loading, empty, error & D & A \\
 4.3 & Kiểm thử tối thiểu API và menu & C & A \\
@@ -324,7 +328,7 @@ Kết quả Review (24/10): cả bốn hạng mục demo được và đạt DoD
 5.4 & Video demo end-to-end & D & C \\
 5.4 & Sprint Review và Retrospective & A & Cả nhóm \\
 \end{longtable}
-Kết quả Review (24/10, cập nhật tới 26/10): Task 5.1, 5.2 và 5.3 demo được và đạt DoD; Task 5.4 ``gần đạt''; video demo chưa xong tại thời điểm Review và được hoàn tất sau đó (xem mục~\ref{sec:se-sanpham}). Điểm còn lại lúc Review là 2 việc (video), tính theo số việc.
+Kết quả Review (26/10): Task 5.1, 5.2 và 5.3 demo được và đạt DoD; Task 5.4 ``gần đạt''; video demo chưa xong tại thời điểm Review và được hoàn tất sau đó (xem mục~\ref{sec:se-sanpham}). Điểm còn lại lúc Review là 2 việc (video), tính theo số việc.
 
 \subsection{Definition of Done}\label{sec:se-dod}
 Bốn mục DoD áp dụng cho mọi task (\path{docs/as1/scrum/dod-nghiem-thu.md}): (D1) chạy được, không lỗi build; (D2) commit rõ ràng và PR có ít nhất một Approve của người khác; (D3) API validate và giao diện có loading, lỗi; (D4) README có hướng dẫn chạy. Người nghiệm thu khác người viết task.
@@ -332,7 +336,7 @@ Bốn mục DoD áp dụng cho mọi task (\path{docs/as1/scrum/dod-nghiem-thu.m
 \textbf{Mức độ áp dụng trung thực:} D1, D3, D4 có bằng chứng (CI xanh, test, README). Với D2, nhóm ghi nhận nghiệm thu chéo trong tài liệu, nhưng các PR chưa có Approve hoặc bình luận nghiệm thu của người đánh giá trên GitHub (cột Reviews trống). Điểm này đã được nêu ở Retrospective của cả hai Sprint.
 
 \section{Đặc tả yêu cầu}\label{ch:yeucau}
-Đặc tả đầy đủ nằm ở \path{docs/requirements/srs.md}, \path{context-and-scope.md} và \path{use-case-checkout.md}. Hệ mã FR/NFR được giữ xuyên suốt để lập ma trận truy vết ở mục~\ref{ch:truyvet}.
+Đặc tả đầy đủ nằm trong thư mục \path{docs/requirements} (các tệp \path{srs.md}, \path{context-and-scope.md} và \path{use-case-checkout.md}). Hệ mã FR/NFR được giữ xuyên suốt để lập ma trận truy vết ở mục~\ref{ch:truyvet}.
 
 \subsection{Bối cảnh, phạm vi (trong / ngoài)}\label{sec:se-phamvi}
 \textbf{Vấn đề nghiệp vụ.} Quán cà phê quy mô nhỏ cần để khách đặt món và thanh toán không dùng tiền mặt trên điện thoại, tránh xếp hàng và nhầm đơn.
@@ -358,7 +362,7 @@ Nhóm phát triển & Xây dựng sản phẩm & Đúng hạn, dễ bảo trì &
 \subsection{Giả định, ràng buộc, phụ thuộc}\label{sec:se-rangbuoc}
 \textbf{Giả định.} (G1) Thanh toán mặc định là mô phỏng (không có tiền thật), có thể thành công hoặc thất bại theo kịch bản; từ \texttt{v0.1.3} có thêm chế độ sandbox VNPay/MoMo khi cấu hình khóa, trong đó VNPay đã được thử đến trạng thái PAID ngày 07/11/2026. (G2) Một cửa hàng, một loại tiền (VND). (G3) Phụ phí size: S +0, M +5.000, L +10.000 đồng. (G4) Điểm thưởng: 1 điểm cho mỗi 10.000 đồng. (G5) Tồn kho tính theo nguyên liệu (\texttt{Ingredient.stock}) cho món có công thức và trừ khi thanh toán thành công; món chưa có công thức dùng \texttt{Product.stock} và trừ khi tạo đơn; hủy đơn chỉ hoàn phần đã trừ. (G6) Đơn mới ở trạng thái PENDING.
 
-\textbf{Ràng buộc.} (R1) Bắt buộc Next.js, NestJS, PostgreSQL. (R2) Frontend mobile-first/PWA. (R3) Hạn nộp theo thông báo của giảng viên. (R4) Nhóm bốn người, làm theo Scrum. (R5) Production qua HTTPS, CSDL không public, secret không nằm trong repo.
+\textbf{Ràng buộc.} (R1) Bắt buộc Next.js, NestJS, PostgreSQL. (R2) Frontend mobile-first/PWA. (R3) Hạn nộp 15/11/2026. (R4) Nhóm bốn người, làm theo Scrum. (R5) Production qua HTTPS, CSDL không public, secret không nằm trong repo.
 
 \textbf{Rủi ro ban đầu.} Không kịp triển khai production (giảm thiểu: triển khai thử sớm, 23/10); hai bài tập lớn chồng lịch (dùng chung mã nguồn); đặt hoặc thanh toán đồng thời gây âm tồn kho (cập nhật có điều kiện trong transaction, có test); sơ đồ mâu thuẫn SRS (rà bằng ma trận truy vết); thành viên chậm tiến độ (quy trình trong thỏa thuận nhóm).
 
@@ -477,7 +481,7 @@ Hình~\ref{fig:class}, Hình~\ref{fig:class-pay} và Hình~\ref{fig:class-inv} k
 
 \begin{table}[htbp]\centering
 \caption{Chuyển trạng thái hợp lệ}\label{tab:state}
-\begin{tabular}{@{}p{3.2cm}p{9.6cm}@{}}\toprule
+\begin{tabular}{@{}p{3.7cm}p{9.1cm}@{}}\toprule
 \textbf{Từ} & \textbf{Sang} \\ \midrule
 PENDING & PAID, PAYMENT\_FAILED, CANCELLED \\
 PAYMENT\_FAILED & PAID (thử lại), CANCELLED \\
@@ -533,8 +537,8 @@ Hình~\ref{fig:deploy} vẽ cấu trúc tĩnh của hệ thống theo ký hiệu
 Giới hạn của gói miễn phí (kiểm tra 23/10/2026): dịch vụ web ngủ khi không dùng (yêu cầu đầu tiên có thể chậm khoảng 50 giây); CSDL hết hạn ngày 22/11/2026 và không có sao lưu.
 
 \subsection{Cơ sở dữ liệu và API}\label{sec:se-db}
-Lược đồ Prisma gồm 10 thực thể (Hình~\ref{fig:erd}). Khuyến mãi liên kết với đơn qua mã \texttt{promoCode}, không dùng khóa ngoại.
-\hinh{erd.png}{.62\linewidth}{Sơ đồ thực thể -- quan hệ theo \texttt{schema.prisma}}{fig:erd}
+Lược đồ Prisma của bản \texttt{v0.1.3} gồm 18 bảng (Hình~\ref{fig:erd}): 10 bảng lõi phục vụ luồng đặt và thanh toán theo đề (User, Product, Topping, Order, OrderItem, OrderItemTopping, Payment, IdempotencyRecord, LoyaltyTransaction, Promotion); 8 bảng còn lại thuộc chức năng bổ sung ngoài đề (nguyên liệu và công thức, thanh toán QR, đổi quà). Khuyến mãi liên kết với đơn qua mã \texttt{promoCode}, không dùng khóa ngoại.
+\hinh{erd.png}{\linewidth}{Sơ đồ thực thể -- quan hệ theo \texttt{schema.prisma}}{fig:erd}
 \nguon{nhóm vẽ từ \path{apps/api/prisma/schema.prisma}}
 \begin{longtable}{@{}p{1.4cm}p{4cm}p{3.4cm}p{3.9cm}@{}}
 \caption{Các endpoint chính}\label{tab:api}\\
@@ -555,7 +559,7 @@ GET & \path{/health} & Công khai & -- \\
 
 \section{Triển khai và tích hợp liên tục}\label{ch:trienkhai-se}
 \subsection{Kho mã và quản lý tài liệu}\label{sec:se-repo}
-Kho \texttt{tthan-prog/BrewLite} theo cấu trúc monorepo: \path{apps/web} (Next.js), \path{apps/api} (NestJS, Prisma), \path{tests/e2e} (Playwright), \path{docs} (yêu cầu, sơ đồ, kiến trúc, Scrum, bằng chứng, release notes), \path{.github/workflows} (\texttt{ci.yml}, \texttt{cd.yml}) và \path{docker-compose.yml}. Mỗi chức năng một nhánh; thay đổi vào \texttt{main} đi qua pull request. Nhánh \texttt{main} được bảo vệ: phải qua PR, hai check \texttt{api} và \texttt{web} phải xanh, cần một approval, không force-push. Tag \texttt{assign1-final} (commit \texttt{e7a627a}) đánh dấu bộ tài liệu Assignment 1; bản phát hành \texttt{v0.1.2} có ghi chú trong \path{docs/as2/release-notes}.
+Kho \texttt{tthan-prog/BrewLite} theo cấu trúc monorepo: \path{apps/web} (Next.js), \path{apps/api} (NestJS, Prisma), \path{tests/e2e} (Playwright), \path{docs} (yêu cầu, sơ đồ, kiến trúc, Scrum, bằng chứng, release notes), \path{.github/workflows} (\texttt{ci.yml}, \texttt{cd.yml}) và \path{docker-compose.yml}. Mỗi chức năng một nhánh; thay đổi vào \texttt{main} đi qua pull request. Nhánh \texttt{main} được bảo vệ: phải qua PR, hai check \texttt{api} và \texttt{web} phải xanh, cần một approval, không force-push. Tag \texttt{assign1-final} (commit \texttt{9581384}) đánh dấu bản Assignment 1 (mã hoàn tất 23/10/2026, thêm bản sửa ngày 07/11 để \texttt{docker compose build} chạy được trên bản clone sạch); bản phát hành \texttt{v0.1.3} có ghi chú trong \path{docs/as2/release-notes}.
 
 \subsection{Hiện thực các chức năng chính}\label{sec:se-hienthuc}
 Luồng menu $\to$ size, đường, đá $\to$ giỏ $\to$ thanh toán $\to$ xác nhận $\to$ lịch sử đã chạy trên production (23/10/2026, tài khoản \texttt{customer@brewlite.com}), kể cả thanh toán thất bại và thử lại. Các ảnh dưới đây là bằng chứng thu thập trong \path{docs/as2/evidence}.
@@ -583,10 +587,11 @@ Kết nối an toàn và endpoint health của production ở Hình~\ref{fig:htt
 \hinh{ev15-ci-xanh-merge-pr22.jpg}{.92\linewidth}{CI xanh 4/4 job (api, api-e2e, web, e2e-browser) sau khi merge PR \#22}{fig:ci4}
 
 \subsection{CD, di trú dữ liệu và quay lui}\label{sec:se-cd}
-\texttt{cd.yml} chạy khi gắn tag \texttt{v*} hoặc chạy tay (\texttt{workflow\_dispatch}, tham số \texttt{image\_tag}) theo ba bước: (1) \emph{quality}: lint và test; (2) \emph{build}: dựng image Docker, đẩy lên GHCR với tag \texttt{sha-...}; (3) \emph{deploy}: gọi Deploy Hook của Render cho API và web kèm \texttt{imgURL}, rồi smoke test gọi \texttt{/health}. Secret nằm trong GitHub Secrets; migration chạy trước khi API khởi động. CD lần đầu (tag \texttt{v0.1.0}) đỏ vì thiếu cấu hình URL và hook; sau khi bổ sung, CD xanh từ \texttt{v0.1.1} và \texttt{v0.1.2}.
+\texttt{cd.yml} chạy khi gắn tag \texttt{v*} hoặc chạy tay (\texttt{workflow\_dispatch}, tham số \texttt{image\_tag}) theo ba bước: (1) \emph{quality}: lint và test; (2) \emph{build}: dựng image Docker, đẩy lên GHCR với tag \texttt{sha-...}; (3) \emph{deploy}: gọi Deploy Hook của Render cho API và web kèm \texttt{imgURL}, rồi smoke test gọi \texttt{/health}. Secret nằm trong GitHub Secrets; migration chạy trước khi API khởi động. CD lần đầu (tag \texttt{v0.1.0}) đỏ vì thiếu cấu hình URL và hook; sau khi bổ sung, CD xanh từ \texttt{v0.1.1} và \texttt{v0.1.2}. Bản bàn giao \texttt{v0.1.3} (07/11/2026): CD chạy từ tag đỏ ở bước smoke test vì web chưa khởi động xong (\texttt{/menu} trả 502, smoke test không thử lại); nhóm chạy tay CD \#15 với \texttt{image\_tag=sha-ecd11bd} và lần này xanh (Hình~\ref{fig:cd013}).
 \hinh{ev12-cd-v0.1.1-xanh.jpg}{.92\linewidth}{CD từ tag \texttt{v0.1.1}: các bước quality, build-and-push, deploy-and-smoke-test đều xanh}{fig:cd011}
 \hinh{ev13-cd-v0.1.2-xanh.jpg}{.92\linewidth}{CD từ tag \texttt{v0.1.2} (commit \texttt{7b1ea96}) xanh}{fig:cd012}
 \hinh{ev14-render-events-deploy-sha-7b1ea96.jpg}{.92\linewidth}{Render Events: deploy image \texttt{sha-7b1ea96} qua Deploy Hook}{fig:render}
+\hinh{ev41-cd15-chay-thu-cong-image-tag-xanh.jpg}{.92\linewidth}{CD \#15 chạy tay với \texttt{image\_tag=sha-ecd11bd} (bản \texttt{v0.1.3}): xanh}{fig:cd013}
 
 \textbf{Quay lui có minh chứng (23/10/2026).} Nhóm chạy lại workflow CD với \texttt{image\_tag} của bản ổn định trước đó (\texttt{sha-e445b63}, tức \texttt{v0.1.1}; CD \#11): bước build bị bỏ qua, chỉ deploy lại image cũ và chạy smoke test; giao diện quay về bản cũ (không có khung lỗi đỏ). Sau đó triển khai lại bản mới \texttt{sha-7b1ea96} (CD \#12), khung lỗi đỏ xuất hiện trở lại, chứng tỏ hai lần deploy khác nhau.
 \hinh{ev20-rollback-cd11-bo-qua-build.jpg}{.92\linewidth}{CD \#11: bỏ qua build, deploy lại image cũ}{fig:rb1}
@@ -602,7 +607,7 @@ Bốn mức kiểm thử, mỗi mức gắn với một nhóm yêu cầu:
 \begin{itemize}
 \item \textbf{Unit} (Vitest): logic thuần như máy trạng thái đơn và tính điểm thưởng.
 \item \textbf{Tích hợp} (Supertest, PostgreSQL thật, job \texttt{api-e2e}): API xác thực, đơn, thanh toán, idempotency, tồn kho, khuyến mãi.
-\item \textbf{E2E trình duyệt} (Playwright, job \texttt{e2e-browser}): giỏ hàng, viewport di động, ba trạng thái menu, manifest PWA.
+\item \textbf{E2E trình duyệt} (Playwright, job \texttt{e2e-browser}): luồng đăng ký, đặt đơn, thanh toán lỗi rồi thử lại, lịch sử; viewport di động; ba trạng thái menu; manifest PWA; giới hạn giỏ hàng.
 \item \textbf{Smoke} (trong \texttt{cd.yml}): gọi \texttt{/health} sau mỗi lần deploy.
 \end{itemize}
 Số test lấy từ lần chạy gần nhất trên nhánh \texttt{main} (commit \texttt{2cae795}); kết quả đạt/không đạt lấy từ CI.
@@ -617,7 +622,7 @@ E2E trình duyệt & Playwright & 10 & \path{tests/e2e/brewlite-flow.spec.ts} \\
 \end{table}
 
 \subsection{Test case}\label{sec:se-testcase}
-Bảng~\ref{tab:testcase} liệt kê các test case chính, lấy tên từ mã nguồn kiểm thử và gắn với FR/NFR. Bảy test Playwright đầu tiên là E2E-T01a/b, T02, T03a/b/c và T04, ba test còn lại thuộc các nhóm bổ sung của tập 10 test.
+Bảng~\ref{tab:testcase} liệt kê các test case chính, lấy tên từ mã nguồn kiểm thử và gắn với FR/NFR. Bảng gồm đủ 10 test Playwright (E2E-T01a đến E2E-T07).
 {\small
 \begin{longtable}{@{}p{1.59cm}p{6.37cm}p{1.69cm}p{3.38cm}@{}}
 \caption{Test case chính và yêu cầu liên quan}\label{tab:testcase}\\
@@ -637,16 +642,20 @@ INT-T10 & \texttt{/orders/me} chỉ trả đơn của mình; \texttt{/orders/:id
 INT-T11 & 20 người đặt song song, kho 5 $\to$ đúng 5 đơn; đơn lỗi giữa chừng rollback; hủy đơn chỉ hoàn phần đã trừ & FR-13 & Tích hợp \\
 INT-T12 & Mã \texttt{WELCOME10} giảm 10\% khi đủ điều kiện & FR-14 & Tích hợp \\
 API-T02, INT-T13 & 1 điểm cho mỗi 10.000 đồng; PAID cộng điểm; hủy đơn đã PAID trừ lại (EARN/REVERSAL) & FR-15 & Unit, tích hợp \\
-E2E-T01a/b & Thêm vào giỏ và tính tổng tiền & FR-04 & E2E \\
+E2E-T01a & Menu hiển thị sản phẩm lấy từ API & FR-01 & E2E \\
+E2E-T01b & Đăng ký, đăng nhập, thêm vào giỏ, đặt đơn, thanh toán lỗi rồi thử lại thành công, xem lịch sử & FR-04, FR-08, FR-12 & E2E \\
 E2E-T02 & Viewport 390 px không cuộn ngang & NFR-05 & E2E \\
 E2E-T03a/b/c & Menu đang tải, rỗng, lỗi và thử lại & FR-02, NFR-06 & E2E \\
 E2E-T04 & Manifest và biểu tượng PWA & NFR-05 & E2E \\
+E2E-T05 & Thanh toán QR bằng tài khoản test, hiện điểm được cộng (chức năng bổ sung ngoài đề) & FR-15 & E2E \\
+E2E-T06 & Giỏ hàng không tăng quá 50 ly mỗi dòng & FR-04 & E2E \\
+E2E-T07 & Ô giả lập thất bại chỉ hiện với Ví/Thẻ và gây thanh toán thất bại & FR-08 & E2E \\
 \end{longtable}}
 
 \subsection{Kết quả kiểm thử}\label{sec:se-ketquakt}
 \textbf{Tự động.} Lần chạy gần nhất trên \texttt{main} (commit \texttt{2cae795}) cho 36 unit, 81 tích hợp và 10 E2E đều đạt, CI xanh ở cả bốn job. Ba test bắt buộc của Task 10 đều đạt: chặn chuyển trạng thái sai, cùng \texttt{Idempotency-Key} chỉ tạo một đơn, 20 yêu cầu song song khi kho còn 5 thì đúng 5 thành công.
 
-\textbf{Thủ công.} Thành viên D chạy trực tiếp trên backend Docker (\texttt{localhost:3001}) sáu trường hợp, tất cả đạt (Bảng~\ref{tab:manual}).
+\textbf{Thủ công.} Giản Thiên Lực (D) chạy trực tiếp trên backend Docker (\texttt{localhost:3001}) sáu trường hợp, tất cả đạt (Bảng~\ref{tab:manual}).
 \begin{table}[htbp]\centering
 \caption{Kiểm thử chức năng thủ công}\label{tab:manual}
 \begin{tabular}{@{}p{6.4cm}p{6.4cm}@{}}\toprule
@@ -674,20 +683,20 @@ E2E-T04 & Manifest và biểu tượng PWA & NFR-05 & E2E \\
 Kho mã nguồn & \url{https://github.com/tthan-prog/BrewLite} \\
 Web production (HTTPS) & \url{https://brewlite-web.onrender.com} \\
 API và health & \url{https://brewlite-api.onrender.com/health} \\
-Bản phát hành & Tag \texttt{v0.1.2}; ghi chú trong \path{docs/as2/release-notes} \\
+Bản phát hành & Tag \texttt{v0.1.3} (07/11/2026); ghi chú trong \path{docs/as2/release-notes} \\
 SRS, use case, truy vết & \path{docs/requirements}, \path{docs/traceability-matrix.md} \\
 Sơ đồ UML (nguồn và ảnh) & \path{docs/diagrams}, \path{docs/architecture} \\
 Kiến trúc và ADR & \path{docs/architecture/architecture.md}, \path{adr/001}--\path{007} \\
 CI/CD và quay lui & \path{.github/workflows/ci.yml}, \path{cd.yml}; \path{docs/deployment.md}; README mục 15 \\
 Test tự động & 36 unit, 81 tích hợp, 10 E2E \\
-Bằng chứng & \path{docs/as2/evidence} (ảnh 01--25) \\
+Bằng chứng & \path{docs/as2/evidence} (ảnh 01--29 và 41) \\
 Biên bản Sprint & \path{docs/as2/scrum/minutes/a2-*} \\
 Video demo end-to-end & \url{https://drive.google.com/file/d/1uxrJSc9OkNkD-68vCTKXsPb0DcUudtat/view?usp=sharing} (Giản Thiên Lực thực hiện) \\
 \end{longtable}
 CSDL production không public (kết nối nội bộ); không có secret trong repository (\texttt{.env} bị \texttt{.gitignore} chặn, giá trị thật nằm trong GitHub Secrets và Render).
 
 \subsection{Sprint Review / Demo}\label{sec:se-review}
-Increment demo được là phiên bản \texttt{v0.1.2} trên production. Bảng~\ref{tab:review} tóm tắt Review Sprint 2 (24/10, cập nhật đến 26/10). Sprint Goal phần lớn đạt: có URL production HTTPS, CI/CD chạy, quay lui đã chứng minh; video demo được hoàn tất sau buổi Review.
+Increment demo tại Review là bản đang chạy trên production lúc đó; bản bàn giao cuối là \texttt{v0.1.3} (07/11/2026). Bảng~\ref{tab:review} tóm tắt Review Sprint 2 (26/10). Sprint Goal phần lớn đạt: có URL production HTTPS, CI/CD chạy, quay lui đã chứng minh; video demo được hoàn tất sau buổi Review.
 \begin{table}[htbp]\centering
 \caption{Kết quả Sprint Review Sprint 2}\label{tab:review}
 \begin{tabular}{@{}p{4.4cm}p{1.8cm}p{2cm}p{4.6cm}@{}}\toprule
@@ -695,7 +704,7 @@ Increment demo được là phiên bản \texttt{v0.1.2} trên production. Bản
 5.1 Hoàn thiện MVP & Có & Có & Ảnh 01--11 \\
 5.2 Tích hợp, kiểm thử & Có & Có & CI 4 job, 10 E2E \\
 5.3 CD và quay lui & Có & Có & Ảnh 12--14, 20--25 \\
-5.4 Production, release, README & Có & Gần đạt & Release \texttt{v0.1.2} \\
+5.4 Production, release, README & Có & Gần đạt & Release trên GitHub; bản bàn giao \texttt{v0.1.3} \\
 5.4 Video demo & Có (sau Review) & Chờ nghiệm thu & Liên kết ở Bảng~\ref{tab:sanpham} \\
 5.4 Review, Retrospective & Có & Có & Biên bản \\ \bottomrule
 \end{tabular}
@@ -725,14 +734,14 @@ Ma trận nối yêu cầu $\to$ use case $\to$ thiết kế $\to$ mã nguồn $
 \toprule \textbf{Yêu cầu} & \textbf{Ưu tiên} & \textbf{Use case} & \textbf{Thiết kế} & \textbf{Mã nguồn} & \textbf{Test} & \textbf{Trạng thái} \\ \midrule \endfirsthead
 \toprule \textbf{Yêu cầu} & \textbf{Ưu tiên} & \textbf{Use case} & \textbf{Thiết kế} & \textbf{Mã nguồn} & \textbf{Test} & \textbf{Trạng thái} \\ \midrule \endhead
 \bottomrule \endlastfoot
-FR-01 & Must & US-01 & Activity, Class & \texttt{GET /products} & INT-T01 & Đạt \\
+FR-01 & Must & US-01 & Activity, Class & \texttt{GET /products} & INT-T01, E2E-T01a & Đạt \\
 FR-02 & Must & US-01 & Activity & Trang menu & E2E-T03a/b/c & Đạt \\
 FR-03 & Must & US-02 & Class & \texttt{GET /products/:id} & INT-T02 & Đạt \\
-FR-04 & Must & US-03 & Activity & Giỏ hàng (web) & E2E-T01a/b & Đạt \\
+FR-04 & Must & US-03 & Activity & Giỏ hàng (web) & E2E-T01b, T06 & Đạt \\
 FR-05 & Must & US-04 & Class (User) & \texttt{POST /auth/*} & INT-T03 & Đạt \\
 FR-06 & Must & UC-01 (E1) & Activity, Sequence & \texttt{JwtAuthGuard} & INT-T04 & Đạt \\
 FR-07 & Must & UC-01 & Sequence, Class & \texttt{POST /orders} & INT-T05 & Đạt \\
-FR-08 & Must & UC-01 & Sequence, Class & \texttt{POST /payments} & INT-T06 & Đạt \\
+FR-08 & Must & UC-01 & Sequence, Class & \texttt{POST /payments} & INT-T06, E2E-T01b, T07 & Đạt \\
 FR-09 & Must & UC-01 (A2) & Sequence, ADR-004 & \texttt{Idempotency-Key} & INT-T07 & Đạt \\
 FR-10 & Must & UC-01, UC-02 & Class (OrderStatus) & \path{order-state.ts} & API-T01, INT-T08 & Đạt \\
 FR-11 & Should & UC-02 & Class (Role) & \texttt{PATCH /orders/:id/status} & INT-T09 & Đạt \\
@@ -799,6 +808,19 @@ Các hạng mục lấy theo cách đánh số Task của Assignment 2 trong tà
 Ma trận truy vết & mục~\ref{ch:truyvet} & Đã đáp ứng \\
 \end{longtable}
 
+\section{Phân công và đóng góp}\label{app:phancong}
+Tỷ lệ đóng góp lấy từ \path{docs/chung/bang-dong-gop.md}: Assignment 1 tính theo điểm ước lượng của Product Backlog (tổng 40 điểm), Assignment 2 tính theo số hạng mục trong \path{docs/as2/phan-cong.md} (tổng 33 hạng mục); tỷ lệ tổng là trung bình cộng hai tỷ lệ. Đây là khối lượng được giao, không phải số giờ làm.
+\begin{table}[htbp]\centering\small
+\caption{Phân công và tỷ lệ đóng góp}\label{tab:donggop}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.2cm}p{1.8cm}>{\raggedright\arraybackslash}p{4.0cm}p{1.05cm}p{1.05cm}p{1.05cm}@{}}\toprule
+\textbf{Thành viên} & \textbf{MSSV} & \textbf{Phụ trách chính (Assignment 2)} & \textbf{AS1} & \textbf{AS2} & \textbf{Tổng} \\ \midrule
+Nguyễn Lê Nhựt Thắng (A) & 3124560085 & Scrum Master; code, CI/CD, triển khai, sequence, báo cáo & 41,3\% & 42,4\% & 41,8\% \\
+Hồ Thiên Ngân (B) & 3124410224 & Mô hình dữ liệu, class diagram, ERD, kiến trúc, ADR & 26,3\% & 15,2\% & 20,7\% \\
+Hà Thiên Long (C) & 3124410193 & Yêu cầu, truy vết, backlog, kiểm thử, Product Owner tạm & 10,0\% & 21,2\% & 15,6\% \\
+Giản Thiên Lực (D) & 3124410206 & Activity, use case, giao diện, video, slide & 22,5\% & 21,2\% & 21,9\% \\ \bottomrule
+\end{tabular}
+\end{table}
+
 \section{Tư liệu bổ sung}\label{app:khac}
 \subsection{Cấu trúc kho mã}\label{app:khac1}
 \begin{lstlisting}[caption={Cấu trúc thư mục chính của repository},label={lst:tree}]
@@ -813,7 +835,12 @@ BrewLite/
 \end{lstlisting}
 
 \subsection{Liên kết}\label{app:khac2}
-Kho mã: \url{https://github.com/tthan-prog/BrewLite}. Web production: \url{https://brewlite-web.onrender.com}. API: \url{https://brewlite-api.onrender.com/health}. Video demo: \url{https://drive.google.com/file/d/1uxrJSc9OkNkD-68vCTKXsPb0DcUudtat/view?usp=sharing}.
+\begin{itemize}\raggedright\setlength{\itemsep}{0pt}
+\item Kho mã: \url{https://github.com/tthan-prog/BrewLite}
+\item Web production: \url{https://brewlite-web.onrender.com}
+\item API: \url{https://brewlite-api.onrender.com/health}
+\item Video demo: \url{https://drive.google.com/file/d/1uxrJSc9OkNkD-68vCTKXsPb0DcUudtat/view?usp=sharing}
+\end{itemize}
 
 \clearpage
 \begin{thebibliography}{80}

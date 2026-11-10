@@ -1,6 +1,6 @@
 # Sprint 1 Backlog
 
-- **Thời gian:** 14/10 – 18/10/2026 (hạn nộp 02/11/2026)
+- **Thời gian:** 14/10 – 18/10/2026
 - **Sprint Goal:** Nền tảng dự án chạy được; có dữ liệu mẫu và menu hiển thị được (Task 1, 2, 3, 4).
 - **Daily Scrum:** hằng ngày 20:00, tối đa 15 phút, qua nhóm chat.
 - **Sprint Review và Retrospective:** 18/10/2026, 20:00 (xem `minutes/02-sprint1-review-retro.md`).

@@ -139,9 +139,9 @@ KHOA CÔNG NGHỆ THÔNG TIN
 	~~\\
 	\hline
 	\\
-	\multicolumn{1}{l}{\textbf{{\Large Bài tập lớn 1 (giữa kì): xây dựng ứng dụng theo Agile Scrum}}}\\
+	\multicolumn{1}{l}{\textbf{{\large Bài tập lớn 1 (giữa kì): xây dựng ứng dụng theo Agile Scrum}}}\\
 	\\
-	\textbf{{\Huge BrewLite -- Ứng dụng đặt đồ uống}}\\
+	\textbf{{\huge BrewLite -- Ứng dụng đặt đồ uống}}\\
 	\\
 	\hline
 \end{tabular}
@@ -152,10 +152,10 @@ KHOA CÔNG NGHỆ THÔNG TIN
 \begin{table}[h]
 \begin{tabular}{rrl}
 \hspace{5 cm} & GVHD: &Từ Lăng Phiêu\\
-& SV: & Nguyễn Lê Nhựt Thắng - \fillme{MSSV}\\
-& & Hồ Thiên Ngân - \fillme{MSSV} \\
-& & Hà Thiên Long - \fillme{MSSV} \\
-& & Giản Thiên Lực - \fillme{MSSV}\\
+& SV: & Nguyễn Lê Nhựt Thắng - 3124560085\\
+& & Hồ Thiên Ngân - 3124410224 \\
+& & Hà Thiên Long - 3124410193 \\
+& & Giản Thiên Lực - 3124410206\\
 \end{tabular}
 \vspace{1.5 cm}
 \end{table}
@@ -174,7 +174,7 @@ KHOA CÔNG NGHỆ THÔNG TIN
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Phần giới thiệu}
 \subsection{Bối cảnh và mục tiêu}
-BrewLite là ứng dụng web mobile-first giúp khách đặt đồ uống và thanh toán không dùng tiền mặt: xem menu, chọn size/topping, thêm vào giỏ, đăng nhập, đặt đơn, thanh toán mô phỏng (Ví/Thẻ) và xem lịch sử đơn. Bài tập lớn gồm 10 task theo Agile Scrum (mỗi task 1 điểm), kèm bốn nghiệp vụ backend nâng cao ở Task 10. Hạn nộp: 02/11/2026.
+BrewLite là ứng dụng web mobile-first giúp khách đặt đồ uống và thanh toán không dùng tiền mặt: xem menu, chọn size/topping, thêm vào giỏ, đăng nhập, đặt đơn, thanh toán mô phỏng (Ví/Thẻ) và xem lịch sử đơn. Bài tập lớn gồm 10 task theo Agile Scrum (mỗi task 1 điểm), kèm bốn nghiệp vụ backend nâng cao ở Task 10. Hạn nộp: 15/11/2026.
 
 \subsection{Công nghệ và sản phẩm bàn giao}
 \begin{center}
@@ -186,7 +186,7 @@ Frontend & Next.js (mobile-first), giỏ hàng, đăng nhập, thanh toán, lị
 Backend & NestJS, class-validator, JWT, bcrypt \\
 Cơ sở dữ liệu & PostgreSQL 16, Prisma 7 (migration, seed) \\
 Kiểm thử, vận hành & Vitest, Supertest, Playwright; Docker Compose, GitHub Actions \\
-Mã nguồn & \url{https://github.com/tthan-prog/BrewLite}; bản nộp: nhánh \texttt{main}; mốc Assignment 1: tag \texttt{assign1-final} (23/10/2026) \\
+Mã nguồn & \url{https://github.com/tthan-prog/BrewLite}; bản nộp: nhánh \texttt{main}; mốc Assignment 1: tag \texttt{assign1-final} (commit \texttt{9581384}: mã hoàn tất 23/10/2026, thêm bản sửa ngày 07/11 để \texttt{docker compose build} chạy được trên bản clone sạch) \\
 Bản chạy & \url{https://brewlite-web.onrender.com} \\ \bottomrule
 \end{tabular}
 \end{center}
@@ -302,7 +302,7 @@ E2E trình duyệt & Playwright & 10 & Đạt \\
 \bottomrule
 \end{tabular}
 \end{center}
-Số liệu của nhánh \texttt{main} (commit \texttt{2cae795}), gồm cả test của phần mở rộng sau mốc \texttt{assign1-final} (23/10), khi đó nhóm ghi 22 unit và 32 tích hợp. Lint, build sạch; CI xanh.
+Số liệu của nhánh \texttt{main} (commit \texttt{2cae795}), gồm cả test của phần mở rộng sau mốc Assignment 1 (23/10), khi đó nhóm ghi 22 unit và 32 tích hợp. Lint, build sạch; CI xanh.
 
 \subsection{Ba test bắt buộc của Task 10}
 \begin{itemize}\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}
@@ -315,10 +315,10 @@ Số liệu của nhánh \texttt{main} (commit \texttt{2cae795}), gồm cả tes
 \section{Bàn giao và nhìn lại}
 \textbf{Bàn giao:} mã nguồn trên Git; \texttt{docker compose up --build} chạy đủ db, backend, frontend; README hướng dẫn cài đặt, chạy, kiểm thử; demo luồng menu, giỏ hàng, đăng nhập, thanh toán, xác nhận, lịch sử.
 
-\textbf{Retrospective.} Làm tốt: theo đường găng và có test chứng minh nghiệp vụ Task 10; README và Docker giúp chạy lại dễ. Cần cải thiện: bắt đầu muộn (Sprint 1 trễ 9 điểm); phân bố commit giữa các thành viên chưa đều (đến mốc \texttt{assign1-final}: A 36, B 5, C 1, D 1 trên 43 commit; A tích hợp phần lớn mã); nghiệm thu chéo mới ghi trong tài liệu nhóm, chưa có Approve trên từng Pull Request.
+\textbf{Retrospective.} Làm tốt: theo đường găng và có test chứng minh nghiệp vụ Task 10; README và Docker giúp chạy lại dễ. Cần cải thiện: bắt đầu muộn (Sprint 1 trễ 9 điểm); phân bố commit giữa các thành viên chưa đều (đến khi mã Assignment 1 hoàn tất ngày 23/10, commit \texttt{e7a627a}: A 36, B 5, C 1, D 1 trên 43 commit; A tích hợp phần lớn mã); nghiệm thu chéo mới ghi trong tài liệu nhóm, chưa có Approve trên từng Pull Request.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\textbf{Backlog sau:} giao diện barista; cổng thanh toán thật (lưu đường/đá vào đơn đã bổ sung sau AS1). Phản hồi giảng viên: \fillme{ghi sau demo}.
+\textbf{Backlog sau:} giao diện barista; cổng thanh toán thật (lưu đường/đá vào đơn đã bổ sung sau AS1).
 
 {\small
 \begin{thebibliography}{80}
